@@ -153,7 +153,6 @@ module.exports = {
         activeProfile = selectedProfile
 
         const cfg = profileEngine.getConfig()
-//         values = JSON.parse(JSON.stringify(cfg.values))
 
         await this.createTable(table, {...cfg}, profileEngine, activeProfile)
       }
@@ -176,7 +175,7 @@ module.exports = {
         values[`section_${sec}`] = newState
       }
 
-      activeCfg.values = values
+      activeCfg.values = JSON.parse(JSON.stringify(values))
       await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
     }
 
@@ -191,7 +190,7 @@ module.exports = {
         values[`section_${sec}`] = isOpen
       }
 
-      activeCfg.values = values
+      activeCfg.values = JSON.parse(JSON.stringify(values))
       await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
     }
 
@@ -212,7 +211,7 @@ module.exports = {
         sectionState[sectionName] = !sectionState[sectionName]
         values[`section_${sectionName}`] = newState
 
-        activeCfg.values = values
+        activeCfg.values = JSON.parse(JSON.stringify(values))
         await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
       }
       table.addRow(header)
@@ -250,7 +249,7 @@ module.exports = {
             if (item.type === "bool" || item.type === "boolean") {
               values[item.key] = !Boolean(current)
 
-              activeCfg.values = values
+              activeCfg.values = JSON.parse(JSON.stringify(values))
               await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
               return
             }
@@ -273,7 +272,7 @@ module.exports = {
                 values[item.key] = opts[r]
               }
 
-              activeCfg.values = values
+              activeCfg.values = JSON.parse(JSON.stringify(values))
               await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
               return
             }
@@ -299,13 +298,13 @@ module.exports = {
 
               if (r === -1) {
 
-                activeCfg.values = values
+                activeCfg.values = JSON.parse(JSON.stringify(values))
                 await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
                 return
               } else if (r < presets.length) {
                 values[item.key] = presets[r]
 
-                activeCfg.values = values
+                activeCfg.values = JSON.parse(JSON.stringify(values))
                 await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
                 return
               } else {
@@ -323,7 +322,7 @@ module.exports = {
                   }
                 }
 
-                activeCfg.values = values
+                activeCfg.values = JSON.parse(JSON.stringify(values))
                 await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
                 return
               }
@@ -339,7 +338,7 @@ module.exports = {
                 current
               )
 
-              activeCfg.values = values
+              activeCfg.values = JSON.parse(JSON.stringify(values))
               await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
             }
           }
@@ -366,7 +365,7 @@ module.exports = {
     saveBtn.dismissOnTap = true
     saveBtn.onTap = async() => {
       const cfg = profileEngine.getConfig()
-      cfg.values = values
+      cfg.values = JSON.parse(JSON.stringify(values))
       profileEngine.saveConfig(activeProfile, cfg)
     }
     table.addRow(actionRow)
