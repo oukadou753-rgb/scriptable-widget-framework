@@ -174,7 +174,7 @@ module.exports = class WF_ProfileEngine {
     let raw = this.storage.read(path)
     let cfg = this.safeParse(raw, null)
 
-    this.version = cfg.version
+    this.version = this.defaultConfig.version
 
     // 壊れてた場合は再生成
     if (!cfg || typeof cfg !== "object") {
