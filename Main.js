@@ -1,8 +1,9 @@
-const APP_VERSION = "1.0.0"
-const APP_DEV_MODE = false
-
 const DEFAULT_APP_ID = "Weather"
+
+const APP_DEV_MODE = false
 const APP_ID = args.widgetParameter || DEFAULT_APP_ID
+const APP_VERSION = "1.0.0"
+const APP_INFO = {id: APP_ID, version: APP_VERSION}
 
 function loadAppConfig(appId) {
   try {
@@ -16,8 +17,8 @@ function loadAppConfig(appId) {
 const APP_CONFIG = loadAppConfig(APP_ID)
 if (APP_DEV_MODE || (config.runsInWidget && !config.runsInApp)) {
   const WF_WidgetCore = importModule("WF_WidgetCore")
-  await (new WF_WidgetCore([APP_ID, APP_VERSION], APP_CONFIG)).start()
+  await (new WF_WidgetCore(APP_INFO, APP_CONFIG)).start()
 } else {
   const WF_AppCore = importModule("WF_AppCore")
-  await (new WF_AppCore([APP_ID, APP_VERSION], APP_CONFIG)).start()
+  await (new WF_AppCore(APP_INFO, APP_CONFIG)).start()
 }
