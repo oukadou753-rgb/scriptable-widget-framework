@@ -18,7 +18,7 @@ const Main = {
       return importModule(`WidgetFramework/App_${appId}Config`)
     } catch (e) {
       console.error(`App config not found: ${appId}`)
-      return importModule(`App_${DEFAULT_APP_ID}Config`)
+      return importModule(`WidgetFramework/App_${DEFAULT_APP_ID}Config`)
     }
   },
 
