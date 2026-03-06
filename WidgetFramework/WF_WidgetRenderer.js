@@ -346,7 +346,7 @@ module.exports = class WF_WidgetRenderer {
     }
 
     const priority = context.item
-      ? ["item", "location", "config.values.location", "data"]
+      ? ["item", "location", "config.values", "data"]
       : ["location", "config.values", "data", "update"]
 
     for (const p of priority) {
