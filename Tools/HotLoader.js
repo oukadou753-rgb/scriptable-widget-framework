@@ -31,6 +31,8 @@ async function hotReload() {
 
     if (localSha[file.name] === file.sha) {
       console.log("skip: " + file.name)
+      console.log(JSON.stringify(file.html_url, null, 2) + "\n")
+//      console.log(JSON.stringify(file.download_url, null, 2) + "\n")
       continue
     }
 
@@ -44,7 +46,8 @@ async function hotReload() {
     localSha[file.name] = file.sha
 
     console.log("Updated: " + file.name)
-    console.log("\n" + api + "\n")
+    console.log(JSON.stringify(file.html_url, null, 2) + "\n")
+//      console.log(JSON.stringify(file.download_url, null, 2) + "\n")
   }
 
   fm.writeString(shaPath, JSON.stringify(localSha))
