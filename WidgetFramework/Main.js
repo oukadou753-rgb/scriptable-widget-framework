@@ -28,17 +28,13 @@ const Main = {
       await (new WF_WidgetCore(APP_INFO, APP_CONFIG)).start();
     } else {
       const WF_AppCore = importModule("WidgetFramework/WF_AppCore");
-      (async() => {
-        await (new WF_AppCore(APP_INFO, APP_CONFIG)).start()
-      })()
+      await (new WF_AppCore(APP_INFO, APP_CONFIG)).start()
     }
   },
 
   async run() {
     const APP_CONFIG = Main.loadAppConfig(APP_ID);
-    (async() => {
-      await Main.start(APP_CONFIG)
-    })()
+    await Main.start(APP_CONFIG)
   }
 }
 module.exports = Main;
