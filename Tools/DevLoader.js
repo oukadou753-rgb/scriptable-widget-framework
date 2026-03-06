@@ -36,9 +36,9 @@ async function devLoader() {
 
       fm.writeString(savePath, code)
 
-      console.log(file.name)
-      console.log(JSON.stringify(file.html_url, null, 2) + "\n")
-//       console.log(JSON.stringify(file.download_url, null, 2) + "\n")
+      console.warn(file.name)
+      console.warn(JSON.stringify(file.html_url, null, 2) + "\n")
+//       console.warn(JSON.stringify(file.download_url, null, 2) + "\n")
     }
   }
 
