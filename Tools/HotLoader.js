@@ -48,8 +48,8 @@ async function hotReload() {
 
     localSha[file.name] = file.sha
 
-    console.log("Updated: " + file.name)
-    console.log(JSON.stringify(file.html_url, null, 2) + "\n")
+    console.warn("Updated: " + file.name)
+    console.warn(JSON.stringify(file.html_url, null, 2) + "\n")
 //     console.log(JSON.stringify(file.download_url, null, 2) + "\n")
   }
 
