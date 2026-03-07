@@ -126,9 +126,8 @@ module.exports = {
         header: [
           {
             type: "hstack",
-//             justify: "space-between",
             children: [
-              { type: "image", src: "cloud.sun.fill", size: 16 },
+              { type: "image", src: "{{header_titleIcon}}", size: 16 },
               { type: "spacer", size: 5 },
               { type: "text", text: "{{header_titleStr}}", style: "titleText" },
               { type: "spacer" },
@@ -234,8 +233,8 @@ module.exports = {
   transform(data, config) {
 
     const v = config?.values || {}
-    console.log(JSON.stringify(v, null, 2))
-    console.log(JSON.stringify(data.current, null, 2))
+//     console.log(JSON.stringify(v, null, 2))
+//     console.log(JSON.stringify(data.current, null, 2))
 
     const minScore = Number(v.minScore) || 0
     const limit = Number(v.limit) || 0
@@ -280,13 +279,16 @@ module.exports = {
 
     // location
     const location = config?.location || null
+    const current = data.current || null
+    const icon = current ? current.condition.text.icon : ""
+    const url = this.makeWeatherApiIcon(current.condition.icon)
 
     // メタ情報
     const meta = {
       count: items.length,
       header: {
-        titleStr: data.current ? data.current.condition.text : v.titleStr,
-        titleIcon: ""
+        titleStr: current ? current.condition.text : v.titleStr,
+        titleIcon: url
       },
       body: {
         
@@ -349,6 +351,15 @@ module.exports = {
     df.dateFormat = format
 
     return df.string(ts)
+  },
+
+  parseURL(t){let e={href:t},a=["protocol host hostname port pathname query hash".split(" "),"directory filename query".split(" "),"basename extension".split(" ")];return[/^(?:(https?:)?(?:\/\/(([^\/:]+)(?::([0-9]+))?)))?(\/?[^?#]*)(\??[^?#]*)(#?.*)/,/^(?:[^:\/?#]+:)?(?:\/\/[^\/?#]*)?(?:([^?#]*\/)([^\/?#]*))?(\?[^#]*)?(?:#.*)?$/,/^([^/]*)\.([^.]+)?$/].map((r,i)=>{let n=String(2==i?e.filename:t).match(r);n&&a[i].forEach(function(t,a){e[t]=void 0===n[a+1]?null:n[a+1]})}),e},
+  makeWeatherApiIcon(url) {
+    let {  protocol, host, pathname, filename } = this.parseURL(url)
+    url = (protocol || 'https') + '://' + host + pathname
+    if (url.includes('day')) filename = filename.replace('.', 'd.')
+    else if (url.includes('night')) filename = filename.replace('.', 'n.')
+    return url
   },
 
   // Test Data
