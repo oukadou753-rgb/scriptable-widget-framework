@@ -280,11 +280,11 @@ log(src)
 
     // URL
     if(src.startsWith("http")){
-
+log("http")
       image = await this.dataProvider.fetchImage(src)
 
     }
-
+log(image)
     // SF Symbol
     else if(!src.includes("/")){
 
