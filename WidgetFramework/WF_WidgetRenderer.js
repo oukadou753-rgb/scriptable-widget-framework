@@ -506,4 +506,11 @@ module.exports = class WF_WidgetRenderer {
     return img
 
   }
+
+  // =========================
+  // ■ fetch
+  // =========================
+  hash(str){
+    return str.replace(/[^\w]/g,"_")
+  }
 }
