@@ -267,7 +267,7 @@ module.exports = class WF_WidgetRenderer {
   // Image
   // =========================
   async renderImage(container, el, context){
-
+log(src)
     const src = this.bind(el.src, context)
     if(!src) return
 
@@ -284,7 +284,7 @@ module.exports = class WF_WidgetRenderer {
       image = await this.dataProvider.fetchImage(src)
 
     }
-
+log(src)
     // SF Symbol
     else if(!src.includes("/")){
 
