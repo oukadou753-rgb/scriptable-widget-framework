@@ -4,32 +4,43 @@
 /**
  * App_Config
  **/
+/**
+ * App_Config
+ **/
 module.exports = {
 
+  // Default Config
   getDefaultConfig() {
+
     return {
 
-      version: "1.0.1",
+      version: "1.0.0",
 
       styles: {
-        defaultText: { fontSize: 14, color: "{{bodyTextColor}}" },
-        title: { fontSize: 16, bold: true, color: "{{titleColor}}" },
-        version: { fontSize: 12, color: "{{bodyTextColor}}" },
-        bodyText: { fontSize: 14, color: "{{bodyTextColor}}" },
-        footerText: { fontSize: 12, color: "{{footerTextColor}}" },
-        updateText: { fontSize: 12, color: "{{updateTextColor}}" }
+        defaultText: { fontSize: 14, bold: false, color: "{{defaultTextColor}}" },
+        HighlightText: { fontSize: 14, bold: false, color: "{{highlightTextColor}}" },
+        headerText: { fontSize: 16, bold: true, color: "{{headerTextColor}}" },
+        bodyText: { fontSize: 14, bold: false, color: "{{bodyTextColor}}" },
+        footerText: { fontSize: 12, bold: false, color: "{{footerTextColor}}" },
+
+        titleText: { fontSize: 16, bold: true, color: "{{highlightTextColor}}" },
+        versionText: { fontSize: 12, bold: false, color: "{{defaultTextColor}}" },
+        updateText: { fontSize: 12, bold: false, color: "{{highlightTextColor}}" },
+        locationText: { fontSize: 14, bold: false, color: "{{highlightTextColor}}" }
       },
 
-      defaultOpenSections: ["General"],
+      defaultOpenSections: ["General", "Style"],
 
       schema: {
         titleStr: { type: "text", label: "Title", section: "General", default: "My Widget" },
 
-        bgColor: { type: "color", label: "Background Color", section: "Style", default: "#222222", presets: ["#000000", "#ff9900"] },
-        titleColor: { type: "color", label: "Title Color", section: "Style", default: "#ffffff" },
+        bgColor: { type: "color", label: "Background Color", section: "Style", default: "#003366", presets: ["#000000", "#ff9900"] },
+
+        defaultTextColor: { type: "color", label: "Default Text Color", section: "Style", default: "#d1cdda" },
+        highlightTextColor: { type: "color", label: "Highlight Text Color", section: "Style", default: "#87cefa" },
+        headerTextColor: { type: "color", label: "Header Text Color", section: "Style", default: "#ffffff" },
         bodyTextColor: { type: "color", label: "Body Text Color", section: "Style", default: "#ffffff" },
         footerTextColor: { type: "color", label: "Footer Text Color", section: "Style", default: "#ffffff" },
-        updateTextColor: { type: "color", label: "Update Text Color", section: "Style", default: "#ffffff" },
 
         useTestData: { type: "bool", label: "Use Test Data", section: "Debug", default: true },
         showTableFullscreen: { type: "bool", label: "Show Table Fullscreen", section: "Debug", default: true },
@@ -62,6 +73,7 @@ module.exports = {
     }
   },
 
+  // API
   api: {
     baseURL: "https://api.weatherapi.com/v1",
     endpoint: "forecast.json",
@@ -89,6 +101,7 @@ module.exports = {
     }
   },
 
+  // Location
   location: {
     get useCurrent() {
       return this.config?.values?.useCurrentLocation ?? true
@@ -98,25 +111,28 @@ module.exports = {
       return {
         lat: this.config?.values?.lat ?? 35.6812,
         lon: this.config?.values?.lon ?? 139.7671,
-        name: "東京都"
+        name: "東京都",
+        full: "東京都 千代田区 千代田"
       }
     },
 
     cacheMinutes: 60
   },
 
+  // Layout
   getLayout(layoutId = "default") {
 
     const layouts = {
 
+      // Default Layout
       default: {
         header: [
           {
             type: "hstack",
             justify: "space-between",
             children: [
-              { type: "text", text: "{{titleStr}}", style: "title" },
-              { type: "text", text: "v{{version.fw}}", style: "version" }
+              { type: "text", text: "{{header_titleStr}}", style: "titleText" },
+              { type: "text", text: "v{{version.fw}}", style: "versionText" }
             ]
           }
         ],
@@ -144,10 +160,11 @@ module.exports = {
         footer: [
           {
             type: "hstack",
-            justify: "space-between",
             children: [
-              { type: "text", text: "{{location_latStr}}, {{location_lonStr}} {{name}}", style: "footerText" },
-              { type: "text", text: "Update: {{updateStr}}", style: "updateText" }
+              { type: "text", text: "{{location_name}}", style: "locationText" },
+              { type: "spacer" },
+              { type: "text", text: "Update: ", style: "updateText" },
+              { type: "text", text: "{{footer_updateStr}}", style: "footerText" }
             ]
           }
         ],
@@ -158,6 +175,7 @@ module.exports = {
         }
       },
 
+      // Test Layout
       test: {
         header: [
           {
@@ -211,41 +229,15 @@ module.exports = {
     return layouts[layoutId] || layouts.default
   },
 
-  getTestData() {
-
-    return {
-      data: {
-        news: [
-          { title: "Apple releases new iOS", score: 98 },
-          { title: "Scriptable Widget Update", score: 87 },
-          { title: "Weather is sunny today", score: 76 },
-          { title: "Breaking News Sample", score: 65 },
-          { title: "Another Headline", score: 55 }
-        ],
-        last_updated_epoch: Math.floor(Date.now() / 1000),
-      },
-      location: {
-        lat: 35.6812,
-        lon: 139.7671,
-        name: "東京都"
-      }
-    }
-  },
-
+  // Data変換
   transform(data, config) {
 
     const v = config?.values || {}
-    const location = config?.location || null
+    console.log(JSON.stringify(v, null, 2))
+    console.log(JSON.stringify(data.current, null, 2))
 
     const minScore = Number(v.minScore) || 0
     const limit = Number(v.limit) || 0
-
-    // 更新時間生成
-    const updateStr = this.formatTime(
-      data.current?.last_updated_epoch ??
-      data.last_updated_epoch,
-      "yyyy/MM/dd HH:mm"
-    )
 
     // 元データ正規化
     const rawList = Array.isArray(data?.news)
@@ -270,15 +262,35 @@ module.exports = {
       }
     })
 
+    // 更新時間生成
+    const updateStr = this.formatTime(
+      data.current?.last_updated_epoch ??
+      data.last_updated_epoch,
+      "HH時mm分"
+    )
+
+    // location
+    const location = config?.location || null
+
     // メタ情報
     const meta = {
       count: items.length,
-      updateStr,
+      header: {
+        titleStr: data.current ? data.current.condition.text : v.titleStr,
+        titleIcon: ""
+      },
+      body: {
+        
+      },
+      footer: {
+        updateStr
+      },
       location: {
         lat: location?.lat ?? null,
         lon: location?.lon ?? null,
         latStr: location?.lat != null ? location.lat.toFixed(4) : "",
-        lonStr: location?.lon != null ? location.lon.toFixed(4) : ""
+        lonStr: location?.lon != null ? location.lon.toFixed(4) : "",
+        name: location?.full != null ? location.full.split(" ").slice(1).join("") : ""
       }
     }
 
@@ -289,28 +301,7 @@ module.exports = {
     }
   },
 
-  formatTime(epoch, format = "HH:mm") {
-
-    if (!epoch) return "--:--"
-
-    const ts = new Date(
-      epoch > 1e12 ? epoch : epoch * 1000
-    )
-
-    const df = new DateFormatter()
-    df.dateFormat = format
-
-    return df.string(ts)
-  },
-
-  getRank(score) {
-
-    if (score >= 90) return "S"
-    if (score >= 75) return "A"
-    if (score >= 60) return "B"
-    return "C"
-  },
-
+  // Object 平坦化
   flatObj(obj, prefix = '') {
 
     const result = {}
@@ -333,5 +324,52 @@ module.exports = {
     }
 
     return result
+  },
+
+  // Epoch Date Formatter
+  formatTime(epoch, format = "HH:mm") {
+
+    if (!epoch) return "--:--"
+
+    const ts = new Date(
+      epoch > 1e12 ? epoch : epoch * 1000
+    )
+
+    const df = new DateFormatter()
+    df.dateFormat = format
+
+    return df.string(ts)
+  },
+
+  // Test Data
+  getTestData() {
+
+    return {
+      data: {
+        news: [
+          { title: "Apple releases new iOS", score: 98 },
+          { title: "Scriptable Widget Update", score: 87 },
+          { title: "Weather is sunny today", score: 76 },
+          { title: "Breaking News Sample", score: 65 },
+          { title: "Another Headline", score: 55 }
+        ],
+        last_updated_epoch: Math.floor(Date.now() / 1000),
+      },
+      location: {
+        lat: 35.6812,
+        lon: 139.7671,
+        name: "東京都",
+        full: "東京都 千代田区 千代田"
+      }
+    }
+  },
+
+  // ランキング
+  getRank(score) {
+
+    if (score >= 90) return "S"
+    if (score >= 75) return "A"
+    if (score >= 60) return "B"
+    return "C"
   }
 }
