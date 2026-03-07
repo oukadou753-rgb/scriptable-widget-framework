@@ -312,6 +312,13 @@ module.exports = class WF_DataProvider {
   }
 
   // =========================
+  // ■ hash
+  // =========================
+  hash(str){
+    return encodeURIComponent(str)
+  }
+
+  // =========================
   // ■ fetch
   // =========================
   async fetch(url) {
