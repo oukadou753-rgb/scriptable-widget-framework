@@ -309,7 +309,7 @@ module.exports = class WF_WidgetRenderer {
       node.imageSize = new Size(size, size)
   
     if(el.opacity)
-      node.imageOpacity = el.opacity
+      node.imageOpacity = Number(el.opacity)
 
   }
 
