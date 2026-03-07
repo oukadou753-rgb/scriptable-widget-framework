@@ -73,6 +73,9 @@ module.exports = class WF_AppCore {
         ? config.widgetFamily
         : "medium")
 
+    // オンライン判定
+    configData.values.isOnline = await checkOnline()
+
     const { data, location } = configData.values.useTestData
       ? this.appConfig.getTestData()
       : await new DataProvider(
@@ -152,6 +155,19 @@ module.exports = class WF_AppCore {
     )
   }
 
+  // Online判定
+  async checkOnline() {
+
+    try {
+      const req = new Request("https://www.apple.com")
+      req.timeoutInterval = 2
+      await req.load()
+      return true
+    } catch(e) {
+      return false
+    }
+  }
+  
   async editConfig() {
     try {
       const active = this.profile.getActive()
