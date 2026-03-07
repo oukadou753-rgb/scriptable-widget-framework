@@ -281,7 +281,7 @@ module.exports = class WF_WidgetRenderer {
     // URL
     if(src.startsWith("http")){
 
-      image = await this.dataProvider.fetchImage(src)
+      image = await this.fetchImage(src)
 
     }
 
@@ -479,5 +479,31 @@ module.exports = class WF_WidgetRenderer {
     } catch (e) {
       return this.getDefaultTextColor()
     }
+  }
+
+  async fetchImage(url){
+
+    const fm = FileManager.local()
+
+    const cacheDir = fm.joinPath(fm.cacheDirectory(), "img_cache")
+    if(!fm.fileExists(cacheDir))
+      fm.createDirectory(cacheDir)
+
+    const fileName = this.hash(url) + ".png"
+    const filePath = fm.joinPath(cacheDir, fileName)
+
+    // キャッシュがあればそれを使う
+    if(fm.fileExists(filePath)){
+      return fm.readImage(filePath)
+    }
+
+    // 無ければダウンロード
+    const req = new Request(url)
+    const img = await req.loadImage()
+
+    fm.writeImage(filePath, img)
+
+    return img
+
   }
 }
