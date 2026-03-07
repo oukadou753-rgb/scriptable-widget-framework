@@ -173,8 +173,7 @@ module.exports = class WF_WidgetRenderer {
         return this.renderStack(container, el, context, false)
 
       case "spacer":
-        container.addSpacer(el.size ?? null)
-        return
+      return this.renderSpacer(container, el)
   
       case "image":
         return await this.renderImage(container, el, context)
@@ -250,6 +249,18 @@ module.exports = class WF_WidgetRenderer {
     }
 
     return stack
+  }
+
+  // =========================
+  // Spacer
+  // =========================
+  renderSpacer(container, el){
+
+    if(el.size)
+      container.addSpacer(el.size)
+    else
+      container.addSpacer()
+  
   }
 
   // =========================
