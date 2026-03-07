@@ -4,9 +4,6 @@
 /**
  * App_Config
  **/
-/**
- * App_Config
- **/
 module.exports = {
 
   // Default Config
@@ -129,10 +126,14 @@ module.exports = {
         header: [
           {
             type: "hstack",
-            justify: "space-between",
+//             justify: "space-between",
             children: [
+              { type: "image", src: "cloud.sun.fill", size: 16 },
+              { type: "spacer", size: 5 },
               { type: "text", text: "{{header_titleStr}}", style: "titleText" },
-              { type: "text", text: "v{{version.fw}}", style: "versionText" }
+              { type: "spacer" },
+              { type: "text", text: "v{{version.fw}}", style: "versionText" },
+              { type: "image", src: "{{status_icon}}", tint: "{{status_color}}", opacity: "{{status_opacity}}", size: 16 }
             ]
           }
         ],
@@ -262,6 +263,14 @@ module.exports = {
       }
     })
 
+    // Online判定
+    const online = v.isOnline ?? false
+    const status = {
+      icon: "location.fill",
+      color: "#ffffff", //'#d1cdda',
+      opacity: online ? 0.6 : 0.3
+    }
+
     // 更新時間生成
     const updateStr = this.formatTime(
       data.current?.last_updated_epoch ??
@@ -285,6 +294,7 @@ module.exports = {
       footer: {
         updateStr
       },
+      status,
       location: {
         lat: location?.lat ?? null,
         lon: location?.lon ?? null,
