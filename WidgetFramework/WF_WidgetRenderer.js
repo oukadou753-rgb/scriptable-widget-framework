@@ -6,7 +6,9 @@
  **/
 module.exports = class WF_WidgetRenderer {
 
-  constructor() {}
+  constructor(appId) {
+    this.appId = appId
+  }
 
   // =========================
   // エントリ
@@ -485,7 +487,18 @@ module.exports = class WF_WidgetRenderer {
 
     const fm = FileManager.iCloud()
 
-    const cacheDir = fm.joinPath(fm.documentsDirectory(), "WF_Cache")
+    // ルート（WF_Data固定）
+    const root = fm.joinPath(
+      fm.documentsDirectory(),
+      "WF_Data"
+    )
+
+    const appRoot = fm.joinPath(root, this.appId)
+    const cacheDir = fm.joinPath(appRoot, "img")
+
+    if(!fm.fileExists(appRoot))
+      fm.createDirectory(appRoot)
+
     if(!fm.fileExists(cacheDir))
       fm.createDirectory(cacheDir)
 
