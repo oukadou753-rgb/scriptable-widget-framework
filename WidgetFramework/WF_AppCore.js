@@ -4,7 +4,6 @@
 /**
  * WF_AppCore
  **/
-// const WF_Core = importModule("WidgetFramework/WF_Core")
 const StorageEngine = importModule("WidgetFramework/WF_StorageEngine")
 const WidgetRenderer = importModule("WidgetFramework/WF_WidgetRenderer")
 const MenuEngine = importModule("WidgetFramework/WF_MenuEngine")
@@ -12,7 +11,7 @@ const ProfileEngine = importModule("WidgetFramework/WF_ProfileEngine")
 const WF_ConfigUI = importModule("WidgetFramework/WF_ConfigUI")
 const DataProvider = importModule("WidgetFramework/WF_DataProvider")
 
-module.exports = class WF_AppCore {
+module.exports = class WF_AppCore extends WF_CoreBase {
 
   constructor(appInfo, appConfig) {
     const appId = appInfo.id
@@ -20,7 +19,6 @@ module.exports = class WF_AppCore {
 
     this.appId = appId || Script.name()
 
-    // this.core = new WF_Core(this.appId)
     this.storage = new StorageEngine(this.appId)
     this.renderer = new WidgetRenderer(this.appId)
     this.menu = new MenuEngine()
