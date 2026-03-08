@@ -25,8 +25,7 @@ module.exports = class WF_WidgetRenderer {
 
     // 背景
     if (values.bgColorTop && values.bgColorBottom) {
-log("values: " + JSON.stringify(values, null, 2))
-      await this.setGradientBackground(widget, values.bgColorTop, values.bgColorBottom)
+      widget.backgroundImage = await this.setGradientBackground(values.bgColorTop, values.bgColorBottom)
     }
     else if (values.bgColor) {
       try {
@@ -515,7 +514,7 @@ log("values: " + JSON.stringify(values, null, 2))
   // =========================
   // ■ setGradientBackground
   // =========================
-  async setGradientBackground(widget, colorTop, colorBottom) {
+  async setGradientBackground(colorTop, colorBottom) {
     const size = new Size(400, 400) // 適当なサイズ、widget実サイズに合わせてもOK
 
     const gradient = new LinearGradient()
@@ -524,9 +523,7 @@ log("values: " + JSON.stringify(values, null, 2))
     gradient.startPoint = new Point(0, 0) // 左上
     gradient.endPoint = new Point(0, 1)   // 左下
 
-    const img = gradient.getImage(size)
-
-    widget.backgroundImage = img
+    return gradient.getImage(size)
   }
 
   // =========================
