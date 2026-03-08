@@ -47,7 +47,7 @@ module.exports = class WF_AppCore extends WF_CoreBase {
     }
   }
 
-  async preview(size) {
+  async _preview(size) {
 
     const context = await this.buildContext({ size })
 
@@ -64,7 +64,7 @@ module.exports = class WF_AppCore extends WF_CoreBase {
     return true
   }
 
-  async buildContext({ size = null, cfg = null } = {}) {
+  async _buildContext({ size = null, cfg = null } = {}) {
 
     const configData = cfg ?? this.profile.getConfig()
 
@@ -157,7 +157,7 @@ module.exports = class WF_AppCore extends WF_CoreBase {
   }
 
   // Check Online
-  async checkOnline() {
+  async _checkOnline() {
     try {
       const req = new Request("https://www.apple.com")
       req.timeoutInterval = 2
