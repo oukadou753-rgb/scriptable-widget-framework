@@ -175,7 +175,6 @@ module.exports = class WF_WidgetRenderer {
         return this.renderStack(container, el, context, true)
 
       case "vstack":
-        if (el.type == "vstack")log(1)
         return this.renderStack(container, el, context, false)
 
       case "spacer":
@@ -203,7 +202,7 @@ module.exports = class WF_WidgetRenderer {
   // Stack
   // =========================
   async renderStack(container, el, context, horizontal) {
-
+if (el.type == "vstack")log(1)
     const stack = container.addStack()
 
     // --- サイズ ---
