@@ -145,7 +145,7 @@ module.exports = class WF_WidgetRenderer {
           }
 
           if (block.template) {
-            await this.renderBlock(container, [block.template], newCtx)
+            await this.renderBlock(repeatStack, [block.template], newCtx)
           }
         }
 
