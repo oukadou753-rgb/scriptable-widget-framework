@@ -202,19 +202,37 @@ module.exports = class WF_WidgetRenderer {
 
     const stack = container.addStack()
 
+    // --- サイズ ---
     if(el.size){
       stack.size = new Size(el.size.width, el.size.height)
     }
 
+    // --- Padding 追加 ---
+    if (el.padding) {
+      const pad = el.padding
+      stack.setPadding(
+        pad.top ?? 0,
+        pad.right ?? 0,
+        pad.bottom ?? 0,
+        pad.left ?? 0
+      )
+    }
+
+    // --- Spacing 追加 ---
+    if (el.spacing != null) stack.spacing = Number(el.spacing)
+
+    // --- 配置方向 ---
     if (horizontal) stack.layoutHorizontally()
     else stack.layoutVertically()
 
     const children = Array.isArray(el.children) ? el.children : []
 
+    // --- アライン ---
     if (el.align === "top") stack.topAlignContent()
     else if (el.align === "center") stack.centerAlignContent()
     else if (el.align === "bottom") stack.bottomAlignContent()
 
+    // --- ジャスティファイ ---
     if (!el.justify || el.justify === "start") {
 
       for (const child of children) {
