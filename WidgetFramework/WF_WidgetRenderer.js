@@ -239,7 +239,7 @@ module.exports = class WF_WidgetRenderer {
     if (!el.justify || el.justify === "start") {
 
       for (const child of children) {
-        if (el.type == "vstack")log("vstack: " + el.justify)
+        if (el.type == "vstack")log("vstack: " + child)
         await this.renderElement(stack, child, context)
       }
     }
@@ -249,7 +249,7 @@ module.exports = class WF_WidgetRenderer {
       stack.addSpacer()
 
       for (const child of children) {
-        if (el.type == "vstack")log("vstack: " + el.justify)
+        if (el.type == "vstack")log("vstack: " + child)
         await this.renderElement(stack, child, context)
       }
 
@@ -261,7 +261,7 @@ module.exports = class WF_WidgetRenderer {
       stack.addSpacer()
 
       for (const child of children) {
-        if (el.type == "vstack")log("vstack: " + el.justify)
+        if (el.type == "vstack")log("vstack: " + child)
         await this.renderElement(stack, child, context)
       }
     }
