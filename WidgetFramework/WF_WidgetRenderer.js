@@ -515,21 +515,11 @@ module.exports = class WF_WidgetRenderer {
   // ■ setGradientBackground
   // =========================
   async setGradientBackground(colorTop, colorBottom) {
+
     const bgColor = new LinearGradient();
     bgColor.colors = [new Color(colorTop), new Color(colorBottom)]
     bgColor.locations = [0, 1]           // 上端0 → 下端1
-    return bgColor
-    
-    
-    const size = new Size(400, 400) // 適当なサイズ、widget実サイズに合わせてもOK
-
-    const gradient = new LinearGradient()
-    gradient.colors = [new Color(colorTop), new Color(colorBottom)]
-    gradient.locations = [0, 1]           // 上端0 → 下端1
-    gradient.startPoint = new Point(0, 0) // 左上
-    gradient.endPoint = new Point(0, 1)   // 左下
-
-    return gradient.getImage(size)
+    return bgColor 
   }
 
   // =========================
