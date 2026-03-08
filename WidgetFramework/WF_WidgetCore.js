@@ -4,14 +4,17 @@
 /**
  * WF_WidgetCore
  **/
-const StorageEngine = importModule("WF_StorageEngine")
-const WidgetRenderer = importModule("WF_WidgetRenderer")
-const ProfileEngine = importModule("WF_ProfileEngine")
-const DataProvider = importModule("WF_DataProvider")
+const WF_CoreBase = importModule("WidgetFramework/WF_CoreBase")
+const StorageEngine = importModule("WidgetFramework/WF_StorageEngine")
+const WidgetRenderer = importModule("WidgetFramework/WF_WidgetRenderer")
+const ProfileEngine = importModule("WidgetFramework/WF_ProfileEngine")
+const DataProvider = importModule("WidgetFramework/WF_DataProvider")
 
-module.exports = class WF_WidgetCore {
+module.exports = class WF_WidgetCore extends WF_CoreBase {
 
   constructor(appInfo, appConfig) {
+    super(appInfo)
+
     const appId = appInfo.id
     const appVersion = appInfo.version
 
