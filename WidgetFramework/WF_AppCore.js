@@ -15,6 +15,8 @@ const DataProvider = importModule("WidgetFramework/WF_DataProvider")
 module.exports = class WF_AppCore extends WF_CoreBase {
 
   constructor(appInfo, appConfig) {
+    super(appInfo)
+
     const appId = appInfo.id
     const appVersion = appInfo.version
 
