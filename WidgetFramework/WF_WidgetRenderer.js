@@ -25,7 +25,7 @@ module.exports = class WF_WidgetRenderer {
 
     // 背景
     if (values.bgColorTop && values.bgColorBottom) {
-      await setGradientBackground(widget, values.bgColorTop, values.bgColorBottom)
+      await this.setGradientBackground(widget, values.bgColorTop, values.bgColorBottom)
     }
     else if (values.bgColor) {
       try {
