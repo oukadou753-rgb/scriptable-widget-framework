@@ -202,7 +202,7 @@ module.exports = class WF_WidgetRenderer {
   // Stack
   // =========================
   async renderStack(container, el, context, horizontal) {
-if (el.type == "vstack")log(1)
+
     const stack = container.addStack()
 
     // --- サイズ ---
@@ -239,6 +239,7 @@ if (el.type == "vstack")log(1)
     if (!el.justify || el.justify === "start") {
 
       for (const child of children) {
+        if (el.type == "vstack")log("vstack: " + el.justify)
         await this.renderElement(stack, child, context)
       }
     }
@@ -248,6 +249,7 @@ if (el.type == "vstack")log(1)
       stack.addSpacer()
 
       for (const child of children) {
+        if (el.type == "vstack")log("vstack: " + el.justify)
         await this.renderElement(stack, child, context)
       }
 
@@ -259,6 +261,7 @@ if (el.type == "vstack")log(1)
       stack.addSpacer()
 
       for (const child of children) {
+        if (el.type == "vstack")log("vstack: " + el.justify)
         await this.renderElement(stack, child, context)
       }
     }
