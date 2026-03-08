@@ -229,7 +229,7 @@ module.exports = class WF_WidgetRenderer {
     else stack.layoutVertically()
 
     const children = Array.isArray(el.children) ? el.children : []
-
+log(children)
     // --- アライン ---
     if (el.align === "top") stack.topAlignContent()
     else if (el.align === "center") stack.centerAlignContent()
