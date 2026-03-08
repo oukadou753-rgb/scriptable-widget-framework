@@ -3,51 +3,152 @@
 // icon-color: deep-gray; icon-glyph: download;
 /**
  * DevLoader
+ * 2026/03/08
  **/
-async function devLoader() {
+const useDiff = true
+const useTarget = true
+const targetFiles = [
+//   "Main.js",
+//   "Tools/DevLoader.js",
+//   "Tools/HotLoader.js",
+//   "WidgetFramework/App_WeatherConfig.js",
+//   "WidgetFramework/WF_AppCore.js",
+//   "WidgetFramework/WF_ConfigUI.js",
+//   "WidgetFramework/WF_CoreBase.js",
+//   "WidgetFramework/WF_DataProvider.js",
+//   "WidgetFramework/WF_MenuEngine.js",
+//   "WidgetFramework/WF_ProfileEngine.js",
+//   "WidgetFramework/WF_StorageEngine.js",
+//   "WidgetFramework/WF_WidgetCore.js",
+//   "WidgetFramework/WF_WidgetRenderer.js"
+]
+const targetFolders = [
+  "WidgetFramework",
+//   "Tools"
+]
+
+/**
+ * useDiff: true=差分取得, false=無条件取得
+ * useTarget: true=指定ファイル/フォルダを対象にする
+ * targetFiles: 個別ファイル指定（GitHub 相対パス）
+ * targetFolders: フォルダ単位指定（例: ["WidgetFramework"]）
+ **/
+async function devLoader({ useDiff = true, useTarget = false, targetFiles = null, targetFolders = null } = {}) {
 
   const user = "oukadou753-rgb"
   const repo = "Scriptable-Widgets"
   const branch = "main"
-  const path = "WidgetFramework"
-
-  const api = `https://api.github.com/repos/${user}/${repo}/contents/${path}?ref=${branch}`
 
   const fm = FileManager.iCloud()
   const baseDir = fm.documentsDirectory()
-  const frameworkDir = fm.joinPath(baseDir, "WidgetFramework")
 
-  if (!fm.fileExists(frameworkDir)) {
-    fm.createDirectory(frameworkDir)
+  // --- SHA 管理用 ---
+  const shaFilePath = fm.joinPath(baseDir, "github_sha.json") // ← 先頭に.は付けない
+  let localSHA = {}
+  if (fm.fileExists(shaFilePath)) {
+    try { localSHA = JSON.parse(fm.readString(shaFilePath)) } catch(e) { localSHA = {} }
   }
 
-  const req = new Request(api)
-  const list = await req.loadJSON()
+  // --- GitHub 全ファイル取得（再帰的） ---
+  const api = `https://api.github.com/repos/${user}/${repo}/git/trees/${branch}?recursive=1`
+  const tree = await new Request(api).loadJSON()
 
-  for (const file of list) {
+  const newSHA = {}
 
-    if (file.type === "file" && file.name.endsWith(".js")) {
+  for (const file of tree.tree) {
+    if (file.type !== "blob") continue // ファイルのみ
 
-      const rawURL = file.download_url
-      const code = await new Request(rawURL).loadString()
+    newSHA[file.path] = file.sha
 
-      const dir = (file.name == 'Main.js') ? baseDir : frameworkDir
-      const savePath = fm.joinPath(dir, file.name)
+    let shouldDownload = false
 
-      fm.writeString(savePath, code)
+    if (useTarget) {
+      // 指定ファイル/フォルダ対象か判定
+      if (targetFiles && targetFiles.includes(file.path)) shouldDownload = true
+      if (!shouldDownload && targetFolders) {
+        shouldDownload = targetFolders.some(f => file.path.startsWith(f + "/"))
+      }
 
-      console.warn(file.name)
-      console.warn(JSON.stringify(file.html_url, null, 2) + "\n")
-//       console.warn(JSON.stringify(file.download_url, null, 2) + "\n")
+      // 差分を使う場合は SHA を確認
+      if (shouldDownload && useDiff) {
+        shouldDownload = !localSHA[file.path] || localSHA[file.path] !== file.sha
+      }
+    } else {
+      // 全体対象
+      if (!useDiff) {
+        shouldDownload = true // 無条件で全体取得
+      } else {
+        shouldDownload = !localSHA[file.path] || localSHA[file.path] !== file.sha // 差分取得
+      }
     }
+
+    if (!shouldDownload) continue
+
+    // --- ダウンロード ---
+    const rawURL = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${file.path}`
+    const code = await new Request(rawURL).loadString()
+
+    // GitHub のフォルダ構造を Scriptable に再現
+    const savePath = fm.joinPath(baseDir, file.path)
+    const dirPath = fm.joinPath(baseDir, file.path.split("/").slice(0, -1).join("/"))
+    if (!fm.fileExists(dirPath)) fm.createDirectory(dirPath, true)
+
+    fm.writeString(savePath, code)
+    console.log("Downloaded: " + file.path)
   }
 
+  // SHA 保存
+  fm.writeString(shaFilePath, JSON.stringify(newSHA, null, 2))
   console.log("Update complete")
 
-  // Mainå®è¡
+  // --- Main 実行 ---
   const Main = importModule("Main")
   if (Main.run) await Main.run()
-
 }
 
-await devLoader()
+await devLoader({ useDiff, useTarget, targetFolders, targetFolders })
+
+/**
+ * DevLoader 呼び出しテンプレート（新フラグ版）
+ **/
+
+// --- 初回全ファイル取得 ---
+// await devLoader({
+//   useDiff: false,          // 差分無視
+//   useTarget: false          // 全体対象
+// })
+
+// --- 通常運用: 指定ファイルのみ更新 ---
+// await devLoader({
+//   useDiff: true,           // 差分のみ
+//   useTarget: true,         // 指定対象のみ
+//   targetFiles: ["WidgetFramework/WF_AppCore.js","WidgetFramework/WF_DataProvider.js"]
+// })
+
+// --- 特定フォルダ単位で更新 ---
+// await devLoader({
+//   useDiff: true,           // 差分のみ
+//   useTarget: true,         // 指定フォルダのみ
+//   targetFolders: ["WidgetFramework"]
+// })
+
+// --- ファイル＋フォルダ併用 ---
+// await devLoader({
+//   useDiff: true,
+//   useTarget: true,
+//   targetFiles: ["Main.js"],
+//   targetFolders: ["WidgetFramework"]
+// })
+
+// --- HotReload: SHA 差分で更新されたファイルのみ自動取得 ---
+// await devLoader({
+//   useDiff: true,
+//   useTarget: false
+// })
+
+// --- HotReload + 特定フォルダ併用 ---
+// await devLoader({
+//   useDiff: true,
+//   useTarget: true,
+//   targetFolders: ["WidgetFramework"]
+// })
