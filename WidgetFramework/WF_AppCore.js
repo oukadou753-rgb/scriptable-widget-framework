@@ -20,7 +20,7 @@ module.exports = class WF_AppCore {
     this.appId = appId || Script.name()
 
     this.storage = new StorageEngine(this.appId)
-    this.renderer = new WidgetRenderer(appId)
+    this.renderer = new WidgetRenderer(this.appId)
     this.menu = new MenuEngine()
     this.configUI = WF_ConfigUI
 
