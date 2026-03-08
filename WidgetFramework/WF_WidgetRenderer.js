@@ -165,7 +165,7 @@ module.exports = class WF_WidgetRenderer {
       const visible = this.evaluate(el.show, context)
       if (!visible) return
     }
-
+log(el)
     switch (el.type) {
 
       case "text":
