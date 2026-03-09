@@ -23,7 +23,11 @@ module.exports = {
         titleText: { fontSize: 14, bold: true, color: "{{highlightTextColor}}" },
         versionText: { fontSize: 9, bold: false, color: "{{defaultTextColor}}" },
         updateText: { fontSize: 9, bold: false, color: "{{highlightTextColor}}" },
-        locationText: { fontSize: 14, bold: false, color: "{{highlightTextColor}}" }
+        locationText: { fontSize: 14, bold: false, color: "{{highlightTextColor}}" },
+
+        columnText: { fontSize: 12, bold: true, color: "{{highlightTextColor}}" },
+        dataText: { fontSize: 12, bold: true, color: "{{defaultTextColor}}" },
+        smallText: { fontSize: 12, bold: false, color: "{{defaultTextColor}}" }
       },
 
       defaultOpenSections: ["General", "Style"],
@@ -44,14 +48,17 @@ module.exports = {
 
         useTestData: { type: "bool", label: "Use Test Data", section: "Debug", default: true },
         showTableFullscreen: { type: "bool", label: "Show Table Fullscreen", section: "Debug", default: true },
+        sort: { type: "select", label: "Sort", section: "Debug", default: "asc", options: ["asc", "desc"] },
+        limit: { type: "number", label: "Limit", section: "Debug", default: 5 },
+        minScore: { type: "number", label: "Min Score", section: "Debug", default: 80 },
 
         myApiKey: { type: "text", label: "API KEY", section: "API", default: "MY_APIKEY" },
         useCacheData: { type: "bool", label: "Use Cache Data", section: "API", default: true },
         refreshMinutes: { type: "number", label: "Refresh Minutes", section: "API", default: 15 },
         forceRefresh: { type: "bool", label: "Force Refresh in App", section: "API", default: false },
-        sort: { type: "select", label: "Sort", section: "API", default: "asc", options: ["asc", "desc"] },
-        limit: { type: "number", label: "Limit", section: "API", default: 5 },
-        minScore: { type: "number", label: "Min Score", section: "API", default: 80 },
+
+        intervalHours: { type: "number", label: "Interval Hours", section: "API", default: 2 },
+        displayCount: { type: "number", label: "Display Count", section: "API", default: 4 },
 
         useCurrentLocation: { type: "bool", label: "現在地を使用", section: "Location", default: true },
         lat: { type: "number", label: "緯度（固定地点）", section: "Location", default: 35.6812, show: "{{!useCurrentLocation}}" },
@@ -148,13 +155,13 @@ module.exports = {
             children: [
               {
                 type: "vstack",
-                size: new Size(80, 0),
+                size: new Size(30, 0),
                 children: [
-                  { type: "text", text: "時間:" },
-                  { type: "text", text: "気圧:" },
-                  { type: "text", text: "風速:" },
-                  { type: "text", text: "気温:" },
-                  { type: "text", text: "降水:" }
+                  { type: "text", text: "時間:", style: "columnText" },
+                  { type: "text", text: "気圧:", style: "columnText" },
+                  { type: "text", text: "風速:", style: "columnText" },
+                  { type: "text", text: "気温:", style: "columnText" },
+                  { type: "text", text: "降水:", style: "columnText" }
                 ]
               },
               {
@@ -165,31 +172,35 @@ module.exports = {
                 align: "center",          // 左右中央揃え
                 template: {
                   type: "vstack",
-                  size: new Size(40, 0), // 列幅
+                  size: new Size(55, 0), // 列幅
                   children: [
                     { type: "hstack", children: [
                         { type: "spacer" },
-                        { type: "text", text: "{{pressure}}" }
+                        { type: "text", text: "{{hour}}", style: "columnText" }
                       ]
                     },
                     { type: "hstack", children: [
                         { type: "spacer" },
-                        { type: "text", text: "{{hour}}" }
+                        { type: "text", text: "{{pressureTrend}} ", style: "smallText" },
+                        { type: "text", text: "{{pressure}}", style: "dataText" }
                       ]
                     },
                     { type: "hstack", children: [
                         { type: "spacer" },
-                        { type: "text", text: "{{windSpeed}}" }
+                        { type: "text", text: "{{windIcon}} ", style: "smallText" },
+                        { type: "text", text: "{{windTrend }} ", style: "smallText" },
+                        { type: "text", text: "{{windSpeed}}", style: "dataText" }
                       ]
                     },
                     { type: "hstack", children: [
                         { type: "spacer" },
-                        { type: "text", text: "{{temp}}" }
+                        { type: "text", text: "{{tempTrend}} ", style: "{{tempTrendColor}}", style: "smallText" },
+                        { type: "text", text: "{{temp}}", style: "dataText" },
                       ]
                     },
                     { type: "hstack", children: [
                         { type: "spacer" },
-                        { type: "text", text: "{{rain}}" }
+                        { type: "text", text: "{{rain}}", style: "dataText" },
                       ]
                     }
                   ]
@@ -287,53 +298,23 @@ module.exports = {
   transform(data, config) {
 
     const v = config?.values || {}
-    console.log(JSON.stringify(v, null, 2))
-//     console.log(JSON.stringify(data, null, 2))
 
     if (v.useTestData) return this.testDataTransform(data, config)
 
-// const items = [
-//   {
-//     pressure: [1000,1002,1001,1000],
-//     windIcon: ["↑","↗","→","↘"],
-//     windSpeed: [3,4,2,5],
-//     temp: [9,8,7,6],
-//     rain: [0,10,20,30]
-//   }
-// ]
-const items = [
-  { hour: 2, pressure: 1000, windIcon: "↑", windSpeed: 3, temp: 9, rain: 0 },
-  { hour: 4, pressure: 1001, windIcon: "↑", windSpeed: 4, temp: 8, rain: 10 },
-  { hour: 6, pressure: 1002, windIcon: "↑", windSpeed: 2, temp: 7, rain: 20 },
-  { hour: 8, pressure: 1003, windIcon: "↑", windSpeed: 5, temp: 6, rain: 30 },
-]
+    const items = this.forecastDataTransform(data, config)
+    const meta = this.metaDataTransform(data, config)
 
-    // current 情報を整理
-    const current = {
-      updated: data.current.last_updated,
-      isDay: data.current.is_day,
-
-      tempC: data.current.temp_c,
-      feelslikeC: data.current.feelslike_c,
-
-      condition: data.current.condition.text,
-      icon: this.makeWeatherApiIcon(data.current.condition.icon),
-
-      humidity: data.current.humidity,
-      cloud: data.current.cloud,
-
-      windKph: data.current.wind_kph,
-      windDir: data.current.wind_dir,
-      windDegree: data.current.wind_degree,
-      gustKph: data.current.gust_kph,
-
-      pressureMb: data.current.pressure_mb,
-      visibilityKm: data.current.vis_km,
-
-      precipMm: data.current.precip_mm,
-      uv: data.current.uv
+    // 共通データ返却（統一フォーマット）
+    return {
+      items,
+      ...this.flatObj(meta)
     }
-//     console.log(JSON.stringify(current, null, 2))
+  },
+
+  // meta 情報を整理
+  metaDataTransform(data, config) {
+
+    const v = config?.values || {}
 
     // Online判定
     const online = v.isOnline ?? false
@@ -354,9 +335,11 @@ const items = [
     // location
     const location = config?.location || null
 
+    // current
+    const current = this.currentDataTransform(data, config)
+
     // メタ情報
     const meta = {
-      count: items.length,
       header: {
         titleStr: current.condition,
         titleIcon: {
@@ -381,13 +364,95 @@ const items = [
       }
     }
 
-    // 共通データ返却（統一フォーマット）
-    return {
-      items,
-      ...this.flatObj(meta)
-    }
+    return meta
   },
 
+  // current 情報を整理
+  currentDataTransform(data, config) {
+
+    const v = config?.values || {}
+
+    const current = {
+      updated: data.current.last_updated,
+      isDay: data.current.is_day,
+
+      tempC: data.current.temp_c,
+      feelslikeC: data.current.feelslike_c,
+
+      condition: data.current.condition.text,
+      icon: this.makeWeatherApiIcon(data.current.condition.icon),
+
+      humidity: data.current.humidity,
+      cloud: data.current.cloud,
+
+      windKph: data.current.wind_kph,
+      windDir: data.current.wind_dir,
+      windDegree: data.current.wind_degree,
+      gustKph: data.current.gust_kph,
+
+      pressureMb: data.current.pressure_mb,
+      visibilityKm: data.current.vis_km,
+
+      precipMm: data.current.precip_mm,
+      uv: data.current.uv
+    }
+
+    return current
+  },
+
+  // forecast 情報を整理
+  forecastDataTransform(data, config) {
+
+    const v = config?.values || {}
+
+    const intervalHours = v.intervalHours || 2      // 取得したい時間間隔（2時間ごと）
+    const displayCount = v.displayCount || 4        // 表示件数（large widget）
+    const nowEpoch = Math.floor(Date.now() / 1000) + (3600 * (intervalHours -1))
+
+    const forecastData = data.forecast.forecastday  // forecastday 配列
+
+    // hour 配列から現在時間以降のデータを flatten して抽出
+    const hours = forecastData.flatMap(day => day.hour)
+      .filter(h => h.time_epoch >= nowEpoch)          // 現在時間以降
+      .filter((h, i) => i % intervalHours === 0)      // 2時間毎に間引き
+      .slice(0, displayCount)                         // 表示件数に制限
+
+    // レンダラー用 JSON に transform
+    const items = hours.map((h, idx) => {
+      const prev = idx > 0 ? hours[idx - 1] : h
+
+      function trendStyle(color) {
+        return { fontSize: 9, color: color }
+      }
+
+      function trendIcon(curr, prev) {
+        if (curr > prev) return { icon: "↑", color: "red" }
+        if (curr < prev) return { icon: "↓", color: "blue" }
+        return { icon: "→", color: "glay" }
+      }
+
+      const tempTrendObj = trendIcon(h.temp_c, prev.temp_c)
+      const pressureTrendObj = trendIcon(h.pressure_mb, prev.pressure_mb)
+      const windTrendObj = trendIcon(h.wind_kph, prev.wind_kph)
+
+      return {
+        hour: Number(h.time.split(" ")[1].slice(0, 2)) + "時",
+        pressure: Math.round(h.pressure_mb),
+        pressureTrend: pressureTrendObj.icon,
+        pressureTrendColor: pressureTrendObj.color,
+        windIcon: this.convertWindDegToIcon(h.wind_degree),
+        windSpeed: Math.round(h.wind_kph),
+        windTrend: windTrendObj.icon,
+        windTrendColor: windTrendObj.color,
+        temp: Math.round(h.temp_c),
+        tempTrend: tempTrendObj.icon,
+        tempTrendColor: tempTrendObj.color,
+        rain: Math.round(h.chance_of_rain)
+      }
+    })
+
+    return items
+  },
   // Object 平坦化
   flatObj(obj, prefix = '') {
 
@@ -435,6 +500,19 @@ const items = [
     if (url.includes('day')) filename = filename.replace('.', 'd.')
     else if (url.includes('night')) filename = filename.replace('.', 'n.')
     return url
+  },
+
+  // 例：風向きをアイコンに変換する関数
+  convertWindDegToIcon(deg) {
+    if (deg >= 337.5 || deg < 22.5) return "↑"
+    if (deg >= 22.5 && deg < 67.5) return "↗"
+    if (deg >= 67.5 && deg < 112.5) return "→"
+    if (deg >= 112.5 && deg < 157.5) return "↘"
+    if (deg >= 157.5 && deg < 202.5) return "↓"
+    if (deg >= 202.5 && deg < 247.5) return "↙"
+    if (deg >= 247.5 && deg < 292.5) return "←"
+    if (deg >= 292.5 && deg < 337.5) return "↖"
+    return "↑"
   },
 
   // Test Data
