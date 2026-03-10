@@ -4,8 +4,6 @@
 /**
  * WF_AppCore
  **/
-// const { loadModule } = importModule("ModuleLoader")
-
 const WF_CoreBase = importModule("WidgetFramework/WF_CoreBase")
 const StorageEngine = importModule("WidgetFramework/WF_StorageEngine")
 const WidgetRenderer = importModule("WidgetFramework/WF_WidgetRenderer")
