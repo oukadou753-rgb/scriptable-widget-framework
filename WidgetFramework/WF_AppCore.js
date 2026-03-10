@@ -21,7 +21,7 @@ module.exports = class WF_AppCore extends WF_CoreBase {
     const appVersion = appInfo.version
 
     this.appId = appId || Script.name()
-    this.storageType = appInfo.storageType
+    this.storageType = appInfo.storageType || "local"
 
     this.storage = new StorageEngine(this.appId, this.storageType)
     this.renderer = new WidgetRenderer(this.appId, this.storageType)
