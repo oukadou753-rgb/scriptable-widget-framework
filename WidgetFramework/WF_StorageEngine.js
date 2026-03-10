@@ -4,16 +4,15 @@
 /**
  * WF_StorageEngine
  **/
-const WF_DEV_MODE = true
-
 module.exports = class WF_StorageEngine {
 
-  constructor(appId) {
+  constructor(appId, useiCloud) {
 
     this.appId = appId
+    this.useiCloud = useiCloud
 
     // 切り替え
-    this.fm = WF_DEV_MODE
+    this.fm = this.useiCloud
       ? FileManager.iCloud()
       : FileManager.local()
 
