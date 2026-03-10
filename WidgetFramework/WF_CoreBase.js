@@ -4,7 +4,9 @@
 /**
  * WF_CoreBase
  **/
-const DataProvider = importModule("WidgetFramework/WF_DataProvider")
+const { loadModule } = importModule("ModuleLoader")
+
+const DataProvider = loadModule("WidgetFramework/WF_DataProvider")
 
 module.exports = class WF_CoreBase {
 
