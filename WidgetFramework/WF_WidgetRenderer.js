@@ -38,7 +38,7 @@ module.exports = class WF_WidgetRenderer {
     //Header
     if (Array.isArray(layout.header) && layout.header.length) {
       await this.renderBlock(widget, layout.header, context)
-      widget.addSpacer()
+      // widget.addSpacer()
     }
 
     // Body
