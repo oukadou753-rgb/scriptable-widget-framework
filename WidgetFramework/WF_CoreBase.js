@@ -8,6 +8,11 @@ const DataProvider = importModule("WidgetFramework/WF_DataProvider")
 
 module.exports = class WF_CoreBase {
 
+  constructor(appInfo, appConfig) {
+    this.appId = appId || Script.name()
+    this.storageType = appInfo.storageType
+  }
+
   async preview(size) {
 
     const context = await this.buildContext({ size })
