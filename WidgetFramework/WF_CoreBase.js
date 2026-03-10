@@ -4,7 +4,7 @@
 /**
  * WF_CoreBase
  **/
-const { loadModule } = importModule("ModuleLoader")
+// const { loadModule } = importModule("ModuleLoader")
 
 const DataProvider = importModule("WidgetFramework/WF_DataProvider")
 
