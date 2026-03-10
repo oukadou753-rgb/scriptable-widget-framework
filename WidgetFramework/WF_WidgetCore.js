@@ -19,9 +19,10 @@ module.exports = class WF_WidgetCore extends WF_CoreBase {
     const appVersion = appInfo.version
 
     this.appId = appId || Script.name()
+    this.useiCloud = useiCloud
 
-    this.storage = new StorageEngine(this.appId)
-    this.renderer = new WidgetRenderer(this.appId)
+    this.storage = new StorageEngine(this.appId, this.useiCloud)
+    this.renderer = new WidgetRenderer(this.appId, this.useiCloud)
 
     this.appConfig = appConfig
     this.defaultConfig = appConfig.getDefaultConfig()
