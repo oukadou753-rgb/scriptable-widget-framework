@@ -397,6 +397,11 @@ module.exports = class WF_WidgetRenderer {
       const y = Number(style.shadowOffset.y || 0)
       textItem.shadowOffset = new Point(x, y)
     }
+
+    // textOpacity
+    if (style.opacity) {
+      textItem.textOpacity = style.opacity
+    }
   }
 
   // =========================
