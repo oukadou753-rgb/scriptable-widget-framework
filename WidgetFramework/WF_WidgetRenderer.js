@@ -352,11 +352,17 @@ module.exports = class WF_WidgetRenderer {
       ? Font.boldSystemFont(size)
       : Font.systemFont(size)
 
-    const rawColor = style.color
-      ? this.resolveColor(this.bind(style.color, context), context)
-      : null
+    const colorValue = this.bind(style.color, context)
 
-    const finalColor = this.toColor(rawColor)
+    if (colorValue) {
+      const finalColor = this.toColor(
+        this.resolveColor(colorValue, context)
+      )
+
+      if (finalColor) {
+        textItem.textColor = finalColor
+      }
+    }
 
     if (finalColor) {
       textItem.textColor = finalColor
@@ -504,7 +510,6 @@ module.exports = class WF_WidgetRenderer {
   // ■ toColor
   // =========================
   toColor(value) {
-    if (value && value == "") return null
     if (!value) return this.getDefaultTextColor()
     if (value instanceof Color) return value
 
