@@ -31,7 +31,7 @@ module.exports = {
         dataText: { fontSize: 11, bold: true, color: "{{defaultTextColor}}" },
         largeText: { fontSize: 20, bold: true, color: "{{defaultTextColor}}" },
         normalText: { fontSize: 16, bold: true, color: "{{defaultTextColor}}" },
-        smallText: { fontSize: 10, bold: true, color: "{{defaultTextColor}}" }
+        smallText: { fontSize: 9, bold: true, color: "{{defaultTextColor}}" }
       },
 
       defaultOpenSections: ["General", "Style"],
@@ -137,17 +137,19 @@ module.exports = {
 
       // Default Layout
       default: {
+        padding: this.pos(10, 16, 10, 16),
+
         header: [
           {
             type: "hstack",
-            padding: new Rect(0, 0, 0, 0),
+            size: new Size(0, 16),
             align: "center",
             children: [
               { type: "image", src: "{{header_titleIcon_src}}", tint: "{{header_titleIcon_tint}}", size: 24 },
               { type: "spacer", size: 3 },
               { type: "text", text: "{{header_titleStr}}", style: "titleText" },
               { type: "spacer" },
-              { type: "image", src: "{{status_icon}}", tint: "{{status_color}}", opacity: "{{status_opacity}}", size: 16 }
+              { type: "image", src: "{{status_icon}}", tint: "{{status_color}}", opacity: "{{status_opacity}}", size: 14 }
             ]
           }
         ],
@@ -155,19 +157,21 @@ module.exports = {
         body: [
           {
             type: "hstack",
-            padding: new Rect(0, 0, 0, 0),
-            size: new Size(0, 80),
+            size: new Size(0, 70),
+            padding: this.pos(0),
+            justify: "center",
             children: [
               {
                 type: "vstack",
-                size: new Size(160, 0),
+                size: new Size(150, 0),
+                padding: this.pos(5, 5, 5, -5),
                 align: "center",
                 children: [
                   {
                     type: "hstack",
                     children: [
                       { type: "spacer" },
-                      { type: "text", text: "{{current_pressureMb}}", style: { base: "defaultText", fontSize: 60, bold: true } },
+                      { type: "text", text: "{{current_pressureMb}}", style: { base: "defaultText", fontSize: 55, bold: true, lineLimit: 1, minimumScaleFactor: 0.8 } },
                       { type: "spacer" }
                     ]
                   },
@@ -175,8 +179,7 @@ module.exports = {
               },
               {
                 type: "vstack",
-                padding: new Rect(0, 0, 0, 0),
-                size: new Size(125, 0),
+                size: new Size(110, 0),
                 align: "center",
                 children: [
                   {
@@ -185,7 +188,7 @@ module.exports = {
                     align: "center",
                     children: [
                       { type: "spacer" },
-                      { type: "text", text: "{{current_tempC}}", style: { base: "normalText", fontSize: 20, color: "#ff453a" } },
+                      { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: 20, color: "#ff453a" } },
                       { type: "text", text: "°C", style: { base: "normalText", color: "#ff453a" } },
                       { type: "spacer", size: 10 },
                       { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: 20, color: "#487de7" } },
@@ -216,12 +219,51 @@ module.exports = {
                     align: "center",
                     children: [
                       { type: "spacer", size: 10 },
-                      { type: "text", text: "雨量：", style: "currentColumnText" },
+                      { type: "text", text: "雨　　量：", style: "currentColumnText" },
                       { type: "text", text: "{{current_precipMm}}㎜", style: "currentDataText" }
                     ]
                   }
                 ]
+              }
+            ]
+          },
+          {
+            type: "vstack",
+            size: new Size(0, 60),
+            justify: "center",
+            children: [
+              {
+                type: "hstack",
+                align: "center",
+                children: [
+                  { type: "spacer" },
+                  { type: "text", text: "日較差：", style: "currentColumnText" },
+                  { type: "text", text: "{{current_tempMax}}", style: "largeText" },
+                  { type: "text", text: "°C", style: "currentDataText" },
+                  { type: "text", text: " / ", style: "largeText" },
+                  { type: "text", text: "{{current_tempMin}}", style: "largeText" },
+                  { type: "text", text: "°C", style: "currentDataText" },
+                  { type: "spacer" },
+                  { type: "text", text: "体感温度：", style: "currentColumnText" },
+                  { type: "text", text: "{{current_feelslike}}", style: "largeText" },
+                  { type: "text", text: "°C", style: "currentDataText" },
+                  { type: "spacer" }
+                ]
               },
+              {
+                type: "hstack",
+                align: "center",
+                children: [
+                  { type: "spacer" },
+                  { type: "text", text: "風速：", style: "currentColumnText" },
+                  { type: "text", text: "{{current_windSpeed}}", style: { base: "largeText", color: "{{current_windSpeedColor}}" } },
+                  { type: "text", text: "m/s", style: { base: "currentDataText", color: "{{current_windSpeedColor}}" } },
+                  { type: "spacer" },
+                  { type: "text", text: "風向き：", style: "currentColumnText" },
+                  { type: "text", text: "{{current_windDegree}}", style: "largeText" },
+                  { type: "spacer" }
+                ]
+              }
             ]
           },
           {
@@ -230,13 +272,29 @@ module.exports = {
             children: [
               {
                 type: "vstack",
-                size: new Size(50, 0),
+                size: new Size(48, 0),
                 children: [
                   { type: "text", text: "{{intervalHours}}時間予報", style: { base: "smallText", color: "{{highlightTextColor}}" } },
-                  { type: "text", text: "気圧(hPa)", style: "columnText" },
-                  { type: "text", text: "風速(m)", style: "columnText" },
-                  { type: "text", text: "気温(°C)", style: "columnText" },
-                  { type: "text", text: "降水(%)", style: "columnText" }
+                  { type: "hstack", align: "center", children: [
+                      { type: "text", text: "気圧", style: { base: "columnText", color: "{{highlightTextColor}}" } },
+                      { type: "text", text: "(hPa)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+                    ]
+                  },
+                  { type: "hstack", align: "center", children: [
+                      { type: "text", text: "風速", style: { base: "columnText", color: "{{highlightTextColor}}" } },
+                      { type: "text", text: "(m)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+                    ]
+                  },
+                  { type: "hstack", align: "center", children: [
+                      { type: "text", text: "気温", style: { base: "columnText", color: "{{highlightTextColor}}" } },
+                      { type: "text", text: "(°C)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+                    ]
+                  },
+                  { type: "hstack", align: "center", children: [
+                      { type: "text", text: "降水", style: { base: "columnText", color: "{{highlightTextColor}}" } },
+                      { type: "text", text: "(％)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+                    ]
+                  }
                 ]
               },
               {
@@ -247,7 +305,7 @@ module.exports = {
                 align: "center",          // 左右中央揃え
                 template: {
                   type: "vstack",
-                  size: new Size(50, 0),  // 列幅
+                  size: new Size(48, 0),  // 列幅
                   children: [
                     { type: "hstack", align: "center", children: [
                         { type: "spacer" },
@@ -284,41 +342,42 @@ module.exports = {
               }
             ]
           },
-          {
-            type: "hstack",
-            size: new Size(0, 40),
-            align: "center",
-            children: [
-              {
-                type: "vstack",
-                justify: "center",
-                children: [
-                  {
-                    type: "hstack",
-                    children: [
-                      { type: "spacer" },
-                  { type: "text", text: "{{current_pressureMb}}", style: "defaultText" },
-                      { type: "spacer" }
-                    ]
-                  },
-                ]
-              },
-              {
-                type: "vstack",
-                align: "center",
-                children: [
-                  { type: "spacer" },
-                  { type: "text", text: "{{current_pressureMb}}", style: "defaultText" },
-                  { type: "spacer" }
-                ]
-              },
-            ]
-          },
+//           {
+//             type: "hstack",
+//             size: new Size(0, 40),
+//             align: "center",
+//             children: [
+//               {
+//                 type: "vstack",
+//                 justify: "center",
+//                 children: [
+//                   {
+//                     type: "hstack",
+//                     children: [
+//                       { type: "spacer" },
+//                   { type: "text", text: "{{current_pressureMb}}", style: "defaultText" },
+//                       { type: "spacer" }
+//                     ]
+//                   },
+//                 ]
+//               },
+//               {
+//                 type: "vstack",
+//                 align: "center",
+//                 children: [
+//                   { type: "spacer" },
+//                   { type: "text", text: "{{current_pressureMb}}", style: "defaultText" },
+//                   { type: "spacer" }
+//                 ]
+//               },
+//             ]
+//           },
         ],
 
         footer: [
           {
             type: "hstack",
+            size: new Size(0, 20),
             justify: "start",
             children: [
               { type: "text", text: "{{location_name}}", style: "locationText" },
@@ -326,9 +385,10 @@ module.exports = {
           },
           {
             type: "hstack",
+            size: new Size(0, 12),
             justify: "start",
             children: [
-              { type: "text", text: "APP_DEV_MODE", style: "footerText", show: "{{debug}}" },
+              { type: "text", text: "APP_DEV_MODE", style: "footerText" },
               { type: "spacer" },
               { type: "text", text: "Update: ", style: "updateText" },
               { type: "text", text: "{{footer_updateStr}}", style: "footerText" }
@@ -344,6 +404,8 @@ module.exports = {
 
       // Test Layout
       test: {
+        padding: this.pos(10, 16, 10, 16),
+
         header: [
           {
             type: "hstack",
@@ -423,7 +485,8 @@ module.exports = {
   metaDataTransform(data, config) {
 
     const v = config?.values || {}
-    console.log(JSON.stringify(config, null, 2))
+//     console.log(JSON.stringify(config, null, 2))
+
     const debug = false
 
     // Online判定
@@ -432,7 +495,7 @@ module.exports = {
     const status = {
       icon: "location.fill",
       color: "#d1cdda",
-      opacity: online ? 0.6 : 0.3
+      opacity: online ? 1.0 : 0.5
     }
 
     // 更新時間生成
@@ -483,6 +546,7 @@ module.exports = {
 
     const v = config?.values || {}
     const defaultTextColor = v.defaultTextColor
+//     console.log(JSON.stringify(data.current, null, 2))
 
     const nowEpoch = Math.floor(Date.now() / 1000) - 3600
 
@@ -490,19 +554,26 @@ module.exports = {
     const hours = forecastData.flatMap(day => day.hour)
       .filter(h => h.time_epoch >= nowEpoch)
       .slice(0, 1)
-
+    console.log(JSON.stringify(forecastData[ 0 ].day, null, 2))
 
     const tempC = Math.round(data.current.temp_c)
+    const tempMin = Math.round(forecastData[0].day.mintemp_c)
+    const tempMax = Math.round(forecastData[0].day.maxtemp_c)
     const humidity = data.current.humidity
     const discomfortIndex = this.getDiscomfortIndex(tempC, humidity)
+    const windSpeed = (data.current.wind_kph / 3.6).toFixed(1)
+    const windDegree = this.getDegreeString(data.current.wind_dir)
     const rain = Math.ceil(Math.max(...[ hours[0].chance_of_rain, hours[0].chance_of_snow ]) / 5) * 5
+
 
     const current = {
       updated: data.current.last_updated,
       isDay: data.current.is_day,
 
-      tempC: tempC,
-      feelslikeC: data.current.feelslike_c,
+      temp: tempC,
+      tempMin: tempMin,
+      tempMax: tempMax,
+      feelslike: Math.round(data.current.feelslike_c),
 
       condition: data.current.condition.text,
       icon: this.makeWeatherApiIcon(data.current.condition.icon),
@@ -510,9 +581,10 @@ module.exports = {
       humidity: humidity,
       cloud: data.current.cloud,
 
-      windKph: Math.round(data.current.wind_kph / 3.6),
+      windSpeed: windSpeed,
+      windSpeedColor: this.getWindColor(windSpeed, defaultTextColor),
       windDir: data.current.wind_dir,
-      windDegree: data.current.wind_degree,
+      windDegree: this.getDegreeString(data.current.wind_dir),
       gustKph: data.current.gust_kph,
 
       pressureMb: data.current.pressure_mb,
@@ -557,7 +629,6 @@ module.exports = {
       const pressureTrend = this.trendIcon(h.pressure_mb, prev.pressure_mb)
       const windTrend = this.trendIcon(h.wind_kph, prev.wind_kph)
       const rainTrend = this.trendIcon(h.chance_of_rain, prev.chance_of_rain)
-
       const rain = Math.ceil(Math.max(...[ h.chance_of_rain, h.chance_of_snow ]) / 5) * 5
 
       return {
@@ -642,6 +713,8 @@ module.exports = {
     return "↑"
   },
 
+  getDegreeString(wind_dir) { return [ ...wind_dir.replace(/E/g, '\u6771').replace(/W/g, '\u897f').replace(/S/g, '\u5357').replace(/N/g, '\u5317') + '\u3000\u3000' ].slice(0, 3).join('') },
+
   trendIcon(curr, prev) {
     if (curr > prev) return "↑"
     if (curr < prev) return "↓"
@@ -694,6 +767,16 @@ module.exports = {
   getDiscomfortIndex(temp, humidity) {
     const index = 0.81 * temp + 0.01 * humidity * (0.99 * temp - 14.3) + 46.3
     return Number(index.toFixed(1))
+  },
+
+  pos(a,b,c,d){
+    if (b === undefined)
+      return {top:a,left:a,bottom:a,right:a}
+    if (c === undefined)
+      return {top:a,left:b,bottom:a,right:b}
+    if (d === undefined)
+      return {top:a,left:b,bottom:c,right:b}
+    return {top:a,left:b,bottom:c,right:d}
   },
 
   // Test Data
@@ -797,6 +880,6 @@ const module_name = module.filename.match(/[^\/]+$/ )[ 0 ].replace('.js', '');
 if (module_name == Script.name()) {
   (async() => {
     const Main = importModule("Main")
-    if (Main.run) await Main.run()
+    if (Main.run) await Main.run("icloud")
   })()
 }
