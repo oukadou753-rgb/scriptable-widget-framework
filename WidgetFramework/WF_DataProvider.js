@@ -347,11 +347,19 @@ module.exports = class WF_DataProvider {
   // ■ fetch
   // =========================
   async fetch(url) {
+
     const req = new Request(url)
     req.method = "GET"
-    req.timeoutInterval = 10
+    req.timeoutInterval = 5
 
-    return await req.loadJSON()
+    try {
+      return await req.loadJSON()
+    }
+    catch(e) {
+      console.warn("API timeout")
+      return null
+    }
+
   }
 
   // =========================
