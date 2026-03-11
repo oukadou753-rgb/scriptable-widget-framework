@@ -76,6 +76,28 @@ module.exports = class WF_DataProvider {
             }
 
             this.saveLocationCache(location)
+          } else {
+
+            // ① cached location
+            const cached = this.storage.readJSON("location")
+
+            if (cached) {
+              location = cached
+            }
+
+            // ② default location
+            else if (this.appConfig.location?.default) {
+
+              const def = this.appConfig.location.default
+
+              location = {
+                lat: Number(def.lat),
+                lon: Number(def.lon),
+                name: def.name || "",
+                full: def.full || ""
+              }
+            }
+        
           }
         }
       }
