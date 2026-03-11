@@ -379,6 +379,24 @@ module.exports = class WF_WidgetRenderer {
     if (style.minimumScaleFactor !== undefined) {
       textItem.minimumScaleFactor = Number(style.minimumScaleFactor)
     }
+
+    // shadowColor
+    const shadowColor = this.bind(style.shadowColor, context)
+    if (shadowColor) {
+      textItem.shadowColor = new Color(shadowColor)
+    }
+
+    // shadowRadius
+    if (style.shadowRadius !== undefined) {
+      textItem.shadowRadius = Number(style.shadowRadius)
+    }
+
+    // shadowOffset
+    if (style.shadowOffset) {
+      const x = Number(style.shadowOffset.x || 0)
+      const y = Number(style.shadowOffset.y || 0)
+      textItem.shadowOffset = new Point(x, y)
+    }
   }
 
   // =========================
