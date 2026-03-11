@@ -310,7 +310,7 @@ module.exports = class WF_WidgetRenderer {
 
     const node = container.addImage(image)
 
-    if(el.tint && el.tint != "")
+    if(el.tint != null)
       node.tintColor = new Color(tint)
 
     if(size)
