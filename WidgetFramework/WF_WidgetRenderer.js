@@ -364,10 +364,6 @@ module.exports = class WF_WidgetRenderer {
       }
     }
 
-    if (finalColor) {
-      textItem.textColor = finalColor
-    }
-
     // lineLimit
     if (style.lineLimit !== undefined) {
       textItem.lineLimit = Number(style.lineLimit)
