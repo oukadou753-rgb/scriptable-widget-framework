@@ -8,10 +8,13 @@
 const storageType = "icloud"
 // const storageType = "local"
 // const storageType = "bookmark"
+// "icloud"
+// "local"
+// "bookmark"
 
-const loadMain = true
+const loadMain = false
 
-const useDiff = true
+const useDiff = false
 const useTarget = true
 const targetFiles = [
 //   "Main.js",
@@ -25,10 +28,10 @@ const targetFiles = [
 //   "WidgetFramework/WF_ProfileEngine.js",
 //   "WidgetFramework/WF_StorageEngine.js",
 //   "WidgetFramework/WF_WidgetCore.js",
-//   "WidgetFramework/WF_WidgetRenderer.js"
+  "WidgetFramework/WF_WidgetRenderer.js"
 ]
 const targetFolders = [
-  "WidgetFramework",
+//   "WidgetFramework",
 //   "Tools"
 ]
 
@@ -71,7 +74,7 @@ async function devLoader({
       baseDir = fm.documentsDirectory()
 
   }
-  console.warn("Using " + storageType)
+  console.warn("USING: " + storageType)
 
   // --- SHA 管理用 ---
   const shaFilePath = fm.joinPath(baseDir, "github_sha.json")
@@ -187,3 +190,48 @@ async function devLoader({
 }
 
 await devLoader({ useDiff, useTarget, targetFiles, targetFolders })
+
+/**
+ * DevLoader 呼び出しテンプレート（新フラグ版）
+ **/
+
+// --- 初回全ファイル取得 ---
+// await devLoader({
+//   useDiff: false,          // 差分無視
+//   useTarget: false          // 全体対象
+// })
+
+// --- 通常運用: 指定ファイルのみ更新 ---
+// await devLoader({
+//   useDiff: true,           // 差分のみ
+//   useTarget: true,         // 指定対象のみ
+//   targetFiles: ["WidgetFramework/WF_AppCore.js","WidgetFramework/WF_DataProvider.js"]
+// })
+
+// --- 特定フォルダ単位で更新 ---
+// await devLoader({
+//   useDiff: true,           // 差分のみ
+//   useTarget: true,         // 指定フォルダのみ
+//   targetFolders: ["WidgetFramework"]
+// })
+
+// --- ファイル＋フォルダ併用 ---
+// await devLoader({
+//   useDiff: true,
+//   useTarget: true,
+//   targetFiles: ["Main.js"],
+//   targetFolders: ["WidgetFramework"]
+// })
+
+// --- HotReload: SHA 差分で更新されたファイルのみ自動取得 ---
+// await devLoader({
+//   useDiff: true,
+//   useTarget: false
+// })
+
+// --- HotReload + 特定フォルダ併用 ---
+// await devLoader({
+//   useDiff: true,
+//   useTarget: true,
+//   targetFolders: ["WidgetFramework"]
+// })
