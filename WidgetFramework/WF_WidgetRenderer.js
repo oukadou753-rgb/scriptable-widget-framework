@@ -323,6 +323,26 @@ module.exports = class WF_WidgetRenderer {
   // =========================
   applyStyle(textItem, styleInput, context) {
 
+let colorValue = this.bind(style.color, context)
+
+if (colorValue === "") {
+  colorValue = style.color
+}
+
+if (colorValue !== undefined && colorValue !== null) {
+
+  const finalColor = this.toColor(
+    this.resolveColor(colorValue, context)
+  )
+
+  if (finalColor) {
+    textItem.textColor = finalColor
+  }
+
+}
+return
+
+
     const styles = context.config?.styles || {}
 
     let style = {}
