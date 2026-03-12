@@ -271,67 +271,70 @@ module.exports = class WF_WidgetRenderer {
   // =========================
   // Image
   // =========================
-  async renderImage(container, el, context){
+async renderImage(container, el, context){
 
-    const rawSrc = this.resolveData(el.src, context)
+  let image
 
-    let image
+  const raw = this.resolveData(el.src, context)
 
-    // ★ DrawContext Image
-    if (rawSrc instanceof Image) {
+  // ★ DrawContext Image
+  if (raw instanceof Image) {
 
-      image = rawSrc
+    image = raw
 
-    } else {
+  } else {
 
-      const src = this.bind(el.src, context)
-      if(!src) return
+    const src = this.bind(el.src, context)
+    if (!src) return
 
-      const size = el.size || 16
+    const size = el.size || 16
 
-      // URL
-      if(typeof src === "string" && src.startsWith("http")){
+    // URL
+    if (typeof src === "string" && src.startsWith("http")) {
 
-        image = await this.fetchImage(src)
-
-      }
-
-      // SF Symbol
-      else if(typeof src === "string" && !src.includes("/")){
-
-        const sym = SFSymbol.named(src)
-        sym.applyFont(Font.systemFont(size))
-
-        image = sym.image
-
-      }
-
-      // local image
-      else{
-
-        const fm = FileManager.local()
-        image = fm.readImage(src)
-
-      }
+      image = await this.fetchImage(src)
 
     }
 
-    const node = container.addImage(image)
+    // SF Symbol
+    else if (typeof src === "string" && !src.includes("/")) {
 
-    const size = el.size || 16
-    const tint = this.bind(el.tint, context)
-    const opacity = this.bind(el.opacity, context)
+      const sym = SFSymbol.named(src)
+      sym.applyFont(Font.systemFont(size))
 
-    if(tint != "")
-      node.tintColor = new Color(tint)
+      image = sym.image
 
-    if(size)
-      node.imageSize = new Size(size, size)
+    }
 
-    if(opacity !== "" && opacity !== null && opacity !== undefined)
-      node.imageOpacity = Number(opacity)
+    // local file
+    else if (typeof src === "string") {
 
+      const fm = FileManager.local()
+      image = fm.readImage(src)
+
+    } else {
+
+      console.warn("Invalid image src:", src)
+      return
+
+    }
   }
+
+  const node = container.addImage(image)
+
+  const size = el.size || 16
+  const tint = this.bind(el.tint, context)
+  const opacity = this.bind(el.opacity, context)
+
+  if (tint !== "")
+    node.tintColor = new Color(tint)
+
+  if (size)
+    node.imageSize = new Size(size, size)
+
+  if (opacity !== "" && opacity !== null && opacity !== undefined)
+    node.imageOpacity = Number(opacity)
+}
 
   // =========================
   // Style
