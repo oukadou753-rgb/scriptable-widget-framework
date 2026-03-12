@@ -431,14 +431,26 @@ module.exports = class WF_WidgetRenderer {
   // =========================
   bind(text, context) {
 
-    if (text === undefined || text === null) return ""
+    if (text === undefined || text === null)
+      return ""
 
+    // 完全変数 {{value}}
+    const m = String(text).match(/^{{(.*?)}}$/)
+
+    if (m) {
+      const key = m[1].trim()
+      const val = this.resolve(key, context)
+      return val ?? ""
+    }
+
+    // 文字列テンプレート
     return String(text).replace(/{{(.*?)}}/g, (_, rawKey) => {
       const key = rawKey.trim()
       const val = this.resolve(key, context)
       return val ?? ""
     })
   }
+
 
   // =========================
   // evaluate（完全安定版）
