@@ -282,7 +282,7 @@ async renderImage(container, el, context){
   let image
 
   // ★ DrawContext Image
-  if (rawSrc instanceof Image){
+  if (rawSrc && rawSrc.size)
 
     image = rawSrc
 
