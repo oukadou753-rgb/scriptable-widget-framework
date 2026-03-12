@@ -32,7 +32,7 @@ module.exports = class WF_StorageEngine {
 
     // ルート（WF_Data固定）
     this.root = this.fm.joinPath(
-      this.fm.documentsDirectory(),
+      this.baseDir,
       "WF_Data"
     )
 
