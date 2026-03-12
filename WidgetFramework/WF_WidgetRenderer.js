@@ -315,7 +315,7 @@ async renderImage(container, el, context){
 
   else{
 
-    console.warn("Invalid image src:", rawSrc)
+    console.warn("Invalid image src: " + rawSrc)
     return
 
   }
