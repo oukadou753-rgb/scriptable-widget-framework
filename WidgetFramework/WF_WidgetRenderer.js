@@ -340,7 +340,6 @@ if (colorValue !== undefined && colorValue !== null) {
   }
 
 }
-return
 
 
     const styles = context.config?.styles || {}
