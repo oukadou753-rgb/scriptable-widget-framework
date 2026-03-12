@@ -4,6 +4,295 @@
 /**
  * App_Config
  **/
+// ======================
+// Function
+// ======================
+function pos(a,b,c,d){
+  if (b === undefined)
+    return {top:a,left:a,bottom:a,right:a}
+  if (c === undefined)
+    return {top:a,left:b,bottom:a,right:b}
+  if (d === undefined)
+    return {top:a,left:b,bottom:c,right:b}
+  return {top:a,left:b,bottom:c,right:d}
+}
+
+// ======================
+// Header Block
+// ======================
+const headerBlock = [
+  {
+    type: "hstack",
+    size: new Size(0, 16),
+    align: "center",
+    children: [
+      { type: "image", src: "{{header_titleIcon_src}}", tint: "{{header_titleIcon_tint}}", size: 24 },
+      { type: "spacer", size: 3 },
+      { type: "text", text: "{{header_titleStr}}", style: "titleText" },
+      { type: "spacer" },
+      { type: "image", src: "{{status_icon}}", tint: "{{status_color}}", opacity: "{{status_opacity}}", size: 14 }
+    ]
+  }
+]
+
+// ======================
+// Footer Block
+// ======================
+// Location Name
+const locationBlock = [
+  {
+    type: "hstack",
+    size: new Size(0, 20),
+    justify: "start",
+    children: [
+      { type: "text", text: "{{location_name}}", style: "locationText" },
+    ]
+  }
+]
+
+// Update + Location.lat/lon
+const updateBlock = [
+  {
+    type: "hstack",
+    size: new Size(0, 12),
+    justify: "start",
+    children: [
+      { type: "text", text: "{{location_latStr}} : {{location_lonStr}}", style: "footerText" },
+      { type: "spacer" },
+      { type: "text", text: "Update: ", style: "updateText" },
+      { type: "text", text: "{{footer_updateStr}}", style: "footerText" }
+    ]
+  }
+]
+
+// ======================
+// Body Block
+// ======================
+// CurrentData Details Block 1
+const currentDataBlock1 = [
+  {
+    type: "vstack",
+    size: new Size(145, 0),
+    padding: pos(10, 0, 0, 0),
+    align: "center",
+    children: [
+      {
+        type: "hstack",
+        children: [
+          { type: "spacer" },
+          { type: "text", text: "{{current_pressureMb}}", style: { base: "defaultText", fontSize: 60, bold: true, lineLimit: 1, minimumScaleFactor: 0.8 } },
+          { type: "spacer" }
+        ]
+      },
+    ]
+  }
+]
+
+// CurrentData Details Block 2
+const currentDataBlock2 = [
+  {
+    type: "vstack",
+    size: new Size(120, 0),
+    align: "center",
+    children: [
+      {
+        type: "hstack",
+        size: new Size(0, 25),
+        align: "center",
+        children: [
+          { type: "spacer" },
+          { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: 20, color: "#ff453a" } },
+          { type: "text", text: "°C", style: { base: "normalText", color: "#ff453a" } },
+          { type: "spacer", size: 13 },
+          { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: 20, color: "#487de7" } },
+          { type: "text", text: "％", style: { base: "normalText", color: "#487de7" } },
+          { type: "spacer" }
+        ]
+      },
+      {
+        type: "hstack",
+        align: "center",
+        children: [
+          { type: "spacer", size: 10 },
+          { type: "text", text: "不快指数：", style: "currentColumnText" },
+          { type: "text", text: "{{current_discomfortIndex}}", style: { base: "currentDataText", color: "{{current_discomfortIndexColor}}" } }
+        ]
+      },
+      {
+        type: "hstack",
+        align: "center",
+        children: [
+          { type: "spacer", size: 10 },
+          { type: "text", text: "降水確率：", style: "currentColumnText" },
+          { type: "text", text: "{{current_rain}}％", style: { base: "currentDataText", color: "{{current_rainColor}}" } }
+        ]
+      },
+      {
+        type: "hstack",
+        align: "center",
+        children: [
+          { type: "spacer", size: 10 },
+          { type: "text", text: "雨　　量：", style: "currentColumnText" },
+          { type: "text", text: "{{current_precipMm}}㎜", style: "currentDataText" }
+        ]
+      }
+    ]
+  }
+]
+
+// CurrentData Details Block 3
+const currentDataBlock3 = [
+  {
+    type: "vstack",
+    size: new Size(0, 60),
+    justify: "center",
+    children: [
+      {
+        type: "hstack",
+        align: "center",
+        children: [
+          { type: "spacer" },
+          { type: "text", text: "日較差：", style: "currentColumnText" },
+          { type: "text", text: "{{current_tempMax}}", style: "largeText" },
+          { type: "text", text: "°C", style: "currentDataText" },
+          { type: "text", text: " / ", style: "largeText" },
+          { type: "text", text: "{{current_tempMin}}", style: "largeText" },
+          { type: "text", text: "°C", style: "currentDataText" },
+          { type: "spacer", size: 15 },
+          { type: "text", text: "体感温度：", style: "currentColumnText" },
+          { type: "text", text: "{{current_feelslike}}", style: "largeText" },
+          { type: "text", text: "°C", style: "currentDataText" },
+          { type: "spacer" }
+        ]
+      },
+      {
+        type: "hstack",
+        align: "center",
+        children: [
+          { type: "spacer" },
+          { type: "text", text: "風速：", style: "currentColumnText" },
+          { type: "text", text: "{{current_windSpeed}}", style: { base: "largeText", color: "{{current_windSpeedColor}}" } },
+          { type: "text", text: "m/s", style: { base: "currentDataText", color: "{{current_windSpeedColor}}" } },
+          { type: "spacer", size: 15 },
+          { type: "text", text: "風向き：", style: "currentColumnText" },
+          { type: "text", text: "{{current_windIcon}} ", style: "currentColumnText" },
+          { type: "text", text: "{{current_windDegree}}", style: "largeText" },
+          { type: "spacer" }
+        ]
+      }
+    ]
+  }
+]
+
+// ForecastData Block
+const forecastDataBlock = [
+  {
+    type: "hstack",
+    size: new Size(0, 75),
+    justify: "center",
+    children: [
+  
+      // Column
+      {
+        type: "vstack",
+        size: new Size(48, 0),
+        children: [
+          { type: "text", text: "{{intervalHours}}時間予報", style: { base: "smallText", color: "{{highlightTextColor}}" } },
+          { type: "hstack", align: "center", children: [
+              { type: "text", text: "気圧", style: { base: "columnText", color: "{{highlightTextColor}}" } },
+              { type: "text", text: "(hPa)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+            ]
+          },
+          { type: "hstack", align: "center", children: [
+              { type: "text", text: "風速", style: { base: "columnText", color: "{{highlightTextColor}}" } },
+              { type: "text", text: "(m)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+            ]
+          },
+          { type: "hstack", align: "center", children: [
+              { type: "text", text: "気温", style: { base: "columnText", color: "{{highlightTextColor}}" } },
+              { type: "text", text: "(°C)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+            ]
+          },
+          { type: "hstack", align: "center", children: [
+              { type: "text", text: "降水", style: { base: "columnText", color: "{{highlightTextColor}}" } },
+              { type: "text", text: "(％)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+            ]
+          }
+        ]
+      },
+  
+      // Repeat
+      {
+        type: "repeat",
+        items: "{{items}}",
+        direction: "horizontal",  // 横並び
+        spacing: 6,
+        align: "center",          // 左右中央揃え
+        template: {
+          type: "vstack",
+          size: new Size(48, 0),  // 列幅
+          children: [
+            { type: "hstack", align: "center", children: [
+                { type: "spacer" },
+                { type: "text", text: "{{hour}}", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+              ]
+            },
+            { type: "hstack", align: "center", children: [
+                { type: "spacer" },
+                { type: "text", text: "{{pressureTrend}} ", style: { base: "smallText", color: "{{pressureColor}}" } },
+                { type: "text", text: "{{pressure}}", style: { base: "dataText", color: "{{pressureColor}}" } }
+              ]
+            },
+            { type: "hstack", align: "center", children: [
+                { type: "spacer" },
+                { type: "text", text: "{{windIcon}} ", style: { base: "dataText", color: "{{highlightTextColor}}" } },
+                { type: "text", text: "{{windTrend }} ", style: { base: "smallText", color: "{{windSpeedColor}}" } },
+                { type: "text", text: "{{windSpeed}}", style: { base: "dataText", color: "{{windSpeedColor}}" } }
+              ]
+            },
+            { type: "hstack", align: "center", children: [
+                { type: "spacer" },
+                { type: "text", text: "{{tempTrend}} ", style: { base: "smallText", color: "{{tempColor}}" } },
+                { type: "text", text: "{{temp}}", style: { base: "dataText", color: "{{tempColor}}" } }
+              ]
+            },
+            { type: "hstack", align: "center", children: [
+                { type: "spacer" },
+                { type: "text", text: "{{rainTrend}} ", style: { base: "smallText", color: "{{rainColor}}" } },
+                { type: "text", text: "{{rain}}", style: { base: "dataText", color: "{{rainColor}}" } }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+]
+
+// Astro Block
+const astroBlock = [
+  {
+    type: "hstack",
+    size: new Size(0, 25),
+    spacing: 3,
+    align: "center",
+    children: [
+      { type: "spacer" },
+      { type: "image", src: "{{current_sunriseIcon}}", tint: "{{current_sunriseColor}}", size: 28, opacity: "{{current_sunriseOpacity}}" },
+      { type: "text", text: "{{current_sunriseTime}}", style: { base: "extraLargeText", color: "{{current_sunriseColor}}", opacity: "{{current_sunriseOpacity}}" } },
+      { type: "spacer", size: 5 },
+      { type: "text", text: "{{current_moonphaseIcon}}", style: { base: "extraLargeText", shadowColor: "#d1cdda", shadowRadius: 3, shadowOffset: { x: 0, y: 0 } } },
+      { type: "spacer", size: 5 },
+      { type: "image", src: "{{current_sunsetIcon}}", tint: "{{current_sunsetColor}}", size: 28, opacity: "{{current_sunsetOpacity}}" },
+      { type: "text", text: "{{current_sunsetTime}}", style: { base: "extraLargeText", color: "{{current_sunsetColor}}", opacity: "{{current_sunsetOpacity}}" } },
+      { type: "spacer" }
+    ]
+  }
+]
+
+// ======================
+// Export
+// ======================
 module.exports = {
 
   // Default Config
@@ -138,274 +427,26 @@ module.exports = {
 
       // Default Layout
       default: {
-        padding: this.pos(10, 16, 10, 16),
+        padding: pos(10, 16, 10, 16),
 
-        header: [
-
-// Header Brock
-{
-  type: "hstack",
-  size: new Size(0, 16),
-  align: "center",
-  children: [
-    { type: "image", src: "{{header_titleIcon_src}}", tint: "{{header_titleIcon_tint}}", size: 24 },
-    { type: "spacer", size: 3 },
-    { type: "text", text: "{{header_titleStr}}", style: "titleText" },
-    { type: "spacer" },
-    { type: "image", src: "{{status_icon}}", tint: "{{status_color}}", opacity: "{{status_opacity}}", size: 14 }
-  ]
-}
-        ],
-
+        header: headerBlock,
         body: [
-
-// CurrentData Block
-{
-  type: "hstack",
-  size: new Size(0, 70),
-  justify: "center",
-  children: [
-
-    // CurrentData Details Block 1
-    {
-      type: "vstack",
-      size: new Size(145, 0),
-      padding: this.pos(10, 0, 0, 0),
-      align: "center",
-      children: [
-        {
-          type: "hstack",
-          children: [
-            { type: "spacer" },
-            { type: "text", text: "{{current_pressureMb}}", style: { base: "defaultText", fontSize: 60, bold: true, lineLimit: 1, minimumScaleFactor: 0.8 } },
-            { type: "spacer" }
-          ]
-        },
-      ]
-    },
-
-    // CurrentData Details Block 2
-    {
-      type: "vstack",
-      size: new Size(120, 0),
-      align: "center",
-      children: [
-        {
-          type: "hstack",
-          size: new Size(0, 25),
-          align: "center",
-          children: [
-            { type: "spacer" },
-            { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: 20, color: "#ff453a" } },
-            { type: "text", text: "°C", style: { base: "normalText", color: "#ff453a" } },
-            { type: "spacer", size: 13 },
-            { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: 20, color: "#487de7" } },
-            { type: "text", text: "％", style: { base: "normalText", color: "#487de7" } },
-            { type: "spacer" }
-          ]
-        },
-        {
-          type: "hstack",
-          align: "center",
-          children: [
-            { type: "spacer", size: 10 },
-            { type: "text", text: "不快指数：", style: "currentColumnText" },
-            { type: "text", text: "{{current_discomfortIndex}}", style: { base: "currentDataText", color: "{{current_discomfortIndexColor}}" } }
-          ]
-        },
-        {
-          type: "hstack",
-          align: "center",
-          children: [
-            { type: "spacer", size: 10 },
-            { type: "text", text: "降水確率：", style: "currentColumnText" },
-            { type: "text", text: "{{current_rain}}％", style: { base: "currentDataText", color: "{{current_rainColor}}" } }
-          ]
-        },
-        {
-          type: "hstack",
-          align: "center",
-          children: [
-            { type: "spacer", size: 10 },
-            { type: "text", text: "雨　　量：", style: "currentColumnText" },
-            { type: "text", text: "{{current_precipMm}}㎜", style: "currentDataText" }
-          ]
-        }
-      ]
-    }
-  ]
-},
-
-// CurrentData Details Block 3
-{
-  type: "vstack",
-  size: new Size(0, 60),
-  justify: "center",
-  children: [
-    {
-      type: "hstack",
-      align: "center",
-      children: [
-        { type: "spacer" },
-        { type: "text", text: "日較差：", style: "currentColumnText" },
-        { type: "text", text: "{{current_tempMax}}", style: "largeText" },
-        { type: "text", text: "°C", style: "currentDataText" },
-        { type: "text", text: " / ", style: "largeText" },
-        { type: "text", text: "{{current_tempMin}}", style: "largeText" },
-        { type: "text", text: "°C", style: "currentDataText" },
-        { type: "spacer", size: 15 },
-        { type: "text", text: "体感温度：", style: "currentColumnText" },
-        { type: "text", text: "{{current_feelslike}}", style: "largeText" },
-        { type: "text", text: "°C", style: "currentDataText" },
-        { type: "spacer" }
-      ]
-    },
-    {
-      type: "hstack",
-      align: "center",
-      children: [
-        { type: "spacer" },
-        { type: "text", text: "風速：", style: "currentColumnText" },
-        { type: "text", text: "{{current_windSpeed}}", style: { base: "largeText", color: "{{current_windSpeedColor}}" } },
-        { type: "text", text: "m/s", style: { base: "currentDataText", color: "{{current_windSpeedColor}}" } },
-        { type: "spacer", size: 15 },
-        { type: "text", text: "風向き：", style: "currentColumnText" },
-        { type: "text", text: "{{current_windIcon}} ", style: "currentColumnText" },
-        { type: "text", text: "{{current_windDegree}}", style: "largeText" },
-        { type: "spacer" }
-      ]
-    }
-  ]
-},
-
-// ForecastData Block
-{
-  type: "hstack",
-  size: new Size(0, 75),
-  justify: "center",
-  children: [
-
-    // Column
-    {
-      type: "vstack",
-      size: new Size(48, 0),
-      children: [
-        { type: "text", text: "{{intervalHours}}時間予報", style: { base: "smallText", color: "{{highlightTextColor}}" } },
-        { type: "hstack", align: "center", children: [
-            { type: "text", text: "気圧", style: { base: "columnText", color: "{{highlightTextColor}}" } },
-            { type: "text", text: "(hPa)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
-          ]
-        },
-        { type: "hstack", align: "center", children: [
-            { type: "text", text: "風速", style: { base: "columnText", color: "{{highlightTextColor}}" } },
-            { type: "text", text: "(m)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
-          ]
-        },
-        { type: "hstack", align: "center", children: [
-            { type: "text", text: "気温", style: { base: "columnText", color: "{{highlightTextColor}}" } },
-            { type: "text", text: "(°C)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
-          ]
-        },
-        { type: "hstack", align: "center", children: [
-            { type: "text", text: "降水", style: { base: "columnText", color: "{{highlightTextColor}}" } },
-            { type: "text", text: "(％)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
-          ]
-        }
-      ]
-    },
-
-    // Repeat
-    {
-      type: "repeat",
-      items: "{{items}}",
-      direction: "horizontal",  // 横並び
-      spacing: 6,
-      align: "center",          // 左右中央揃え
-      template: {
-        type: "vstack",
-        size: new Size(48, 0),  // 列幅
-        children: [
-          { type: "hstack", align: "center", children: [
-              { type: "spacer" },
-              { type: "text", text: "{{hour}}", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+          {
+            type: "hstack",
+            size: new Size(0, 70),
+            justify: "center",
+            children: [
+              ...currentDataBlock1,
+              ...currentDataBlock2
             ]
           },
-          { type: "hstack", align: "center", children: [
-              { type: "spacer" },
-              { type: "text", text: "{{pressureTrend}} ", style: { base: "smallText", color: "{{pressureColor}}" } },
-              { type: "text", text: "{{pressure}}", style: { base: "dataText", color: "{{pressureColor}}" } }
-            ]
-          },
-          { type: "hstack", align: "center", children: [
-              { type: "spacer" },
-              { type: "text", text: "{{windIcon}} ", style: { base: "dataText", color: "{{highlightTextColor}}" } },
-              { type: "text", text: "{{windTrend }} ", style: { base: "smallText", color: "{{windSpeedColor}}" } },
-              { type: "text", text: "{{windSpeed}}", style: { base: "dataText", color: "{{windSpeedColor}}" } }
-            ]
-          },
-          { type: "hstack", align: "center", children: [
-              { type: "spacer" },
-              { type: "text", text: "{{tempTrend}} ", style: { base: "smallText", color: "{{tempColor}}" } },
-              { type: "text", text: "{{temp}}", style: { base: "dataText", color: "{{tempColor}}" } }
-            ]
-          },
-          { type: "hstack", align: "center", children: [
-              { type: "spacer" },
-              { type: "text", text: "{{rainTrend}} ", style: { base: "smallText", color: "{{rainColor}}" } },
-              { type: "text", text: "{{rain}}", style: { base: "dataText", color: "{{rainColor}}" } }
-            ]
-          }
-        ]
-      }
-    }
-  ]
-},
-
-// Sunrise/Sunset/Moonphase Block
-{
-  type: "hstack",
-  size: new Size(0, 25),
-  spacing: 3,
-  align: "center",
-  children: [
-    { type: "spacer" },
-    { type: "image", src: "{{current_sunriseIcon}}", tint: "{{current_sunriseColor}}", size: 28, opacity: "{{current_sunriseOpacity}}" },
-    { type: "text", text: "{{current_sunriseTime}}", style: { base: "extraLargeText", color: "{{current_sunriseColor}}", opacity: "{{current_sunriseOpacity}}" } },
-    { type: "spacer", size: 5 },
-    { type: "text", text: "{{current_moonphaseIcon}}", style: { base: "extraLargeText", shadowColor: "#d1cdda", shadowRadius: 3, shadowOffset: { x: 0, y: 0 } } },
-    { type: "spacer", size: 5 },
-    { type: "image", src: "{{current_sunsetIcon}}", tint: "{{current_sunsetColor}}", size: 28, opacity: "{{current_sunsetOpacity}}" },
-    { type: "text", text: "{{current_sunsetTime}}", style: { base: "extraLargeText", color: "{{current_sunsetColor}}", opacity: "{{current_sunsetOpacity}}" } },
-    { type: "spacer" }
-  ]
-},
+          ...currentDataBlock3,
+          ...forecastDataBlock,
+          ...astroBlock
         ],
-
         footer: [
-
-// Location Name Block
-{
-  type: "hstack",
-  size: new Size(0, 20),
-  justify: "start",
-  children: [
-    { type: "text", text: "{{location_name}}", style: "locationText" },
-  ]
-},
-
-// Update Block
-{
-  type: "hstack",
-  size: new Size(0, 12),
-  justify: "start",
-  children: [
-    { type: "text", text: "{{location_latStr}} : {{location_lonStr}}", style: "footerText" },
-    { type: "spacer" },
-    { type: "text", text: "Update: ", style: "updateText" },
-    { type: "text", text: "{{footer_updateStr}}", style: "footerText" }
-  ]
-}
-
+          ...locationBlock,
+          ...updateBlock
         ],
 
         // Spacing
@@ -417,7 +458,7 @@ module.exports = {
 
       // Test Layout
       test: {
-        padding: this.pos(10, 16, 10, 16),
+        padding: pos(10, 16, 10, 16),
 
         header: [
           {
@@ -849,16 +890,6 @@ module.exports = {
     const sunIcon = '\ud83d\udfe0';
     const moonIcons = [ '\ud83c\udf11', '\ud83c\udf12', '\ud83c\udf13', '\ud83c\udf14', '\ud83c\udf15', '\ud83c\udf16', '\ud83c\udf17', '\ud83c\udf18' ];
     return isMoonUp ? moonIcons[ dt.getMoonphase() ] : sunIcon;
-  },
-
-  pos(a,b,c,d){
-    if (b === undefined)
-      return {top:a,left:a,bottom:a,right:a}
-    if (c === undefined)
-      return {top:a,left:b,bottom:a,right:b}
-    if (d === undefined)
-      return {top:a,left:b,bottom:c,right:b}
-    return {top:a,left:b,bottom:c,right:d}
   },
 
   // Test Data
