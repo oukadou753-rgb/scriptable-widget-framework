@@ -360,11 +360,11 @@ module.exports = class WF_WidgetRenderer {
 
     const colorValue = this.bind(style.color, context)
 
-    if (colorValue !== "" && colorValue !== null && colorValue !== undefined) {
+    if (colorValue) {
       const finalColor = this.toColor(
         this.resolveColor(colorValue, context)
       )
-    
+
       if (finalColor) {
         textItem.textColor = finalColor
       }
