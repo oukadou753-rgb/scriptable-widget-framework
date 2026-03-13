@@ -61,7 +61,7 @@ const currentDataBlockSmall = [
     type: "vstack",
     size: new Size(0, 0),
     padding: pos(5, 0, 0, 0),
-    align: "center",
+//     align: "center",
     children: [
       {
         type: "hstack",
@@ -95,8 +95,8 @@ const currentDataBlock1 = [
   {
     type: "vstack",
     size: new Size(150, 0),
-    padding: pos(5, 0, 0, -15),
-    align: "center",
+    padding: pos(5, 0, 0, 0),
+//     align: "center",
     children: [
       {
         type: "hstack",
@@ -114,14 +114,14 @@ const currentDataBlock1 = [
 const currentDataBlock2 = [
   {
     type: "vstack",
-    size: new Size(110, 0),
+    size: new Size(120, 0),
     padding: pos(0, 0, 0, 0),
-    align: "center",
+//     align: "center",
     children: [
       {
         type: "hstack",
         size: new Size(0, 25),
-        align: "center",
+//         align: "center",
         children: [
           { type: "spacer" },
           { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: 20, color: "#ff453a" } },
@@ -134,10 +134,11 @@ const currentDataBlock2 = [
       },
       {
         type: "hstack",
-        align: "center",
+//         align: "center",
         children: [
           { type: "spacer", size: 10 },
           { type: "text", text: "不快指数：", style: "currentColumnText" },
+          { type: "spacer" },
           { type: "text", text: "{{current_discomfortIndex}}", style: { base: "currentDataText", color: "{{current_discomfortIndexColor}}" } }
         ]
       },
@@ -147,15 +148,17 @@ const currentDataBlock2 = [
         children: [
           { type: "spacer", size: 10 },
           { type: "text", text: "降水確率：", style: "currentColumnText" },
+          { type: "spacer" },
           { type: "text", text: "{{current_rain}}％", style: { base: "currentDataText", color: "{{current_rainColor}}" } }
         ]
       },
       {
         type: "hstack",
-        align: "center",
+//         align: "center",
         children: [
           { type: "spacer", size: 10 },
           { type: "text", text: "雨　　量：", style: "currentColumnText" },
+          { type: "spacer" },
           { type: "text", text: "{{current_precipMm}}㎜", style: "currentDataText" }
         ]
       }
@@ -168,7 +171,7 @@ const currentDataBlock3 = [
   {
     type: "vstack",
     size: new Size(0, 60),
-    justify: "center",
+//     justify: "center",
     children: [
       {
         type: "hstack",
@@ -213,13 +216,12 @@ const forecastDataBlock = [
   {
     type: "hstack",
     size: new Size(0, 75),
-    justify: "center",
     children: [
   
       // Column
       {
         type: "vstack",
-        size: new Size(48, 0),
+        size: new Size(55, 0),
         children: [
           { type: "text", text: "{{intervalHours}}時間予報", style: { base: "smallText", color: "{{highlightTextColor}}" } },
           { type: "hstack", align: "center", children: [
@@ -251,10 +253,10 @@ const forecastDataBlock = [
         items: "{{items}}",
         direction: "horizontal",  // 横並び
         spacing: 6,
-        align: "center",          // 左右中央揃え
+//         align: "center",          // 左右中央揃え
         template: {
           type: "vstack",
-          size: new Size(48, 0),  // 列幅
+          size: new Size(50, 0),  // 列幅
           children: [
             { type: "hstack", align: "center", children: [
                 { type: "spacer" },
@@ -459,7 +461,7 @@ module.exports = {
           {
             type: "hstack",
             size: new Size(0, 70),
-            justify: "center",
+//             justify: "space-between",
             children: [
               ...currentDataBlock1,
               ...currentDataBlock2
@@ -508,7 +510,7 @@ module.exports = {
           {
             type: "hstack",
             size: new Size(0, 70),
-            justify: "center",
+//             justify: "center",
             children: [
               ...currentDataBlock1,
               ...currentDataBlock2
@@ -561,7 +563,7 @@ module.exports = {
             template: {
               type: "hstack",
               children: [
-                { type: "text", text: "{{index}}. {{title}}", style: "bodyText" },
+                { type: "text", text: "{{index}}. {{titleStr}} ", style: "bodyText" },
                 { type: "text", text: "{{value}} ({{sub}})", style: "bodyText" },
                 { type: "text", text: "🔥", style: "bodyText", show: "{{flag}}" }
               ]
@@ -853,7 +855,7 @@ module.exports = {
 
       return {
         // 共通キー
-        title: item?.title || "No Title",
+        titleStr: item?.title || "No Title",
         value: score,
         sub: this.getRank(score),
         flag: score >= minScore,
@@ -1088,6 +1090,6 @@ const module_name = module.filename.match(/[^\/]+$/ )[ 0 ].replace('.js', '');
 if (module_name == Script.name()) {
   (async() => {
     const Main = importModule("Main")
-    if (Main.run) await Main.run("icloud")
+    await Main.start("icloud")
   })()
 }
