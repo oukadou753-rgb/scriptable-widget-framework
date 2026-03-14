@@ -114,7 +114,7 @@ const currentDataBlock1 = [
 const currentDataBlock2 = [
   {
     type: "vstack",
-    size: new Size(120, 0),
+    size: new Size(110, 0),
     padding: pos(0, 0, 0, 0),
 //     align: "center",
     children: [
