@@ -3,11 +3,12 @@
 // icon-color: blue; icon-glyph: download;
 /**
  * Main
+ * UTF-8 日本語コメント
  **/
 const DEFAULT_APP_ID = "Weather"
-const DEFAULT_STRAGE_TYPE = "icloud" // "icloud", "local", "bookmark"
+const DEFAULT_STRAGE_TYPE = "local" // "icloud", "local", "bookmark"
 
-const APP_DEV_MODE = false
+const APP_DEV_MODE = true
 const APP_ID = args.widgetParameter || DEFAULT_APP_ID
 const APP_VERSION = "1.0.0"
 
@@ -19,7 +20,6 @@ const APP_INFO = {
 }
 
 const ModuleLoader = importModule("ModuleLoader")
-const moduleLoader = new ModuleLoader(DEFAULT_STRAGE_TYPE)
 
 // =========================
 // Export
@@ -29,16 +29,17 @@ const Main = {
   // =========================
   // loadAppConfig
   // =========================
-  loadAppConfig(appId) {
+  loadAppConfig(appId, moduleLoader) {
 
     try {
 
-      return importModule(`App_${appId}Config`)
+      if (APP_DEV_MODE) return importModule(`App_${appId}Config`)
+      return moduleLoader.load(`WidgetFramework/App_${DEFAULT_APP_ID}Config`)
 
     } catch (e) {
 
       console.error(`App config not found: ${appId}`)
-      return importModule(`WidgetFramework/App_${DEFAULT_APP_ID}Config`)
+      return moduleLoader.load(`WidgetFramework/App_${DEFAULT_APP_ID}Config`)
 
     }
   },
@@ -49,7 +50,8 @@ const Main = {
   async start(storageType) {
 
     APP_INFO.storageType = storageType
-    const APP_CONFIG = Main.loadAppConfig(APP_ID)
+    const moduleLoader = new ModuleLoader(storageType)
+    const APP_CONFIG = Main.loadAppConfig(APP_ID, moduleLoader)
 
     try {
 
@@ -79,6 +81,8 @@ const Main = {
         await widgetCore.start();
 
       } else {
+
+//         throw new Error("Debug")
 
         const WF_MenuEngine = moduleLoader.load("WidgetFramework/WF_MenuEngine")
         const WF_ConfigUI = moduleLoader.load("WidgetFramework/WF_ConfigUI")
@@ -133,7 +137,7 @@ const Main = {
     w.addSpacer(10)
     this._addText(w, e.message, Font.boldSystemFont(16), color[2], "center")
     w.addSpacer()
-    this._addText(w, new Date().toLocaleString(), Font.semiboldSystemFont(11), color[1], "right")
+    this._addText(w, APP_INFO.storageType + " " + new Date().toLocaleTimeString(), Font.semiboldSystemFont(11), color[1], "right")
 
     if (config.runsInWidget) Script.setWidget(w)
     else w.presentLarge()
