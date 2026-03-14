@@ -406,9 +406,25 @@ module.exports = class WF_WidgetRenderer {
 
     const size = Number(style.fontSize) || 14
 
-    textItem.font = style.bold
-      ? Font.boldSystemFont(size)
-      : Font.systemFont(size)
+    if (style.font instanceof Font) {
+
+      textItem.font = style.font
+
+    }
+    else if (style.font === "monospace") {
+
+      textItem.font = style.bold
+        ? Font.boldMonospacedSystemFont(size)
+        : Font.mediumMonospacedSystemFont(size)
+
+    }
+    else {
+
+      textItem.font = style.bold
+        ? Font.boldSystemFont(size)
+        : Font.systemFont(size)
+
+    }
 
     const colorValue = this.bind(style.color, context)
 
