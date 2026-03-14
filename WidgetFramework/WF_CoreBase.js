@@ -97,3 +97,19 @@ module.exports = class WF_CoreBase {
     }
   }
 }
+
+function mixinCore(target, core) {
+
+  const proto = Object.getPrototypeOf(core)
+
+  Object.getOwnPropertyNames(proto)
+    .filter(k => k !== "constructor")
+    .forEach(k => {
+      target[k] = proto[k].bind(target)
+    })
+
+  Object.assign(target, core)
+
+}
+
+module.exports.mixinCore = mixinCore
