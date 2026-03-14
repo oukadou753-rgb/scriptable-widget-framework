@@ -29,6 +29,7 @@ module.exports = class WF_WidgetCore extends WF_CoreBase {
 
     this.appId = appId || Script.name()
     this.storageType = appInfo.storageType || "local"
+    this.version = appVersion || "3.0.0"
 
     this.storage = new WF_StorageEngine(this.appId, this.storageType)
     this.renderer = new WF_WidgetRenderer(this.appId, this.storageType)
@@ -36,12 +37,6 @@ module.exports = class WF_WidgetCore extends WF_CoreBase {
     this.appConfig = appConfig
     this.defaultConfig = appConfig.getDefaultConfig()
     this.profile = new WF_ProfileEngine(this.storage, this.defaultConfig)
-
-    this.version = {
-      app: appVersion,
-      cfg: this.defaultConfig.version,
-      fw: "3.0.0"
-    }
   }
 
   async start() {
