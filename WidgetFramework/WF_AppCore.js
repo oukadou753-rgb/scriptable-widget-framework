@@ -37,13 +37,13 @@ module.exports = class WF_AppCore {
     this.appConfig = appConfig
     this.defaultConfig = appConfig.getDefaultConfig()
     this.profile = new WF_ProfileEngine(this.storage, this.defaultConfig)
-
+log(1)
     const core = new WF_CoreBase(
       this.appId,
       this.storageType,
       moduleCache
     )
-
+log(2)
     Object.assign(this, core)
   }
 
