@@ -484,7 +484,8 @@ module.exports = class WF_AppCore extends WF_CoreBase {
     a.title = "Framework v" + this.version
     a.message =
       "AppId: " + this.appId + "\n" +
-      "Profile: " + this.profile.getActive()
+      "Profile: " + this.profile.getActive() + "\n" +
+      "Mode: " + this.storageType
 
     a.addAction("OK")
     await a.present()
