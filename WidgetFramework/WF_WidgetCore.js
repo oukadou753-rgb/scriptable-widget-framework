@@ -4,13 +4,9 @@
 /**
  * WF_WidgetCore
  **/
-const WF_CoreBase = importModule("WidgetFramework/WF_CoreBase")
-
-module.exports = class WF_WidgetCore extends WF_CoreBase {
+module.exports = class WF_WidgetCore {
 
   constructor(appInfo, appConfig, moduleCache) {
-
-    super(appInfo, appConfig, moduleCache)
 
     const appId = appInfo.id
     const appVersion = appInfo.version
@@ -37,6 +33,16 @@ module.exports = class WF_WidgetCore extends WF_CoreBase {
     this.appConfig = appConfig
     this.defaultConfig = appConfig.getDefaultConfig()
     this.profile = new WF_ProfileEngine(this.storage, this.defaultConfig)
+
+    const core = new WF_CoreBase(appInfo, appConfig, moduleCache)
+
+    Object.getOwnPropertyNames(Object.getPrototypeOf(core))
+      .filter(k => k !== "constructor")
+      .forEach(k => {
+        this[k] = core[k].bind(this)
+      })
+
+    Object.assign(this, core)
   }
 
   async start() {
