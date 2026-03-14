@@ -2,7 +2,7 @@
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-gray; icon-glyph: magic;
 /**
- * WF_AppCore 
+ * WF_AppCore
  **/
 module.exports = class WF_AppCore {
 
