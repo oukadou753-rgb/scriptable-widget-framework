@@ -17,6 +17,7 @@ const APP_INFO = {
   id: APP_ID,
   version: APP_VERSION,
   storageType: DEFAULT_STRAGE_TYPE,
+  frameworkRepo: "oukadou753-rgb/scriptable-widget-framework"
 }
 
 const ModuleLoader = importModule("ModuleLoader")
