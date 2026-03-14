@@ -62,6 +62,6 @@ module.exports = class WF_WidgetCore {
       return
     }
 
-    await this.preview("extraLarge")
+    await this.preview("large")
   }
 }
