@@ -3,6 +3,7 @@
 // icon-color: orange; icon-glyph: magic;
 /**
  * WF_CoreBase
+ * UTF-8 日本語コメント
  **/
 module.exports = class WF_CoreBase {
 
