@@ -44,6 +44,30 @@ module.exports = class WF_AppCore {
   }
 
   async start() {
+
+    // Framework update check
+    const update = await this.checkFrameworkUpdate(VERSION_URL)
+
+    if (update?.update) {
+
+      console.log(
+        "Framework Update Available\n" +
+        "Local: " + update.local + "\n" +
+        "Remote: " + update.remote
+      )
+
+    }
+
+    this.setupMenus()
+
+    while (true) {
+      const exit = await this.menu.start("Main")
+      if (exit) break
+    }
+
+  }
+
+  async _start() {
     this.setupMenus()
 
     while (true) {
