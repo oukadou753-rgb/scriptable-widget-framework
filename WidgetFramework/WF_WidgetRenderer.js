@@ -11,6 +11,8 @@ module.exports = class WF_WidgetRenderer {
     this.appId = appId
     this.storageType = storageType || "local"
 
+    this.fontCache = {}
+
     this.initStorage()
   }
 
@@ -607,6 +609,35 @@ module.exports = class WF_WidgetRenderer {
     const key = expr.replace(/{{|}}/g, "").trim()
 
     return this.resolve(key, context)
+  }
+
+  // =========================
+  // getFont
+  // =========================
+  getFont(type, size, bold) {
+
+    const key = `${type}_${size}_${bold}`
+
+    if (this.fontCache[key]) {
+      return this.fontCache[key]
+    }
+
+    let font
+
+    if (type === "monospace") {
+      font = bold
+        ? Font.boldMonospacedSystemFont(size)
+        : Font.monospacedSystemFont(size)
+    } else {
+      font = bold
+        ? Font.boldSystemFont(size)
+        : Font.systemFont(size)
+    }
+
+    this.fontCache[key] = font
+
+    return font
+
   }
 
   // =========================
