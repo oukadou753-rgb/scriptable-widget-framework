@@ -14,108 +14,140 @@ const DEFAULT_STRAGE_TYPE = "local" // "icloud", "local", "bookmark"
 // ======================
 // Color
 // ======================
+const PALETTE = Object.freeze({
+
+  red: "#ff4d4d",
+  orange: "#ff9a3c",
+  amber: "#ffb347",
+  yellow: "#ffd84d",
+  green: "#9de24f",
+
+  sky: "#66d1ff",
+  cyan: "#3ddcff",
+  blue: "#4d8dff",
+  purple: "#7a4dff",
+
+  gray: "#7f8fa6"
+
+})
+
+const ROLE = Object.freeze({
+
+  danger: PALETTE.red,
+  warning: PALETTE.orange,
+  caution: PALETTE.yellow,
+  success: PALETTE.green,
+
+  info: PALETTE.sky,
+  accent: PALETTE.blue,
+
+  strongWeather: PALETTE.purple,
+  neutral: PALETTE.gray
+
+})
+
 const COLORS = {
 
   theme: {
     textPrimary: "#d1cdda",    // メイン文字
     textSecondary: "#a8b2c7",  // サブ文字
-    divider: "#2c4a72",        // 仕切り
+    divider: "#2c4a72",
 
-    accent: "#4d8dff",         // 強調
-    info: "#66d1ff",           // 情報
-    highlight: "#87cefa"       // 特殊 #7a4dff
+    accent: PALETTE.blue,      // 仕切り
+    info: PALETTE.sky,         // 強調
+    highlight: PALETTE.purple  // 特殊
   },
 
   background: {
-    base: "#003366",
-    top: "#000000",
-    bottom: "#003366"
+    base: "#003366",           // 単色
+    top: "#000000",            // グラデーション・上
+    bottom: "#003366"          // グラデーション・下
   },
 
   pressure: {
-    rising: "#5cc8ff",      // 上昇
-    steady: "#d1cdda",      // 変化なし
-    falling: "#ffb347",     // 下降
-    alert: "#ff4d4d"        // 警戒
+    rising: PALETTE.sky,       // 上昇
+    steady: "#d1cdda",         // 変化なし
+    falling: PALETTE.amber,    //下降
+    alert: PALETTE.red         // 警戒
   },
 
   temp: {
-    extremeHot: "#ff4d4d",  // 35℃以上
-    hot: "#ff7a45",         // 30〜34℃
-    warm: "#ffb347",        // 25〜29℃
-    mild: "#ffd966",        // 20〜24℃
+    extremeHot: PALETTE.red,    // 35℃以上
+    hot: PALETTE.orange,        // 30〜34℃
+    warm: PALETTE.amber,        // 25〜29℃
+    mild: PALETTE.yellow,       // 20〜24℃
 
-    cool: "#7fb3ff",        // 15〜19℃
-    cold: "#4d7cff",        // 5〜14℃
-    freezing: "#3f66ff"     // 4℃以下
+    cool: PALETTE.sky,          // 15〜19℃
+    cold: PALETTE.blue,         // 5〜14℃
+    freezing: PALETTE.purple    // 4℃以下
   },
 
   humidity: {
-    dry: "#7fb3ff",         // 30%未満
-    comfortable: "#5cc8ff", // 30〜50%
-    humid: "#3ddcff",       // 50〜70%
-    wet: "#00e5ff"          // 70%以上
+    dry: PALETTE.sky,           // 30%未満
+    comfortable: PALETTE.sky,   // 30〜50%
+    humid: PALETTE.cyan,        // 50〜70%
+    wet: PALETTE.cyan           // 70%以上
   },
 
   wind: {
-    calm: "#9de24f",        // 無風〜微風
-    breeze: "#66d1ff",      // 弱風
-    windy: "#ffd84d",       // やや強い
-    strong: "#ff9a3c",      // 強風
-    storm: "#ff4d4d"        // 暴風
+    calm: PALETTE.green,        // 無風〜微風
+    breeze: PALETTE.sky,        // 弱風
+    windy: PALETTE.yellow,      // やや強い
+    strong: PALETTE.orange,     // 強風
+    storm: PALETTE.red          // 暴風
   },
 
   rain: {
-    none: "#7f8fa6",        // 0mm
-    light: "#66d1ff",       // 0.1〜1mm
-    moderate: "#3ddcff",    // 1〜5mm
-    heavy: "#4d8dff",       // 5〜20mm
-    storm: "#7a4dff"        // 20mm+
+    none: PALETTE.gray,         // 0mm
+    light: PALETTE.sky,         // 0.1〜1mm
+    moderate: PALETTE.cyan,     // 1〜5mm
+    heavy: PALETTE.blue,        // 5〜20mm
+    storm: PALETTE.purple       // 20mm+
   },
 
   pop: {
-    none: "#7f8fa6",        // 0%
-    low: "#66d1ff",         // 10〜30%
-    medium: "#3ddcff",      // 40〜60%
-    high: "#4d8dff",        // 70〜80%
-    veryHigh: "#7a4dff"     // 90〜100%
+    none: PALETTE.gray,         // 0%
+    low: PALETTE.sky,           // 10〜30%
+    medium: PALETTE.cyan,       // 40〜60%
+    high: PALETTE.blue,         // 70〜80%
+    veryHigh: PALETTE.purple    // 90〜100%
   },
 
   discomfort: {
-    soHot: "#ff4d4d",       // "暑くてたまらない"
-    hot: "#ff7a66",         // "暑くて汗が出る"
-    littleHot: "#ffb347",   // "やや暑い"
-    notHot: "#f2f26b",      // "暑くない"
-    pleasant: "#9de24f",    // "快い"
-    none: "#66d1ff",        // "何も感じない"
-    chilly: "#4d8dff",      // "肌寒い"
-    cold: "#7a4dff",        // "寒い"
+    soHot: PALETTE.red,         // "暑くてたまらない"
+    hot: PALETTE.orange,        // "暑くて汗が出る"
+    littleHot: PALETTE.amber,   // "やや暑い"
+    notHot: PALETTE.yellow,     // "暑くない"
+    pleasant: PALETTE.green,    // "快い"
+    none: PALETTE.sky,          // "何も感じない"
+    chilly: PALETTE.blue,       // "肌寒い"
+    cold: PALETTE.purple        // "寒い"
   },
 
   level: {
-    normal: "#9de24f",      // 普通
-    caution: "#ffd84d",     // 注意
-    alert: "#ff9a3c",       // 警戒
-    danger: "#ff4d4d"       // 危険
+    normal: PALETTE.green,      // 普通
+    caution: PALETTE.yellow,    // 注意
+    alert: PALETTE.orange,      // 警戒
+    danger: PALETTE.red         // 危険
   },
 
-  statue: {
-    ok: "#9de24f",           // 正常
-    info: "#66d1ff",         // 情報
-    notice: "#ffd84d",       // 軽注意
-    warning: "#ff9a3c",      // 注意
-    danger: "#ff4d4d",       // 危険
-    critical: "#ff2d55"      // 最危険
+  status: {
+    ok: PALETTE.green,          // 正常
+    info: PALETTE.sky,          // 情報
+    notice: PALETTE.yellow,     // 軽注意
+    warning: PALETTE.orange,    // 注意
+    danger: PALETTE.red,        // 危険
+    critical: PALETTE.red       // 最危険
   },
 
   extra: {
-    temp: "#ff453a",
-    humidity: "#09a1f9",
-    rain: "#66d1ff",
+    temp: PALETTE.red,
+    humidity: PALETTE.cyan,
+    rain: PALETTE.sky,
     snow: "#cfe9ff",
-    cloud: "#b0c4de",
-    pressureHigh: "#ff9a3c",
-    pressureLow: "#7a4dff"
+    cloud: PALETTE.gray,
+    pressureHigh: PALETTE.orange,
+    pressureLow: PALETTE.purple
   }
 
 }
@@ -284,7 +316,7 @@ const currentDataBlock1 = [
       {
         type: "hstack",
         children: [
-          { type: "text", text: "{{current_pressure}}", style: { base: "dataText", font:"monospace", fontSize: 60, bold: true, color: "{{current_pressureColor}}", lineLimit: 1, minimumScaleFactor: 0.8 } }
+          { type: "text", text: "{{current_pressure}}", style: { base: "dataText", font:"monospace", fontSize: 55, bold: true, color: "{{current_pressureColor}}", lineLimit: 1, minimumScaleFactor: 0.9 } }
         ]
       },
     ]
@@ -441,24 +473,24 @@ const forecastDataBlock = [
               ]
             },
             { type: "hstack", justify: "end", align: "center", children: [
-                { type: "text", text: "{{pressureTrend}} ", style: { base: "smallText", color: "{{pressureColor}}" } },
+                { type: "text", text: "{{pressureTrend}} ", style: { base: "smallText", bold: true, color: "{{pressureColor}}" } },
                 { type: "text", text: "{{pressure}}", style: "dataText" }
               ]
             },
             { type: "hstack", justify: "end", align: "center", children: [
                 { type: "image", src: "{{windIcon}}", tint: "{{highlightTextColor}}", size: 13 },
                 { type: "spacer", size: 3 },
-                { type: "text", text: "{{windTrend }} ", style: { base: "smallText", color: "{{windSpeedColor}}" } },
+                { type: "text", text: "{{windTrend }} ", style: { base: "smallText", bold: true, color: "{{windSpeedColor}}" } },
                 { type: "text", text: "{{windSpeed}}", style: "dataText" }
               ]
             },
             { type: "hstack", justify: "end", align: "center", children: [
-                { type: "text", text: "{{tempTrend}} ", style: { base: "smallText", color: "{{tempColor}}" } },
+                { type: "text", text: "{{tempTrend}} ", style: { base: "smallText", bold: true, color: "{{tempColor}}" } },
                 { type: "text", text: "{{temp}}", style: "dataText" }
               ]
             },
             { type: "hstack", justify: "end", align: "center", children: [
-                { type: "text", text: "{{popTrend}} ", style: { base: "smallText", color: "{{popColor}}" } },
+                { type: "text", text: "{{popTrend}} ", style: { base: "smallText", bold: true, color: "{{popColor}}" } },
                 { type: "text", text: "{{pop}}", style: "dataText" }
               ]
             }
