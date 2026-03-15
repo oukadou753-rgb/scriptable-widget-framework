@@ -128,25 +128,25 @@ const LEVEL_THRESHOLDS = {
     [20, COLORS.rain.storm],
     [5, COLORS.rain.heavy],
     [1, COLORS.rain.moderate],
-    [0.1, COLORS.rain.light]
+//     [0.1, COLORS.rain.light]
   ],
-  rainDef: COLORS.pop.none,
+  rainDef: COLORS.theme.textPrimary,
 
   pop: [
     [90, COLORS.pop.veryHigh],
     [70, COLORS.pop.high],
-    [40, COLORS.pop.medium],
-    [10, COLORS.pop.low]
+//     [40, COLORS.pop.medium],
+//     [10, COLORS.pop.low]
   ],
-  popDef: COLORS.pop.none,
+  popDef: COLORS.theme.textPrimary,
 
   wind: [
     [15, COLORS.wind.storm],
     [10, COLORS.wind.strong],
     [6, COLORS.wind.windy],
-    [3, COLORS.wind.breeze]
+//     [3, COLORS.wind.breeze]
   ],
-  windDef: COLORS.wind.calm,
+  windDef: COLORS.theme.textPrimary,
 
   discomfort: [
     [85, [COLORS.discomfort.soHot, "暑くてたまらない"]],
@@ -305,7 +305,7 @@ const currentDataBlock2 = [
           { type: "text", text: "降水確率：", style: "currentColumnText" },
           { type: "spacer" },
           { type: "text", text: "{{current_pop}}", style: { base: "currentDataText", color: "{{current_popColor}}" } },
-          { type: "text", text: "％", style: { base: "currentDataText", color: "{{current_popColor}}" } }
+          { type: "text", text: "％", style: "currentDataText" }
         ]
       },
       {
@@ -375,7 +375,7 @@ const forecastDataBlock = [
       // Column
       {
         type: "vstack",
-        size: new Size(55, 0),
+        size: new Size(50, 0),
         children: [
           { type: "text", text: "{{intervalHours}}時間予報", style: { base: "smallText", color: "{{highlightTextColor}}" } },
           { type: "hstack", align: "center", children: [
@@ -410,7 +410,7 @@ const forecastDataBlock = [
         align: "center",          // 左右中央揃え
         template: {
           type: "vstack",
-          size: new Size(50, 0),  // 列幅
+          size: new Size(51, 0),  // 列幅
           children: [
             { type: "hstack", justify: "end", align: "center", children: [
                 { type: "text", text: "{{hour}}", style: { base: "smallText", color: "{{highlightTextColor}}" } }
@@ -418,24 +418,24 @@ const forecastDataBlock = [
             },
             { type: "hstack", justify: "end", align: "center", children: [
                 { type: "text", text: "{{pressureTrend}} ", style: { base: "smallText", color: "{{pressureColor}}" } },
-                { type: "text", text: "{{pressure}}", style: { base: "dataText", color: "{{pressureColor}}" } }
+                { type: "text", text: "{{pressure}}", style: "dataText" }
               ]
             },
             { type: "hstack", justify: "end", align: "center", children: [
                 { type: "image", src: "{{windIcon}}", tint: "{{highlightTextColor}}", size: 13 },
                 { type: "spacer", size: 3 },
                 { type: "text", text: "{{windTrend }} ", style: { base: "smallText", color: "{{windSpeedColor}}" } },
-                { type: "text", text: "{{windSpeed}}", style: { base: "dataText", color: "{{windSpeedColor}}" } }
+                { type: "text", text: "{{windSpeed}}", style: "dataText" }
               ]
             },
             { type: "hstack", justify: "end", align: "center", children: [
                 { type: "text", text: "{{tempTrend}} ", style: { base: "smallText", color: "{{tempColor}}" } },
-                { type: "text", text: "{{temp}}", style: { base: "dataText", color: "{{tempColor}}" } }
+                { type: "text", text: "{{temp}}", style: "dataText" }
               ]
             },
             { type: "hstack", justify: "end", align: "center", children: [
                 { type: "text", text: "{{popTrend}} ", style: { base: "smallText", color: "{{popColor}}" } },
-                { type: "text", text: "{{pop}}", style: { base: "dataText", color: "{{popColor}}" } }
+                { type: "text", text: "{{pop}}", style: "dataText" }
               ]
             }
           ]
@@ -499,7 +499,7 @@ module.exports = {
         extraLargeText: { font:"monospace", fontSize: 24, bold: true, color: "{{defaultTextColor}}", lineLimit: 1 },
         largeText: { font:"monospace", fontSize: 20, bold: true, color: "{{defaultTextColor}}", lineLimit: 1 },
         normalText: { font:"monospace", fontSize: 16, bold: true, color: "{{defaultTextColor}}", lineLimit: 1 },
-        smallText: { font:"monospace", fontSize: 9, bold: true, color: "{{defaultTextColor}}", lineLimit: 1 }
+        smallText: { font:"monospace", fontSize: 10, bold: true, color: "{{defaultTextColor}}", lineLimit: 1 }
       },
 
       defaultOpenSections: ["General", "Style"],
@@ -1092,16 +1092,16 @@ function pos(a,b,c,d){
   return {top:a,left:b,bottom:c,right:d}
 }
 
-function degreeTo16Compass(deg) {
-  const dirs = [
-    "N", "NNE", "NE", "ENE",
-    "E", "ESE", "SE", "SSE",
-    "S", "SSW", "SW", "WSW",
-    "W", "WNW", "NW", "NNW"
-  ]
-  const index = Math.floor(((deg + 11.25) % 360) / 22.5)
-  return dirs[index]
-}
+// function degreeTo16Compass(deg) {
+//   const dirs = [
+//     "N", "NNE", "NE", "ENE",
+//     "E", "ESE", "SE", "SSE",
+//     "S", "SSW", "SW", "WSW",
+//     "W", "WNW", "NW", "NNW"
+//   ]
+//   const index = Math.floor(((deg + 11.25) % 360) / 22.5)
+//   return dirs[index]
+// }
 function getDegString(deg) { return Math.floor((deg + 11.25) / 22.5) * 22.5 + 180 }
 function drawCircle(t,e,a,r,i,n,s,o,l){let c,u,d,$,m,h,p,g,f,w,y,_;d=e.width/2,$=e.height/2,r=r||0,i=i||0,n=n||0,o=o||0,p=1,w=l&&l.strokeColor?l.strokeColor:"#000",y=l&&l.strokeWidth?l.strokeWidth:0,_=l&&l.fillColor?l.fillColor:"#000";let S=new Path,T=[];for(let k=0;k<360;k++)g=(a-y/2)*Math.cos(m=(h=-90+p*k+o)*(Math.PI/180)),f=(a-y/2)*Math.sin(m),c=d+g,u=$+f,T.push(new Point(c,u));S.addLines(T),S.closeSubpath(),"transparent"!==_&&(t.addPath(S),t.setFillColor(new Color(_)),t.fillPath(S)),"transparent"!==w&&y>0&&(t.addPath(S),t.setStrokeColor(new Color(w)),t.setLineWidth(y),t.strokePath())}
 function drawTriangle(t,e,a,r,i,n,s,o,l){let c,u,d,$,m,h,p,g,f,w,y,_;d=e.width/2,$=e.height/2,r=r||0,i=i||0,n=n||0,o=o||0,w=l&&l.strokeColor?l.strokeColor:"#000",y=l&&l.strokeWidth?l.strokeWidth:0,_=l&&l.fillColor?l.fillColor:"#000";let S=new Path,T=[],k=[];for(let F=0;F<4;F++)0==F?h=-90+o:1==F?h=-90+o+n:2==F?p=(h+(360-2*n)/2)*(Math.PI/180):3==F&&(h=-90+o+(360-n)),m=h*(Math.PI/180),2==F?(g=(a-i)*Math.cos(p),f=(a-i)*Math.sin(p)):(g=(a+r)*Math.cos(m),f=(a+r)*Math.sin(m)),c=d+g,u=$+f,T.push(new Point(c,u)),k.push([c,u]);S.addLines(T),S.closeSubpath(),"transparent"!==_&&(t.addPath(S),t.setFillColor(new Color(_)),t.fillPath(S)),"transparent"!==w&&y>0&&(t.addPath(S),t.setStrokeColor(new Color(w)),t.setLineWidth(y),t.strokePath())}
@@ -1180,7 +1180,7 @@ function getPressureColor(curr, prev) {
   const diff = curr - prev
   const c = COLORS.pressure
   let color = c.steady
-  if (diff > 4 || diff < -4) color = c.alart
+  if (diff > 2 || diff < -2) color = c.alart
   else if (diff > 0.5) color = c.rising
   else if (diff < -0.5) color = c.falling
   return color
