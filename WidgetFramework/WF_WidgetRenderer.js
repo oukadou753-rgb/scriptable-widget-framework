@@ -521,6 +521,30 @@ module.exports = class WF_WidgetRenderer {
       raw = raw.slice(2, -2).trim()
     }
 
+  // cache
+  if (!this.evalCache) this.evalCache = {}
+
+  let func = this.evalCache[raw]
+
+  if (!func) {
+
+    try {
+
+      func = new Function("ctx", `
+        with(ctx){
+          return (${raw})
+        }
+      `)
+
+      this.evalCache[raw] = func
+
+    } catch (e) {
+
+      console.warn("evaluate compile error: " + raw)
+      return false
+
+    }
+
     try {
       const func = new Function("ctx", `
         with(ctx){
