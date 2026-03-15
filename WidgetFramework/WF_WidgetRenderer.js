@@ -12,6 +12,7 @@ module.exports = class WF_WidgetRenderer {
     this.storageType = storageType || "local"
 
     this.fontCache = {}
+    this.styleCache = {}
 
     this.initStorage()
   }
@@ -383,28 +384,36 @@ module.exports = class WF_WidgetRenderer {
 
     const styles = context.config?.styles || {}
 
-    let style = {}
+    const cacheKey = JSON.stringify(styleInput)
 
-    if (typeof styleInput === "string") {
-      style = styles[styleInput] || styles.defaultText || {}
-    }
-    else if (typeof styleInput === "object") {
-      // base スタイル取得
-      if (styleInput.base) {
-        style = { ...(styles[styleInput.base] || {}) }
+    let style = this.styleCache[cacheKey]
+
+    if (!style) {
+      style = {}
+
+      if (typeof styleInput === "string") {
+        style = { ...(styles[styleInput] || styles.defaultText || {}) }
       }
+      else if (typeof styleInput === "object") {
+        // base スタイル取得
+        if (styleInput.base) {
+          style = { ...(styles[styleInput.base] || {}) }
+        }
 
-      // 空文字は上書きしない
-      for (const k in styleInput) {
-        if (k === "base") continue
-        const v = styleInput[k]
-        if (v !== "" && v !== null && v !== undefined) {
-          style[k] = v
+        // 空文字は上書きしない
+        for (const k in styleInput) {
+          if (k === "base") continue
+          const v = styleInput[k]
+          if (v !== "" && v !== null && v !== undefined) {
+            style[k] = v
+          }
         }
       }
-    }
-    else {
-      style = styles.defaultText || {}
+      else {
+        style = styles.defaultText || {}
+      }
+
+      this.styleCache[cacheKey] = style
     }
 
     textItem.font = this.getFont(style)
