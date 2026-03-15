@@ -62,7 +62,7 @@ const Main = {
       const WF_DataProvider = moduleLoader.load("WidgetFramework/WF_DataProvider")
       const WF_CoreBase = moduleLoader.load("WidgetFramework/WF_CoreBase")
 
-      if ((config.runsInWidget && !config.runsInApp)) {
+      if (config.runsInWidget && !config.runsInApp) {
 
         const WF_WidgetCore = moduleLoader.load("WidgetFramework/WF_WidgetCore")
 
@@ -82,8 +82,6 @@ const Main = {
         await widgetCore.start();
 
       } else {
-
-//         throw new Error("Debug")
 
         const WF_MenuEngine = moduleLoader.load("WidgetFramework/WF_MenuEngine")
         const WF_ConfigUI = moduleLoader.load("WidgetFramework/WF_ConfigUI")
