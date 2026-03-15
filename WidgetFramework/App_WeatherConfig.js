@@ -12,12 +12,144 @@ const APP_VERSION = "2.0.0"
 const DEFAULT_STRAGE_TYPE = "local" // "icloud", "local", "bookmark"
 
 // ======================
+// Color
+// ======================
+const COLORS = {
+
+  theme: {
+    textPrimary: "#d1cdda",
+    textSecondary: "#a8b2c7",
+    divider: "#87cefa", // #2c4a72
+  
+    accent: "#4d8dff",
+    info: "#66d1ff",
+    highlight: "#7a4dff"
+  },
+
+  temp: {
+    extremeHot: "#ff4d4d",  // 35℃以上
+    hot: "#ff7a45",         // 30〜34℃
+    warm: "#ffb347",        // 25〜29℃
+    mild: "#ffd966",        // 20〜24℃
+
+    cool: "#7fb3ff",        // 15〜19℃
+    cold: "#4d7cff",        // 5〜14℃
+    freezing: "#3f66ff"     // 4℃以下
+  },
+
+  humidity: {
+    dry: "#7fb3ff",          // 30%未満
+    comfortable: "#5cc8ff",  // 30〜50%
+    humid: "#3ddcff",        // 50〜70%
+    wet: "#00e5ff"           // 70%以上
+  },
+
+  wind: {
+    calm: "#9de24f",      // 無風〜微風
+    breeze: "#66d1ff",    // 弱風
+    windy: "#ffd84d",     // やや強い
+    strong: "#ff9a3c",    // 強風
+    storm: "#ff4d4d"      // 暴風
+  },
+
+  rain: {
+    none: "#7f8fa6",      // 0mm
+    light: "#66d1ff",     // 0.1〜1mm
+    moderate: "#3ddcff",  // 1〜5mm
+    heavy: "#4d8dff",     // 5〜20mm
+    storm: "#7a4dff"      // 20mm+
+  },
+
+  pop: {
+    none: "#7f8fa6",     // 0%
+    low: "#66d1ff",      // 10〜30%
+    medium: "#3ddcff",   // 40〜60%
+    high: "#4d8dff",     // 70〜80%
+    veryHigh: "#7a4dff"  // 90〜100%
+  },
+
+  level: {
+    normal: "#9de24f",
+    caution: "#ffd84d",
+    alert: "#ff9a3c",
+    danger: "#ff4d4d"
+  },
+
+  extra: {
+    rain: "#66d1ff",
+    snow: "#cfe9ff",
+    cloud: "#b0c4de",
+    pressureHigh: "#ff9a3c",
+    pressureLow: "#7a4dff"
+  }
+
+}
+
+const DISCOMFORT_COLORS = [
+
+  [85, ["#ff4d4d", "暑くてたまらない"]],
+  [80, ["#ff7a66", "暑くて汗が出る"]],
+  [75, ["#ffb347", "やや暑い"]],
+  [70, ["#f2f26b", "暑くない"]],
+  [65, ["#9de24f", "快い"]],
+  [60, ["#66d1ff", "何も感じない"]],
+  [54, ["#4d8dff", "肌寒い"]]
+
+]
+
+const DISCOMFORT_COLD= ["#7a4dff", "寒い"]
+
+const LEVEL_THRESHOLDS = {
+
+  temp: [
+    [35, COLORS.temp.extremeHot],
+    [30, COLORS.temp.hot],
+    [25, COLORS.temp.warm],
+    [20, COLORS.temp.mild],
+    [15, COLORS.temp.cool],
+    [5, COLORS.temp.cold]
+  ],
+
+  rain: [
+    [20, COLORS.rain.storm],
+    [5, COLORS.rain.heavy],
+    [1, COLORS.rain.moderate],
+    [0.1, COLORS.rain.light]
+  ],
+
+  pop: [
+    [90, COLORS.pop.veryHigh],
+    [70, COLORS.pop.high],
+    [40, COLORS.pop.medium],
+    [10, COLORS.pop.low]
+  ],
+
+  wind: [
+    [15, COLORS.wind.storm],
+    [10, COLORS.wind.strong],
+    [6, COLORS.wind.windy],
+    [3, COLORS.wind.breeze]
+  ],
+
+  discomfort: [
+    [85, ["#ff4d4d", "暑くてたまらない"]],
+    [80, ["#ff7a66", "暑くて汗が出る"]],
+    [75, ["#ffb347", "やや暑い"]],
+    [70, ["#f2f26b", "暑くない"]],
+    [65, ["#9de24f", "快い"]],
+    [60, ["#66d1ff", "何も感じない"]],
+    [54, ["#4d8dff", "肌寒い"]]
+  ]
+
+}
+
+// ======================
 // Header Block
 // ======================
 const headerBlock = [
   {
     type: "hstack",
-    size: new Size(0, 16),
+    size: new Size(0, 20),
     align: "center",
     children: [
       { type: "image", src: "{{header_titleIcon_src}}", tint: "{{header_titleIcon_tint}}", size: 24 },
@@ -132,8 +264,8 @@ const currentDataBlock2 = [
           { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: 20, color: "#ff453a" } },
           { type: "text", text: "°C", style: { base: "normalText", color: "#ff453a" } },
           { type: "spacer", size: 13 },
-          { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: 20, color: "#487de7" } },
-          { type: "text", text: "％", style: { base: "normalText", color: "#487de7" } }
+          { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: 20, color: "#09a1f9" } },
+          { type: "text", text: "％", style: { base: "normalText", color: "#09a1f9" } }
         ]
       },
       {
@@ -154,8 +286,8 @@ const currentDataBlock2 = [
         children: [
           { type: "text", text: "降水確率：", style: "currentColumnText" },
           { type: "spacer" },
-          { type: "text", text: "{{current_rain}}", style: { base: "currentDataText", color: "{{current_rainColor}}" } },
-          { type: "text", text: "％", style: { base: "currentDataText", color: "{{current_rainColor}}" } }
+          { type: "text", text: "{{current_pop}}", style: { base: "currentDataText", color: "{{current_popColor}}" } },
+          { type: "text", text: "％", style: { base: "currentDataText", color: "{{current_popColor}}" } }
         ]
       },
       {
@@ -166,7 +298,7 @@ const currentDataBlock2 = [
           { type: "text", text: "雨　　量：", style: "currentColumnText" },
           { type: "spacer" },
           { type: "text", text: "{{current_precipMm}}", style: "currentDataText" },
-          { type: "text", text: "㎜", style: "currentDataText" }
+          { type: "text", text: "㎜", style: "currentDataText" },
         ]
       }
     ]
@@ -284,8 +416,8 @@ const forecastDataBlock = [
               ]
             },
             { type: "hstack", justify: "end", align: "center", children: [
-                { type: "text", text: "{{rainTrend}} ", style: { base: "smallText", color: "{{rainColor}}" } },
-                { type: "text", text: "{{rain}}", style: { base: "dataText", color: "{{rainColor}}" } }
+                { type: "text", text: "{{popTrend}} ", style: { base: "smallText", color: "{{popColor}}" } },
+                { type: "text", text: "{{pop}}", style: { base: "dataText", color: "{{popColor}}" } }
               ]
             }
           ]
@@ -299,7 +431,7 @@ const forecastDataBlock = [
 const astroBlock = [
   {
     type: "hstack",
-    size: new Size(0, 30),
+    size: new Size(0, 28),
     spacing: 3,
     align: "center",
     children: [
@@ -327,6 +459,8 @@ module.exports = {
     return {
 
       version: APP_VERSION,
+
+      colors: COLORS,
 
       styles: {
         defaultText: { fontSize: 13, bold: false, color: "{{defaultTextColor}}" },
@@ -360,8 +494,8 @@ module.exports = {
         bgColorBottom: { type: "color", label: "Gradient Background Bottom Color", section: "BackgroundColor", default: "#003366", presets: ["#000000", "#ff9900"] },
         bgColor: { type: "color", label: "Background Color", section: "BackgroundColor", default: "#003366", presets: ["#000000", "#ff9900"] },
 
-        defaultTextColor: { type: "color", label: "Default Text Color", section: "Style", default: "#d1cdda" },
-        highlightTextColor: { type: "color", label: "Highlight Text Color", section: "Style", default: "#87cefa" },
+        defaultTextColor: { type: "color", label: "Default Text Color", section: "Style", default: COLORS.theme.textPrimary },
+        highlightTextColor: { type: "color", label: "Highlight Text Color", section: "Style", default: COLORS.theme.divider },
         headerTextColor: { type: "color", label: "Header Text Color", section: "Style", default: "#ffffff" },
         bodyTextColor: { type: "color", label: "Body Text Color", section: "Style", default: "#ffffff" },
         footerTextColor: { type: "color", label: "Footer Text Color", section: "Style", default: "#ffffff" },
@@ -692,21 +826,13 @@ module.exports = {
     const humidity = data.current.humidity
 
     const discomfortIndex = getDiscomfortIndex(temp, humidity)
-    const [ discomfortIndexColor, discomfortIndexStr ] = colorByThreshold(discomfortIndex, [
-      [85, ["#ff453a", "暑くてたまらない"]],
-      [80, ["#ff6666", "暑くて汗が出る"]],
-      [75, ["#ffbd55", "やや暑い"]],
-      [70, ["#ffff66", "暑くない"]],
-      [65, ["#9de24f", "快い"]],
-      [60, ["#87cefa", "何も感じない"]],
-      [54, ["#487de7", "肌寒い"]]
-      ], ["#6500cb", "寒い"])
+    const [ discomfortIndexColor, discomfortIndexStr ] = colorByThreshold(discomfortIndex, LEVEL_THRESHOLDS.discomfort, DISCOMFORT_COLD)
 
     const windSpeed = (data.current.wind_kph / 3.6).toFixed(1)
     const windDegree = getDegreeString(data.current.wind_dir)
     const windIcon = drawArrow(getDegString(data.current.wind_degree), null, true)
 
-    const rain = Math.ceil(Math.max(...[ hours[0].chance_of_rain, hours[0].chance_of_snow ]) / 5) * 5
+    const pop = Math.ceil(Math.max(...[ hours[0].chance_of_rain, hours[0].chance_of_snow ]) / 5) * 5
 
     const now = new Date()
     const h = String(now.getHours()).padStart(2, '0')
@@ -735,7 +861,7 @@ module.exports = {
 
       windSpeed,
       windIcon,
-      windSpeedColor: colorByThreshold(windSpeed, [[20, "#ff453a"], [15, "#ff6666"], [10, "#ffbd55"], [5, "#ffff66"]], defaultTextColor),
+      windSpeedColor: colorByThreshold(windSpeed, LEVEL_THRESHOLDS.wind, LEVEL_THRESHOLDS.wind.calm),
       windDir: data.current.wind_dir,
       windDegree: getDegreeString(data.current.wind_dir),
 
@@ -743,10 +869,10 @@ module.exports = {
 
       precipMm: data.current.precip_mm.toFixed(1),
   
-      rain,
-      rainColor: colorByThreshold(rain, [[100, "#ff453a"], [80, "#ff453a"], [60, "#ff6666"], [40, "#ffff66"]], defaultTextColor),
+      pop,
+      popColor: colorByThreshold(pop, LEVEL_THRESHOLDS.pop, defaultTextColor),
 
-      discomfortIndex,
+      discomfortIndex: discomfortIndex.toFixed(1),
       discomfortIndexColor,
       discomfortIndexStr,
 
@@ -797,8 +923,8 @@ module.exports = {
       const tempTrend = trendIcon(h.temp_c, prev.temp_c)
       const pressureTrend = trendIcon(h.pressure_mb, prev.pressure_mb)
       const windTrend = trendIcon(h.wind_kph, prev.wind_kph)
-      const rainTrend = trendIcon(h.chance_of_rain, prev.chance_of_rain)
-      const rain = Math.ceil(Math.max(...[ h.chance_of_rain, h.chance_of_snow ]) / 5) * 5
+      const popTrend = trendIcon(h.chance_of_rain, prev.chance_of_rain)
+      const pop = Math.ceil(Math.max(...[ h.chance_of_rain, h.chance_of_snow ]) / 5) * 5
 
       const temp = Math.round(h.temp_c)
       const windSpeed = Math.round(h.wind_kph / 3.6)
@@ -812,17 +938,18 @@ module.exports = {
         pressureTrend,
 
         windSpeed,
-        windSpeedColor: colorByThreshold(windSpeed, [[20, "#ff453a"], [15, "#ff6666"], [10, "#ffbd55"], [5, "#ffff66"]], defaultTextColor),
+        windSpeedColor: colorByThreshold(windSpeed, LEVEL_THRESHOLDS.wind, LEVEL_THRESHOLDS.wind.calm),
+//         windSpeedColor: colorByThreshold(windSpeed, [[20, "#ff453a"], [15, "#ff6666"], [10, "#ffbd55"], [5, "#ffff66"]], defaultTextColor),
         windTrend,
         windIcon,
 
         temp,
-        tempColor: colorByThreshold(temp, [[35, "#ff453a"], [30, "#ff6666"], [25, "#ffff66"], [0, "#87cefa"]], defaultTextColor),
+        tempColor: colorByThreshold(temp, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.temp.freezing),
         tempTrend,
 
-        rain,
-        rainColor: colorByThreshold(rain, [[100, "#ff453a"], [80, "#ff453a"], [60, "#ff6666"], [40, "#ffff66"]], defaultTextColor),
-        rainTrend
+        pop,
+        popColor: colorByThreshold(pop, LEVEL_THRESHOLDS.pop, LEVEL_THRESHOLDS.pop.none),
+        popTrend
       }
     })
 
@@ -996,17 +1123,17 @@ function makeWeatherApiIcon(url) {
 }
 
 // 例：風向きをアイコンに変換する関数
-function _convertWindDegToIcon(deg) {
-  if (deg >= 337.5 || deg < 22.5) return "↑"
-  if (deg >= 22.5 && deg < 67.5) return "↗"
-  if (deg >= 67.5 && deg < 112.5) return "→"
-  if (deg >= 112.5 && deg < 157.5) return "↘"
-  if (deg >= 157.5 && deg < 202.5) return "↓"
-  if (deg >= 202.5 && deg < 247.5) return "↙"
-  if (deg >= 247.5 && deg < 292.5) return "←"
-  if (deg >= 292.5 && deg < 337.5) return "↖"
-  return "↑"
-}
+// function _convertWindDegToIcon(deg) {
+//   if (deg >= 337.5 || deg < 22.5) return "↑"
+//   if (deg >= 22.5 && deg < 67.5) return "↗"
+//   if (deg >= 67.5 && deg < 112.5) return "→"
+//   if (deg >= 112.5 && deg < 157.5) return "↘"
+//   if (deg >= 157.5 && deg < 202.5) return "↓"
+//   if (deg >= 202.5 && deg < 247.5) return "↙"
+//   if (deg >= 247.5 && deg < 292.5) return "←"
+//   if (deg >= 292.5 && deg < 337.5) return "↖"
+//   return "↑"
+// }
 
 function getDegreeString(wind_dir) { return [ ...wind_dir.replace(/E/g, '\u6771').replace(/W/g, '\u897f').replace(/S/g, '\u5357').replace(/N/g, '\u5317') + '\u3000\u3000' ].slice(0, 3).join('') }
 
@@ -1017,13 +1144,10 @@ function trendIcon(curr, prev) {
 }
 
 function colorByThreshold(v, table, defaultColor) {
-
   for (const [limit, color] of table) {
     if (v >= limit) return color
   }
-
   return defaultColor
-
 }
 
 function getPressureColor(curr, prev, color) {
@@ -1032,27 +1156,6 @@ function getPressureColor(curr, prev, color) {
   if (Math.abs(curr - prev) >= 3) return "#ffff66"
   return color
 }
-
-// colorByThreshold(dis, [
-// [85, ["#ff453a", "aaa"]],
-// [80, ["#ff6666", "aaa"]],
-// [75, ["#ffbd55", "aaa"]],
-// [70, ["#ffff66", "aaa"]],
-// [65, ["#9de24f", "aaa"]],
-// [60, ["#87cefa", "aaa"]],
-// [54, ["#487de8", "aaa"]]
-// ], [def, "ddd"])
-// function getDiscomfortColor(dis, color) {
-//   if ( dis <= 54 ) return '#6500cb'
-//   if ( 55 <= dis && dis < 60 ) return '#487DE7'
-//   if ( 60 <= dis && dis < 65 ) return '#87CEFA'
-//   if ( 65 <= dis && dis < 70 ) return '#9DE24F'
-//   if ( 70 <= dis && dis < 75 ) return '#FFFF66'
-//   if ( 75 <= dis && dis < 80 ) return '#FFBD55'
-//   if ( 80 <= dis && dis < 85 ) return '#FF6666'
-//   if ( 85 <= dis ) return '#FF453A'
-//   return color
-// }
 
 function getDiscomfortIndex(temp, humidity) {
   const index = 0.81 * temp + 0.01 * humidity * (0.99 * temp - 14.3) + 46.3
