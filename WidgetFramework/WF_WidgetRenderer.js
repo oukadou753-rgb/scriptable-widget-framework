@@ -255,6 +255,12 @@ module.exports = class WF_WidgetRenderer {
   async renderStack(container, el, context, horizontal) {
     const stack = container.addStack()
 
+    // background color
+    if (el.backgroundColor) {
+      const color = this.resolveColor(this.bind(el.backgroundColor, context), context)
+      stack.backgroundColor = this.toColor(color)
+    }
+
     // サイズ
     if (el.size) stack.size = new Size(el.size.width, el.size.height)
 
