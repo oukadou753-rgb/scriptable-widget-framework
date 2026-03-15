@@ -2,113 +2,198 @@
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-gray; icon-glyph: download;
 /**
- * ModuleLoader
+ * DevLoader
  * UTF-8 日本語コメント
+ * 2026/03/10
  **/
-class ModuleLoader {
+let storageType = "icloud"
+storageType = "local"
+// storageType = "bookmark"
+// "icloud"
+// "local"
+// "bookmark"
 
-  constructor(storageType = "local") {
+const loadMain = false
 
-    this.storageType = storageType
-    this.cache = {}
+const useDiff = false
+const useTarget = true
+const targetFiles = [
+//   "Main.js",
+//   "Tools/DevLoader.js",
+  "WidgetFramework/App_WeatherConfig.js",
+//   "WidgetFramework/WF_AppCore.js",
+//   "WidgetFramework/WF_ConfigUI.js",
+//   "WidgetFramework/WF_CoreBase.js",
+//   "WidgetFramework/WF_DataProvider.js",
+//   "WidgetFramework/WF_MenuEngine.js",
+//   "WidgetFramework/WF_ProfileEngine.js",
+//   "WidgetFramework/WF_StorageEngine.js",
+//   "WidgetFramework/WF_WidgetCore.js",
+//   "WidgetFramework/WF_WidgetRenderer.js"
+]
+const targetFolders = [
+//   "WidgetFramework",
+//   "Tools"
+]
 
-    switch (storageType) {
+/**
+ * useDiff: true=差分取得, false=無条件取得
+ * useTarget: true=指定ファイル/フォルダを対象にする
+ * targetFiles: 個別ファイル指定（GitHub 相対パス）
+ * targetFolders: フォルダ単位指定（例: ["WidgetFramework"]）
+ **/
+async function devLoader({
+  useDiff = true,
+  useTarget = false,
+  useiCloud = true,
+  useBookmark = false,
+  targetFiles = null,
+  targetFolders = null
+} = {}) {
 
-      case "icloud":
-        this.fm = FileManager.iCloud()
-        this.baseDir = this.fm.documentsDirectory()
-        break
+  const user = "oukadou753-rgb"
+  const repo = "Scriptable-Widgets"
+  const branch = "main"
 
-      case "bookmark":
-        this.fm = FileManager.local()
-        this.baseDir = this.fm.bookmarkedPath("Scriptable")
-        break
+  let fm
+  let baseDir
 
-      default:
-        this.fm = FileManager.local()
-        this.baseDir = this.fm.documentsDirectory()
+  switch (storageType) {
 
-    }
+    case "icloud":
+      fm = FileManager.iCloud()
+      baseDir = fm.documentsDirectory()
+      break
 
-    console.log("MODULE LOADER" + "\n")
-    console.log("STORAGE: " + this.storageType)
-    console.log("BASE: " + this.baseDir + "\n")
+    case "bookmark":
+      fm = FileManager.local()
+      baseDir = fm.bookmarkedPath("Scriptable")
+      break
+
+    default:
+      fm = FileManager.local()
+      baseDir = fm.documentsDirectory()
+
+  }
+  console.warn("USING: " + storageType)
+
+  // --- SHA 管理用 ---
+  const githubDir = fm.joinPath(baseDir, "WidgetFramework")
+  const shaFilePath = fm.joinPath(githubDir, "github_sha.json")
+  let localSHA = {}
+  if (fm.fileExists(shaFilePath)) {
+    try { localSHA = JSON.parse(fm.readString(shaFilePath)) } catch(e) { localSHA = {} }
   }
 
-  // =========================
-  // load module
-  // =========================
-  load(path) {
+  // --- GitHub 全ファイル取得（再帰的） ---
+  const treeCacheFile = fm.joinPath(githubDir, "github_tree_cache.json")
+  const cacheLife = 600 // 10分
 
-    if (this.cache[path]) {
-      return this.cache[path]
+  let tree
+
+  if (fm.fileExists(treeCacheFile)) {
+
+    const cache = JSON.parse(fm.readString(treeCacheFile))
+    const now = Date.now() / 1000
+
+    if (now - cache.time < cacheLife) {
+      console.log("Using GitHub tree cache")
+      tree = cache.data
     }
-
-    const fullPath = this.getFilePath(path)
-
-    const module = importModule(fullPath)
-
-    this.cache[fullPath] = module
-
-    console.log("IMPORT: " + path)
-
-    return module
   }
 
-  // =========================
-  // resolve path
-  // =========================
-  getFilePath(path) {
+  if (!tree) {
 
-    const file = path.endsWith(".js") ? path : path + ".js"
+    console.log("Fetching GitHub tree")
 
-    const fullPath = this.fm.joinPath(this.baseDir, file)
+    const api = `https://api.github.com/repos/${user}/${repo}/git/trees/${branch}?recursive=1`
 
-    if (!this.fm.fileExists(fullPath)) {
-      throw new Error("Module not found:\n" + fullPath)
-    }
+    const req = new Request(api)
 
-    // iCloud auto download
-    if (this.storageType === "icloud") {
-      if (!this.fm.isFileDownloaded(fullPath)) {
-        this.fm.downloadFileFromiCloud(fullPath)
+    if (Keychain.contains("github_token")) {
+      req.headers = {
+        "Authorization": "token " + Keychain.get("github_token")
       }
     }
 
-    return fullPath
+    tree = await req.loadJSON()
+
+    fm.writeString(treeCacheFile, JSON.stringify({
+      time: Date.now() / 1000,
+      data: tree
+    }))
   }
 
-  // =========================
-  // static shortcut
-  // =========================
-  static import(path, storageType = "local") {
+  const newSHA = {}
 
-    const loader = new ModuleLoader(storageType)
+  for (const file of tree.tree) {
+    if (file.type !== "blob") continue // ファイルのみ
 
-    return loader.load(path)
+    newSHA[file.path] = file.sha
+
+    let shouldDownload = false
+
+    if (useTarget) {
+
+      // 指定ファイル/フォルダ対象か判定
+      if (targetFiles && targetFiles.includes(file.path)) shouldDownload = true
+      if (!shouldDownload && targetFolders) {
+        shouldDownload = targetFolders.some(f => file.path.startsWith(f + "/"))
+      }
+
+      // 差分を使う場合は SHA を確認
+      if (shouldDownload && useDiff) {
+        shouldDownload = !localSHA[file.path] || localSHA[file.path] !== file.sha
+      }
+    } else {
+      // 全体対象
+      if (!useDiff) {
+        shouldDownload = true // 無条件で全体取得
+      } else {
+        shouldDownload = !localSHA[file.path] || localSHA[file.path] !== file.sha // 差分取得
+      }
+    }
+
+    if (!shouldDownload) continue
+
+    // --- ダウンロード ---
+    const rawURL = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${file.path}`
+    let code = await new Request(rawURL).loadString()
+
+    // GitHub のフォルダ構造を Scriptable に再現
+    const savePath = fm.joinPath(baseDir, file.path)
+    const dirPath = fm.joinPath(baseDir, file.path.split("/").slice(0, -1).join("/"))
+    if (!fm.fileExists(dirPath)) fm.createDirectory(dirPath, true)
+
+    // JSはBOM付与
+//     if (file.path.endsWith(".js") && !code.startsWith("\uFEFF")) {
+//       code = "\uFEFF" + code
+//     }
+
+    fm.writeString(savePath, code)
+    console.log("Downloaded: " + file.path)
   }
 
-}
+  // --- GitHubから削除されたファイルを削除 ---
+  for (const path in localSHA) {
+    if (!newSHA[path]) {
+      const removePath = fm.joinPath(baseDir, path)
+      if (fm.fileExists(removePath)) {
+        fm.remove(removePath)
+        console.log("Removed: " + path)
+      }
+    }
+  }
 
-module.exports = ModuleLoader
+  // SHA 保存
+  fm.writeString(shaFilePath, JSON.stringify(newSHA, null, 2))
+  console.log("Update complete")
 
-// =========================
-// Module Test
-// =========================
-const module_name = module.filename.match(/[^\/]+$/ )[ 0 ].replace('.js', '');
-if (module_name == Script.name()) {
-  (async() => {
-    const storageType = "local"
-    const filename = "Main"
-
-//     const Main = importModule(filename)
-//     await Main.start(storageType)
-
-//     const Module = new ModuleLoader(storageType)
-//     const Main = Module.load(filename)
-//     await Main.start(storageType)
-
-    const Main = ModuleLoader.import(filename, storageType)
+  // --- Main 実行 ---
+  if (loadMain) {
+    const Main = importModule("Main")
     await Main.start(storageType)
-  })()
+  }
 }
+
+await devLoader({ useDiff, useTarget, targetFiles, targetFolders })
