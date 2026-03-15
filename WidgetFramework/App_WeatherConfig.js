@@ -227,7 +227,7 @@ const currentDataBlockSmall = [
         justify: "center",
         align: "center",
         children: [
-          { type: "text", text: "{{current_pressureMb}}", style: { base: "defaultText", font:"monospace", fontSize: 45, bold: true, lineLimit: 1, minimumScaleFactor: 0.8 } }
+          { type: "text", text: "{{current_pressure}}", style: { base: "defaultText", font:"monospace", fontSize: 45, bold: true, lineLimit: 1, minimumScaleFactor: 0.8 } }
         ]
       },
       { type: "spacer" },
@@ -260,7 +260,7 @@ const currentDataBlock1 = [
       {
         type: "hstack",
         children: [
-          { type: "text", text: "{{current_pressureMb}}", style: { base: "defaultText", font:"monospace", fontSize: 60, bold: true, lineLimit: 1, minimumScaleFactor: 0.8 } }
+          { type: "text", text: "{{current_pressure}}", style: { base: "defaultText", font:"monospace", fontSize: 60, bold: true, color: "{{current_pressureColor}}", lineLimit: 1, minimumScaleFactor: 0.8 } }
         ]
       },
     ]
@@ -827,19 +827,22 @@ module.exports = {
     const v = config?.values || {}
     const defaultTextColor = v.defaultTextColor
 
+    const intervalHours = v.intervalHours || 2
+    const displayCount = 2
     const nowEpoch = Math.floor(Date.now() / 1000) - 3600
 
     const forecastData = data.forecast.forecastday  // forecastday 配列
     const hours = forecastData.flatMap(day => day.hour)
       .filter(h => h.time_epoch >= nowEpoch)
-      .slice(0, 1)
+      .filter((h, i) => i % intervalHours === 0)
+      .slice(0, displayCount)
 
 //     console.log(JSON.stringify(data, null, 2))
 //     console.log(JSON.stringify(forecastData[ 0 ].day, null, 2))
 //     console.log(JSON.stringify(forecastData[ 0 ].astro, null, 2))
 
     const pressure_current = data.current.pressure_mb
-    const pressure_after = forecastData[0].pressure_mb
+    const pressure_after = hours[1].pressure_mb || pressure_current
 
     const temp = Math.round(data.current.temp_c)
     const tempMin = Math.round(forecastData[0].day.mintemp_c)
@@ -886,7 +889,7 @@ module.exports = {
       windDir: data.current.wind_dir,
       windDegree: getDegreeString(data.current.wind_dir),
 
-      pressureMb: pressure_current,
+      pressure: pressure_current,
       pressureColor: getPressureColor(pressure_after, pressure_current),
 
       precipMm: data.current.precip_mm.toFixed(1),
@@ -928,7 +931,7 @@ module.exports = {
 
     const intervalHours = v.intervalHours || 2      // 取得したい時間間隔（2時間ごと）
     const displayCount = v.displayCount || 4        // 表示件数（large widget）
-    const nowEpoch = Math.floor(Date.now() / 1000) + (3600 * (intervalHours -1))
+    const nowEpoch = Math.floor(Date.now() / 1000) - (3600 * (intervalHours + 1))
 
     const forecastData = data.forecast.forecastday  // forecastday 配列
 
@@ -936,10 +939,11 @@ module.exports = {
     const hours = forecastData.flatMap(day => day.hour)
       .filter(h => h.time_epoch >= nowEpoch)          // 現在時間以降
       .filter((h, i) => i % intervalHours === 0)      // 2時間毎に間引き
-      .slice(0, displayCount)                         // 表示件数に制限
+      .slice(0, displayCount + 2)                     // 表示件数に制限
 
     // レンダラー用 JSON に transform
     const items = hours.map((h, idx) => {
+      if (idx <= 1) return null
       const prev = idx > 0 ? hours[idx - 1] : h
 
       const tempTrend = trendIcon(h.temp_c, prev.temp_c)
@@ -956,7 +960,7 @@ module.exports = {
         hour: Number(h.time.split(" ")[1].slice(0, 2)) + "時",
 
         pressure: Math.round(h.pressure_mb),
-        pressureColor: getPressureColor(prev.pressure_mb, h.pressure_mb),
+        pressureColor: getPressureColor(h.pressure_mb, prev.pressure_mb),
         pressureTrend,
 
         windSpeed,
@@ -972,7 +976,7 @@ module.exports = {
         popColor: colorByThreshold(pop, LEVEL_THRESHOLDS.pop, LEVEL_THRESHOLDS.popDef),
         popTrend
       }
-    })
+    }).filter(v => v)
 
     return items
   },
@@ -1176,8 +1180,8 @@ function getPressureColor(curr, prev) {
   const c = COLORS.pressure
   let color = c.steady
   if (diff > 4 || diff < -4) color = c.alart
-  else if (diff > 2) color = c.rising
-  else if (diff < -2) color = c.falling
+  else if (diff > 0.5) color = c.rising
+  else if (diff < -0.5) color = c.falling
   return color
 }
 
