@@ -605,6 +605,10 @@ module.exports = class WF_WidgetRenderer {
   // =========================
   getFont(style) {
 
+    if (style.font instanceof Font) {
+      return style.font
+    }
+
     const size = Number(style.fontSize) || 14
     const type = style.font || "system"
     const bold = style.bold || false
@@ -617,7 +621,13 @@ module.exports = class WF_WidgetRenderer {
 
     let font
 
-    if (type === "monospace") {
+    if (type === "semibold") {
+      font = Font.semiboldSystemFont(size)
+    }
+    else if (type === "medium") {
+      font = Font.mediumSystemFont(size)
+    }
+    else if (type === "monospace") {
 
       font = bold
         ? Font.boldMonospacedSystemFont(size)
