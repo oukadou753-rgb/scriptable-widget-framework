@@ -17,13 +17,20 @@ const DEFAULT_STRAGE_TYPE = "local" // "icloud", "local", "bookmark"
 const COLORS = {
 
   theme: {
-    textPrimary: "#d1cdda",
-    textSecondary: "#a8b2c7",
-    divider: "#87cefa", // #2c4a72
+    textPrimary: "#d1cdda",    // メイン文字
+    textSecondary: "#a8b2c7",  // サブ文字
+    divider: "#2c4a72",        // 仕切り
+
+    accent: "#4d8dff",         // 強調
+    info: "#66d1ff",           // 情報
+    highlight: "#87cefa"       // 特殊 #7a4dff
+  },
+
+  pressure: {
+    rising: "#5cc8ff",      // 上昇
+    steady: "#d1cdda",      // 変化なし
+    falling: "#ffb347"      // 下降
   
-    accent: "#4d8dff",
-    info: "#66d1ff",
-    highlight: "#7a4dff"
   },
 
   temp: {
@@ -38,41 +45,61 @@ const COLORS = {
   },
 
   humidity: {
-    dry: "#7fb3ff",          // 30%未満
-    comfortable: "#5cc8ff",  // 30〜50%
-    humid: "#3ddcff",        // 50〜70%
-    wet: "#00e5ff"           // 70%以上
+    dry: "#7fb3ff",         // 30%未満
+    comfortable: "#5cc8ff", // 30〜50%
+    humid: "#3ddcff",       // 50〜70%
+    wet: "#00e5ff"          // 70%以上
   },
 
   wind: {
-    calm: "#9de24f",      // 無風〜微風
-    breeze: "#66d1ff",    // 弱風
-    windy: "#ffd84d",     // やや強い
-    strong: "#ff9a3c",    // 強風
-    storm: "#ff4d4d"      // 暴風
+    calm: "#9de24f",        // 無風〜微風
+    breeze: "#66d1ff",      // 弱風
+    windy: "#ffd84d",       // やや強い
+    strong: "#ff9a3c",      // 強風
+    storm: "#ff4d4d"        // 暴風
   },
 
   rain: {
-    none: "#7f8fa6",      // 0mm
-    light: "#66d1ff",     // 0.1〜1mm
-    moderate: "#3ddcff",  // 1〜5mm
-    heavy: "#4d8dff",     // 5〜20mm
-    storm: "#7a4dff"      // 20mm+
+    none: "#7f8fa6",        // 0mm
+    light: "#66d1ff",       // 0.1〜1mm
+    moderate: "#3ddcff",    // 1〜5mm
+    heavy: "#4d8dff",       // 5〜20mm
+    storm: "#7a4dff"        // 20mm+
   },
 
   pop: {
-    none: "#7f8fa6",     // 0%
-    low: "#66d1ff",      // 10〜30%
-    medium: "#3ddcff",   // 40〜60%
-    high: "#4d8dff",     // 70〜80%
-    veryHigh: "#7a4dff"  // 90〜100%
+    none: "#7f8fa6",        // 0%
+    low: "#66d1ff",         // 10〜30%
+    medium: "#3ddcff",      // 40〜60%
+    high: "#4d8dff",        // 70〜80%
+    veryHigh: "#7a4dff"     // 90〜100%
+  },
+
+  discomfort: {
+    soHot: "#ff4d4d",       // "暑くてたまらない"
+    hot: "#ff7a66",         // "暑くて汗が出る"
+    littleHot: "#ffb347",   // "やや暑い"
+    notHot: "#f2f26b",      // "暑くない"
+    pleasant: "#9de24f",    // "快い"
+    none: "#66d1ff",        // "何も感じない"
+    chilly: "#4d8dff",      // "肌寒い"
+    cold: "#7a4dff",        // "寒い"
   },
 
   level: {
-    normal: "#9de24f",
-    caution: "#ffd84d",
-    alert: "#ff9a3c",
-    danger: "#ff4d4d"
+    normal: "#9de24f",      // 普通
+    caution: "#ffd84d",     // 注意
+    alert: "#ff9a3c",       // 警戒
+    danger: "#ff4d4d"       // 危険
+  },
+
+  statue: {
+    ok: "#9de24f",           // 正常
+    info: "#66d1ff",         // 情報
+    notice: "#ffd84d",       // 軽注意
+    warning: "#ff9a3c",      // 注意
+    danger: "#ff4d4d",       // 危険
+    critical: "#ff2d55"      // 最危険
   },
 
   extra: {
@@ -85,20 +112,6 @@ const COLORS = {
 
 }
 
-const DISCOMFORT_COLORS = [
-
-  [85, ["#ff4d4d", "暑くてたまらない"]],
-  [80, ["#ff7a66", "暑くて汗が出る"]],
-  [75, ["#ffb347", "やや暑い"]],
-  [70, ["#f2f26b", "暑くない"]],
-  [65, ["#9de24f", "快い"]],
-  [60, ["#66d1ff", "何も感じない"]],
-  [54, ["#4d8dff", "肌寒い"]]
-
-]
-
-const DISCOMFORT_COLD= ["#7a4dff", "寒い"]
-
 const LEVEL_THRESHOLDS = {
 
   temp: [
@@ -109,6 +122,7 @@ const LEVEL_THRESHOLDS = {
     [15, COLORS.temp.cool],
     [5, COLORS.temp.cold]
   ],
+  tempDef: COLORS.temp.freezing,
 
   rain: [
     [20, COLORS.rain.storm],
@@ -116,6 +130,7 @@ const LEVEL_THRESHOLDS = {
     [1, COLORS.rain.moderate],
     [0.1, COLORS.rain.light]
   ],
+  rainDef: COLORS.pop.none,
 
   pop: [
     [90, COLORS.pop.veryHigh],
@@ -123,6 +138,7 @@ const LEVEL_THRESHOLDS = {
     [40, COLORS.pop.medium],
     [10, COLORS.pop.low]
   ],
+  popDef: COLORS.pop.none,
 
   wind: [
     [15, COLORS.wind.storm],
@@ -130,16 +146,18 @@ const LEVEL_THRESHOLDS = {
     [6, COLORS.wind.windy],
     [3, COLORS.wind.breeze]
   ],
+  windDef: COLORS.wind.calm,
 
   discomfort: [
-    [85, ["#ff4d4d", "暑くてたまらない"]],
-    [80, ["#ff7a66", "暑くて汗が出る"]],
-    [75, ["#ffb347", "やや暑い"]],
-    [70, ["#f2f26b", "暑くない"]],
-    [65, ["#9de24f", "快い"]],
-    [60, ["#66d1ff", "何も感じない"]],
-    [54, ["#4d8dff", "肌寒い"]]
-  ]
+    [85, [COLORS.discomfort.soHot, "暑くてたまらない"]],
+    [80, [COLORS.discomfort.hot, "暑くて汗が出る"]],
+    [75, [COLORS.discomfort.littleHot, "やや暑い"]],
+    [70, [COLORS.discomfort.notHot, "暑くない"]],
+    [65, [COLORS.discomfort.pleasant, "快い"]],
+    [60, [COLORS.discomfort.none, "何も感じない"]],
+    [54, [COLORS.discomfort.chilly, "肌寒い"]]
+  ],
+  discomfortDef: [COLORS.discomfort.cold, "寒い"]
 
 }
 
@@ -495,7 +513,7 @@ module.exports = {
         bgColor: { type: "color", label: "Background Color", section: "BackgroundColor", default: "#003366", presets: ["#000000", "#ff9900"] },
 
         defaultTextColor: { type: "color", label: "Default Text Color", section: "Style", default: COLORS.theme.textPrimary },
-        highlightTextColor: { type: "color", label: "Highlight Text Color", section: "Style", default: COLORS.theme.divider },
+        highlightTextColor: { type: "color", label: "Highlight Text Color", section: "Style", default: COLORS.theme.highlight },
         headerTextColor: { type: "color", label: "Header Text Color", section: "Style", default: "#ffffff" },
         bodyTextColor: { type: "color", label: "Body Text Color", section: "Style", default: "#ffffff" },
         footerTextColor: { type: "color", label: "Footer Text Color", section: "Style", default: "#ffffff" },
@@ -826,7 +844,7 @@ module.exports = {
     const humidity = data.current.humidity
 
     const discomfortIndex = getDiscomfortIndex(temp, humidity)
-    const [ discomfortIndexColor, discomfortIndexStr ] = colorByThreshold(discomfortIndex, LEVEL_THRESHOLDS.discomfort, DISCOMFORT_COLD)
+    const [ discomfortIndexColor, discomfortIndexStr ] = colorByThreshold(discomfortIndex, LEVEL_THRESHOLDS.discomfort, LEVEL_THRESHOLDS.discomfortDef)
 
     const windSpeed = (data.current.wind_kph / 3.6).toFixed(1)
     const windDegree = getDegreeString(data.current.wind_dir)
@@ -861,7 +879,7 @@ module.exports = {
 
       windSpeed,
       windIcon,
-      windSpeedColor: colorByThreshold(windSpeed, LEVEL_THRESHOLDS.wind, LEVEL_THRESHOLDS.wind.calm),
+      windSpeedColor: colorByThreshold(windSpeed, LEVEL_THRESHOLDS.wind, LEVEL_THRESHOLDS.windDef),
       windDir: data.current.wind_dir,
       windDegree: getDegreeString(data.current.wind_dir),
 
@@ -870,7 +888,7 @@ module.exports = {
       precipMm: data.current.precip_mm.toFixed(1),
   
       pop,
-      popColor: colorByThreshold(pop, LEVEL_THRESHOLDS.pop, defaultTextColor),
+      popColor: colorByThreshold(pop, LEVEL_THRESHOLDS.pop, LEVEL_THRESHOLDS.popDef),
 
       discomfortIndex: discomfortIndex.toFixed(1),
       discomfortIndexColor,
@@ -934,21 +952,20 @@ module.exports = {
         hour: Number(h.time.split(" ")[1].slice(0, 2)) + "時",
 
         pressure: Math.round(h.pressure_mb),
-        pressureColor: getPressureColor(h.pressure_mb, prev.pressure_mb, defaultTextColor),
+        pressureColor: getPressureColor(h.pressure_mb, prev.pressure_mb),
         pressureTrend,
 
         windSpeed,
-        windSpeedColor: colorByThreshold(windSpeed, LEVEL_THRESHOLDS.wind, LEVEL_THRESHOLDS.wind.calm),
-//         windSpeedColor: colorByThreshold(windSpeed, [[20, "#ff453a"], [15, "#ff6666"], [10, "#ffbd55"], [5, "#ffff66"]], defaultTextColor),
+        windSpeedColor: colorByThreshold(windSpeed, LEVEL_THRESHOLDS.wind, LEVEL_THRESHOLDS.windDef),
         windTrend,
         windIcon,
 
         temp,
-        tempColor: colorByThreshold(temp, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.temp.freezing),
+        tempColor: colorByThreshold(temp, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef),
         tempTrend,
 
         pop,
-        popColor: colorByThreshold(pop, LEVEL_THRESHOLDS.pop, LEVEL_THRESHOLDS.pop.none),
+        popColor: colorByThreshold(pop, LEVEL_THRESHOLDS.pop, LEVEL_THRESHOLDS.popDef),
         popTrend
       }
     })
@@ -1150,10 +1167,12 @@ function colorByThreshold(v, table, defaultColor) {
   return defaultColor
 }
 
-function getPressureColor(curr, prev, color) {
-  if (prev < 1000) return "#ff6666"
-  if (Math.abs(curr - prev) >= 5) return "#ff6666"
-  if (Math.abs(curr - prev) >= 3) return "#ffff66"
+function getPressureColor(curr, prev) {
+  const diff = curr - prev
+  const c = COLORS.pressure
+  let color = c.steady
+  if (diff > 0.5) color = c.rising
+  else if (diff < -0.5) color = c.falling
   return color
 }
 
