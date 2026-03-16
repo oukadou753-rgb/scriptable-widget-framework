@@ -222,17 +222,17 @@ const SIZES = {
     footer: 9,
   
     extraLarge: 24,
-    large: 20,
-    normal: 16,
+    large: 18,
+    normal: 13,
     small: 10,
 
-    column: 13,
-    data: 13
+    column: 12,
+    data: 12
   },
   image: {
     extraLarge: 24,
     large: 20,
-    normal: 16,
+    normal: 14,
     small: 10
   }
 }
@@ -271,7 +271,7 @@ const headerBlock = [
 const locationBlock = [
   {
     type: "hstack",
-    size: new Size(0, 16),
+    size: new Size(0, 14),
     align: "center",
     children: [
       { type: "text", text: "{{location_name}}", style: { base: "footerText", fontSize: SIZES.text.normal, bold: true, color: "{{highlightTextColor}}" } },
@@ -307,7 +307,7 @@ const currentDataBlockSmall = [
     children: [
       {
         type: "hstack",
-        justify: "center",
+      justify: "center",
         align: "center",
         children: [
           { type: "text", text: "{{current_pressure}}", style: { base: "bodyText", font:"monospace", fontSize: 35, bold: true, color: "{{current_pressureColor}}", lineLimit: 1, minimumScaleFactor: 0.9 } }
@@ -320,10 +320,10 @@ const currentDataBlockSmall = [
         justify: "center",
         align: "center",
         children: [
-          { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: 26, color: COLORS.extra.temp } },
+          { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: 20, color: COLORS.extra.temp } },
           { type: "text", text: "°C", style: { base: "normalText", color: COLORS.extra.temp } },
           { type: "spacer", size: 13 },
-          { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: 26, color: COLORS.extra.humidity } },
+          { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: 20, color: COLORS.extra.humidity } },
           { type: "text", text: "％", style: { base: "normalText", color: COLORS.extra.humidity } }
         ]
       }
@@ -335,14 +335,14 @@ const currentDataBlockSmall = [
 const currentDataBlock1 = [
   {
     type: "vstack",
-    size: new Size(140, 0),
+    size: new Size(145, 0),
     justify: "center",
     align: "center",
     children: [
       {
         type: "hstack",
         children: [
-          { type: "text", text: "{{current_pressure}}", style: { base: "bodyText", font:"monospace", fontSize: 55, bold: true, color: "{{current_pressureColor}}", lineLimit: 1, minimumScaleFactor: 0.9 } }
+          { type: "text", text: "{{current_pressure}}", style: { base: "bodyText", font:"monospace", fontSize: 50, bold: true, color: "{{current_pressureColor}}", lineLimit: 1, minimumScaleFactor: 0.9 } }
         ]
       },
     ]
@@ -353,7 +353,7 @@ const currentDataBlock1 = [
 const currentDataBlock2 = [
   {
     type: "vstack",
-    size: new Size(130, 0),
+    size: new Size(120, 0),
     children: [
       {
         type: "hstack",
@@ -361,10 +361,10 @@ const currentDataBlock2 = [
         justify: "center",
         align: "center",
         children: [
-          { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: 26, color: COLORS.extra.temp } },
+          { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: SIZES.text.large, color: COLORS.extra.temp } },
           { type: "text", text: "°C", style: { base: "normalText", color: COLORS.extra.temp } },
-          { type: "spacer", size: 13 },
-          { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: 26, color: COLORS.extra.humidity } },
+          { type: "spacer", size: 10 },
+          { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: SIZES.text.large, color: COLORS.extra.humidity } },
           { type: "text", text: "％", style: { base: "normalText", color: COLORS.extra.humidity } }
         ]
       },
@@ -375,7 +375,8 @@ const currentDataBlock2 = [
         children: [
           { type: "text", text: "不快指数：", style: { base: "columnText", fontSize: SIZES.text.normal } },
           { type: "spacer" },
-          { type: "text", text: "{{current_discomfortIndex}} 　", style: { base: "dataText", fontSize: SIZES.text.normal } },
+          { type: "text", text: "{{current_discomfortIndex}}", style: { base: "dataText", fontSize: SIZES.text.normal } },
+          { type: "text", text: " ", style: { base: "dataText", fontSize: SIZES.text.small } },
           { type: "text", text: MARK.mark, style: { base: "dataText", fontSize: SIZES.image.small, color: "{{current_discomfortIndexColor}}" } },
         ]
       },
@@ -386,7 +387,8 @@ const currentDataBlock2 = [
         children: [
           { type: "text", text: "降水確率：", style: { base: "columnText", fontSize: SIZES.text.normal } },
           { type: "spacer" },
-          { type: "text", text: "{{current_pop}} ％", style: { base: "dataText", fontSize: SIZES.text.normal } },
+          { type: "text", text: "{{current_pop}}", style: { base: "dataText", fontSize: SIZES.text.normal } },
+          { type: "text", text: "％", style: { base: "dataText", fontSize: SIZES.text.small } },
           { type: "text", text: MARK.mark, style: { base: "dataText", fontSize: SIZES.image.small, color: "{{current_popColor}}" } }
         ]
       },
@@ -397,7 +399,8 @@ const currentDataBlock2 = [
         children: [
           { type: "text", text: "雨　　量：", style: { base: "columnText", fontSize: SIZES.text.normal } },
           { type: "spacer" },
-          { type: "text", text: "{{current_rain}} ㎜", style: { base: "dataText", fontSize: SIZES.text.normal } },
+          { type: "text", text: "{{current_rain}}", style: { base: "dataText", fontSize: SIZES.text.normal } },
+          { type: "text", text: "㎜", style: { base: "dataText", fontSize: SIZES.text.small } },
           { type: "text", text: MARK.mark, style: { base: "dataText", fontSize: SIZES.image.small, color: "{{current_rainColor}}" } }
         ]
       }
@@ -418,14 +421,14 @@ const currentDataBlock3 = [
         spacing: 2,
         children: [
           { type: "text", text: "日較差：", style: "columnText" },
-          { type: "text", text: "{{current_tempMax}}", style: { base: "dataText", fontSize: SIZES.text.normal, color: "{{current_tempMaxColor}}" } },
+          { type: "text", text: "{{current_tempMax}}", style: { base: "dataText", fontSize: SIZES.text.large, color: "{{current_tempMaxColor}}" } },
           { type: "text", text: "°C", style: "dataText" },
           { type: "text", text: " / ", style: "columnText" },
-          { type: "text", text: "{{current_tempMin}}", style: { base: "dataText", fontSize: SIZES.text.normal, color: "{{current_tempMinColor}}" } },
+          { type: "text", text: "{{current_tempMin}}", style: { base: "dataText", fontSize: SIZES.text.large, color: "{{current_tempMinColor}}" } },
           { type: "text", text: "°C", style: "dataText" },
           { type: "spacer", size: 10 },
           { type: "text", text: "体感温度：", style: "columnText" },
-          { type: "text", text: "{{current_feelslike}}", style: { base: "dataText", fontSize: SIZES.text.normal, color: "{{current_feelslikeColor}}" } },
+          { type: "text", text: "{{current_feelslike}}", style: { base: "dataText", fontSize: SIZES.text.large, color: "{{current_feelslikeColor}}" } },
           { type: "text", text: "°C", style: "dataText" }
         ]
       },
@@ -436,13 +439,13 @@ const currentDataBlock3 = [
         spacing: 2,
         children: [
           { type: "text", text: "風速：", style: "columnText" },
-          { type: "text", text: "{{current_windSpeed}}", style: { base: "dataText", fontSize: SIZES.text.normal, color: "{{current_windSpeedColor}}" } },
+          { type: "text", text: "{{current_windSpeed}}", style: { base: "dataText", fontSize: SIZES.text.large, color: "{{current_windSpeedColor}}" } },
           { type: "text", text: "m/s", style: "dataText" },
           { type: "spacer", size: 10 },
           { type: "text", text: "風向き：", style: "columnText" },
           { type: "image", src: "{{current_windIcon}}", tint: "{{highlightTextColor}}", size: SIZES.image.extraLarge },
           { type: "spacer", size: 5 },
-          { type: "text", text: "{{current_windDegree}}", style: { base: "dataText", fontSize: SIZES.text.normal } }
+          { type: "text", text: "{{current_windDegree}}", style: { base: "dataText", fontSize: SIZES.text.large } }
         ]
       }
     ]
@@ -453,7 +456,8 @@ const currentDataBlock3 = [
 const forecastDataBlock = [
   {
     type: "hstack",
-    size: new Size(0, 75),
+    size: new Size(0, 73),
+    justify: "center",
     children: [
   
       // Column
@@ -461,25 +465,25 @@ const forecastDataBlock = [
         type: "vstack",
         size: new Size(50, 0),
         children: [
-          { type: "text", text: "{{intervalHours}}時間予報", style: { base: "smallText", color: "{{highlightTextColor}}" } },
+          { type: "text", text: "{{intervalHours}}時間予報", style: { base: "smallText", fontSize: 9, color: "{{highlightTextColor}}" } },
           { type: "hstack", align: "center", children: [
               { type: "text", text: "気圧", style: "columnText" },
-              { type: "text", text: "(hPa)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+              { type: "text", text: "(hPa)", style: { base: "smallText", fontSize: 9, color: "{{highlightTextColor}}" } }
             ]
           },
           { type: "hstack", align: "center", children: [
               { type: "text", text: "風速", style: "columnText" },
-              { type: "text", text: "(m/s)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+              { type: "text", text: "(m/s)", style: { base: "smallText", fontSize: 9, color: "{{highlightTextColor}}" } }
             ]
           },
           { type: "hstack", align: "center", children: [
               { type: "text", text: "気温", style: "columnText" },
-              { type: "text", text: "(°C)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+              { type: "text", text: "(°C)", style: { base: "smallText", fontSize: 9, color: "{{highlightTextColor}}" } }
             ]
           },
           { type: "hstack", align: "center", children: [
               { type: "text", text: "降水", style: "columnText" },
-              { type: "text", text: "(％)", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+              { type: "text", text: "(％)", style: { base: "smallText", fontSize: 9, color: "{{highlightTextColor}}" } }
             ]
           }
         ]
@@ -497,7 +501,7 @@ const forecastDataBlock = [
           size: new Size(53, 0),  // 列幅
           children: [
             { type: "hstack", justify: "end", align: "center", children: [
-                { type: "text", text: "{{hour}}", style: { base: "smallText", color: "{{highlightTextColor}}" } }
+                { type: "text", text: "{{hour}}", style: { base: "smallText", fontSize: 9, color: "{{highlightTextColor}}" } }
               ]
             },
             { type: "hstack", justify: "end", align: "center", children: [
@@ -509,7 +513,7 @@ const forecastDataBlock = [
                 { type: "image", src: "{{windIcon}}", tint: "{{highlightTextColor}}", size: SIZES.image.normal },
                 { type: "spacer", size: 3 },
                 { type: "text", text: "{{windTrend }} ", style: { base: "smallText", bold: true, color: "{{windSpeedColor}}" } },
-                { type: "text", text: "8{{windSpeed}}", style: "dataText" }
+                { type: "text", text: "{{windSpeed}}", style: "dataText" }
               ]
             },
             { type: "hstack", justify: "end", align: "center", children: [
@@ -574,15 +578,15 @@ module.exports = {
         titleText: { fontSize: SIZES.text.header, bold: true, color: "{{highlightTextColor}}" },
         versionText: { fontSize: SIZES.text.footer, bold: false, color: "{{defaultTextColor}}" },
         updateText: { fontSize: SIZES.text.footer, bold: false, color: "{{highlightTextColor}}" },
-        locationText: { fontSize: SIZES.text.body, bold: true, color: "{{highlightTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        locationText: { fontSize: SIZES.text.body, bold: true, color: "{{highlightTextColor}}", lineLimit: 1, minimumScaleFactor: 1},
 
-        columnText: { font:"monospace", fontSize: SIZES.text.column, bold: true, color: "{{highlightTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
-        dataText: { font:"monospace", fontSize: SIZES.text.data, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        columnText: { font:"monospace", fontSize: SIZES.text.column, bold: true, color: "{{highlightTextColor}}", lineLimit: 1, minimumScaleFactor: 1},
+        dataText: { font:"monospace", fontSize: SIZES.text.data, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 1},
 
-        extraLargeText: { font:"monospace", fontSize: SIZES.text.extraLarge, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
-        largeText: { font:"monospace", fontSize: SIZES.text.large, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
-        normalText: { font:"monospace", fontSize: SIZES.text.normal, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
-        smallText: { font:"monospace", fontSize: SIZES.text.small, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8}
+        extraLargeText: { font:"monospace", fontSize: SIZES.text.extraLarge, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 1},
+        largeText: { font:"monospace", fontSize: SIZES.text.large, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 1},
+        normalText: { font:"monospace", fontSize: SIZES.text.normal, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 1},
+        smallText: { font:"monospace", fontSize: SIZES.text.small, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 1}
       },
 
       defaultOpenSections: ["General", "Style"],
@@ -688,13 +692,14 @@ module.exports = {
 
       // Default Layout
       default: {
-        padding: pos(10, 16, 10, 16),
+        padding: pos(10, 16, 10, 12),
 
         header: headerBlock,
         body: [
           {
             type: "hstack",
             size: new Size(0, 70),
+            justify: "center",
             children: [
               ...currentDataBlock1,
               ...currentDataBlock2
