@@ -137,7 +137,7 @@ const COLORS = {
 
   status: {
     ok: ROLE.success,           // 正常
-    info: ROLE.info,            // 情報
+    info: ROLE.info,       // 情報
     notice: ROLE.caution,       // 軽注意
     warning: ROLE.warning,      // 注意
     danger: ROLE.danger,        // 危険
@@ -156,6 +156,11 @@ const COLORS = {
 
 }
 
+const PRESETS_COLORS = {
+  theme: Object.values(COLORS.theme),
+  background: Object.values(COLORS.background)
+}
+
 const LEVEL_THRESHOLDS = {
 
   temp: [
@@ -172,15 +177,15 @@ const LEVEL_THRESHOLDS = {
     [20, COLORS.rain.storm],
     [5, COLORS.rain.heavy],
     [1, COLORS.rain.moderate],
-//     [0.1, COLORS.rain.light]
+    [0.1, COLORS.rain.light]
   ],
   rainDef: COLORS.theme.textPrimary,
 
   pop: [
     [90, COLORS.pop.veryHigh],
     [70, COLORS.pop.high],
-//     [40, COLORS.pop.medium],
-//     [10, COLORS.pop.low]
+    [40, COLORS.pop.medium],
+    [10, COLORS.pop.low]
   ],
   popDef: COLORS.theme.textPrimary,
 
@@ -188,7 +193,7 @@ const LEVEL_THRESHOLDS = {
     [15, COLORS.wind.storm],
     [10, COLORS.wind.strong],
     [6, COLORS.wind.windy],
-//     [3, COLORS.wind.breeze]
+    [3, COLORS.wind.breeze]
   ],
   windDef: COLORS.theme.textPrimary,
 
@@ -234,7 +239,8 @@ const headerBlock = [
       { type: "spacer", size: 3 },
       { type: "text", text: "{{header_titleStr}}", style: "headerText" },
       { type: "spacer" },
-      { type: "text", text: "{{current_discomfortIndexStr}}", style: { base: "headerText", color: "{{current_discomfortIndexColor}}" } },
+{ type: "text", text: "●", style: { base: "headerText", color: "{{current_discomfortIndexColor}}" } },
+      { type: "text", text: "{{current_discomfortIndexStr}}", style: "headerText" },
       { type: "spacer", size: 5 },
       { type: "image", src: "{{status_icon}}", tint: "{{status_color}}", opacity: "{{status_opacity}}", size: 14 }
     ]
@@ -287,22 +293,21 @@ const currentDataBlockSmall = [
         justify: "center",
         align: "center",
         children: [
-          { type: "text", text: "{{current_pressure}}", style: { base: "defaultText", font:"monospace", fontSize: 45, bold: true, lineLimit: 1, minimumScaleFactor: 0.8 } }
+          { type: "text", text: "{{current_pressure}}", style: { base: "bodyText", font:"monospace", fontSize: 35, bold: true, color: "{{current_pressureColor}}", lineLimit: 1, minimumScaleFactor: 0.9 } }
         ]
       },
       { type: "spacer" },
       {
         type: "hstack",
         size: new Size(0, 15),
+        justify: "center",
         align: "center",
         children: [
-          { type: "spacer" },
-          { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: 20, color: "#ff453a", lineLimit: 1, minimumScaleFactor: 0.8 } },
-          { type: "text", text: "°C", style: { base: "normalText", color: "#ff453a" } },
+          { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: 26, color: COLORS.extra.temp } },
+          { type: "text", text: "°C", style: { base: "normalText", color: COLORS.extra.temp } },
           { type: "spacer", size: 13 },
-          { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: 20, color: "#487de7", lineLimit: 1, minimumScaleFactor: 0.8 } },
-          { type: "text", text: "％", style: { base: "normalText", color: "#487de7" } },
-          { type: "spacer" }
+          { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: 26, color: COLORS.extra.humidity } },
+          { type: "text", text: "％", style: { base: "normalText", color: COLORS.extra.humidity } }
         ]
       }
     ]
@@ -313,14 +318,14 @@ const currentDataBlockSmall = [
 const currentDataBlock1 = [
   {
     type: "vstack",
-    size: new Size(150, 0),
+    size: new Size(140, 0),
     justify: "center",
     align: "center",
     children: [
       {
         type: "hstack",
         children: [
-          { type: "text", text: "{{current_pressure}}", style: { base: "dataText", font:"monospace", fontSize: 55, bold: true, color: "{{current_pressureColor}}", lineLimit: 1, minimumScaleFactor: 0.9 } }
+          { type: "text", text: "{{current_pressure}}", style: { base: "bodyText", font:"monospace", fontSize: 55, bold: true, color: "{{current_pressureColor}}", lineLimit: 1, minimumScaleFactor: 0.9 } }
         ]
       },
     ]
@@ -331,7 +336,7 @@ const currentDataBlock1 = [
 const currentDataBlock2 = [
   {
     type: "vstack",
-    size: new Size(120, 0),
+    size: new Size(130, 0),
     children: [
       {
         type: "hstack",
@@ -339,10 +344,10 @@ const currentDataBlock2 = [
         justify: "center",
         align: "center",
         children: [
-          { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: 20, color: COLORS.extra.temp } },
+          { type: "text", text: "{{current_temp}}", style: { base: "normalText", fontSize: 26, color: COLORS.extra.temp } },
           { type: "text", text: "°C", style: { base: "normalText", color: COLORS.extra.temp } },
           { type: "spacer", size: 13 },
-          { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: 20, color: COLORS.extra.humidity } },
+          { type: "text", text: "{{current_humidity}}", style: { base: "normalText", fontSize: 26, color: COLORS.extra.humidity } },
           { type: "text", text: "％", style: { base: "normalText", color: COLORS.extra.humidity } }
         ]
       },
@@ -353,8 +358,8 @@ const currentDataBlock2 = [
         children: [
           { type: "text", text: "不快指数：", style: "currentColumnText" },
           { type: "spacer" },
-          { type: "text", text: "{{current_discomfortIndex}}", style: { base: "currentDataText", color: "{{current_discomfortIndexColor}}" } },
-            { type: "text", text: "　", style: "currentDataText" }
+          { type: "text", text: "{{current_discomfortIndex}}", style: "currentDataText" },
+          { type: "text", text: "●", style: { base: "currentDataText", color: "{{current_discomfortIndexColor}}" } },
         ]
       },
       {
@@ -364,8 +369,8 @@ const currentDataBlock2 = [
         children: [
           { type: "text", text: "降水確率：", style: "currentColumnText" },
           { type: "spacer" },
-          { type: "text", text: "{{current_pop}}", style: { base: "currentDataText", color: "{{current_popColor}}" } },
-          { type: "text", text: "％", style: "currentDataText" }
+          { type: "text", text: "{{current_pop}}％", style: "currentDataText" },
+          { type: "text", text: "●", style: { base: "currentDataText", color: "{{current_popColor}}" } }
         ]
       },
       {
@@ -375,8 +380,8 @@ const currentDataBlock2 = [
         children: [
           { type: "text", text: "雨　　量：", style: "currentColumnText" },
           { type: "spacer" },
-          { type: "text", text: "{{current_precipMm}}", style: "currentDataText" },
-          { type: "text", text: "㎜", style: "currentDataText" },
+          { type: "text", text: "{{current_rain}}㎜", style: "currentDataText" },
+          { type: "text", text: "●", style: { base: "currentDataText", color: "{{current_rainColor}}" } }
         ]
       }
     ]
@@ -393,6 +398,7 @@ const currentDataBlock3 = [
         type: "hstack",
         justify: "center",
         align: "center",
+        spacing: 2,
         children: [
           { type: "text", text: "日較差：", style: "currentColumnText" },
           { type: "text", text: "{{current_tempMax}}", style: { base: "normalText", color: "{{current_tempMaxColor}}" } },
@@ -400,7 +406,7 @@ const currentDataBlock3 = [
           { type: "text", text: " / ", style: "currentColumnText" },
           { type: "text", text: "{{current_tempMin}}", style: { base: "normalText", color: "{{current_tempMinColor}}" } },
           { type: "text", text: "°C", style: "currentDataText" },
-          { type: "spacer", size: 15 },
+          { type: "spacer", size: 10 },
           { type: "text", text: "体感温度：", style: "currentColumnText" },
           { type: "text", text: "{{current_feelslike}}", style: { base: "normalText", color: "{{current_feelslikeColor}}" } },
           { type: "text", text: "°C", style: "currentDataText" }
@@ -410,11 +416,12 @@ const currentDataBlock3 = [
         type: "hstack",
         justify: "center",
         align: "center",
+        spacing: 2,
         children: [
           { type: "text", text: "風速：", style: "currentColumnText" },
           { type: "text", text: "{{current_windSpeed}}", style: { base: "normalText", color: "{{current_windSpeedColor}}" } },
           { type: "text", text: "m/s", style: "currentDataText" },
-          { type: "spacer", size: 15 },
+          { type: "spacer", size: 10 },
           { type: "text", text: "風向き：", style: "currentColumnText" },
           { type: "image", src: "{{current_windIcon}}", tint: "{{highlightTextColor}}", size: 24 },
           { type: "spacer", size: 5 },
@@ -551,18 +558,18 @@ module.exports = {
         titleText: { fontSize: SIZE_FONTS.header, bold: true, color: "{{highlightTextColor}}" },
         versionText: { fontSize: SIZE_FONTS.footer, bold: false, color: "{{defaultTextColor}}" },
         updateText: { fontSize: SIZE_FONTS.footer, bold: false, color: "{{highlightTextColor}}" },
-        locationText: { fontSize: SIZE_FONTS.body, bold: true, color: "{{highlightTextColor}}" },
+        locationText: { fontSize: SIZE_FONTS.body, bold: true, color: "{{highlightTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
 
-        currentColumnText: { font:"monospace", fontSize: 13, bold: true, color: "{{highlightTextColor}}", lineLimit: 1 },
-        currentDataText: { font:"monospace", fontSize: 13, bold: true, color: "{{defaultTextColor}}", lineLimit: 1 },
+        currentColumnText: { font:"monospace", fontSize: 13, bold: true, color: "{{highlightTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        currentDataText: { font:"monospace", fontSize: 13, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
 
-        columnText: { font:"monospace", fontSize: 11, bold: true, color: "{{highlightTextColor}}", lineLimit: 1 },
-        dataText: { font:"monospace", fontSize: 11, bold: true, color: "{{defaultTextColor}}", lineLimit: 1 },
+        columnText: { font:"monospace", fontSize: 11, bold: true, color: "{{highlightTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        dataText: { font:"monospace", fontSize: 11, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
 
-        extraLargeText: { font:"monospace", fontSize: SIZE_FONTS.extraLarge, bold: true, color: "{{defaultTextColor}}", lineLimit: 1 },
-        largeText: { font:"monospace", fontSize: SIZE_FONTS.large, bold: true, color: "{{defaultTextColor}}", lineLimit: 1 },
-        normalText: { font:"monospace", fontSize: SIZE_FONTS.normal, bold: true, color: "{{defaultTextColor}}", lineLimit: 1 },
-        smallText: { font:"monospace", fontSize: SIZE_FONTS.small, bold: true, color: "{{defaultTextColor}}", lineLimit: 1 }
+        extraLargeText: { font:"monospace", fontSize: SIZE_FONTS.extraLarge, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        largeText: { font:"monospace", fontSize: SIZE_FONTS.large, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        normalText: { font:"monospace", fontSize: SIZE_FONTS.normal, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        smallText: { font:"monospace", fontSize: SIZE_FONTS.small, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8}
       },
 
       defaultOpenSections: ["General", "Style"],
@@ -571,15 +578,15 @@ module.exports = {
         titleStr: { type: "text", label: "Title", section: "General", default: "My Widget" },
 
         useBgGradient: { type: "bool", label: "Use Gradient Color", section: "BackgroundColor", default: true },
-        bgColorTop: { type: "color", label: "Gradient Background Top Color", section: "BackgroundColor", default: COLORS.background.top, presets: ["#000000", "#ff9900"] },
-        bgColorBottom: { type: "color", label: "Gradient Background Bottom Color", section: "BackgroundColor", default: COLORS.background.bottom, presets: ["#000000", "#ff9900"] },
-        bgColor: { type: "color", label: "Background Color", section: "BackgroundColor", default: COLORS.background.base, presets: ["#000000", "#ff9900"] },
+        bgColorTop: { type: "color", label: "Gradient Background Top Color", section: "BackgroundColor", default: COLORS.background.top, presets: PRESETS_COLORS.background },
+        bgColorBottom: { type: "color", label: "Gradient Background Bottom Color", section: "BackgroundColor", default: COLORS.background.bottom, presets: PRESETS_COLORS.background },
+        bgColor: { type: "color", label: "Background Color", section: "BackgroundColor", default: COLORS.background.base, presets: PRESETS_COLORS.background },
 
-        defaultTextColor: { type: "color", label: "Default Text Color", section: "Style", default: COLORS.theme.textPrimary },
-        highlightTextColor: { type: "color", label: "Highlight Text Color", section: "Style", default: COLORS.theme.highlight },
-        headerTextColor: { type: "color", label: "Header Text Color", section: "Style", default: COLORS.theme.textPrimary },
-        bodyTextColor: { type: "color", label: "Body Text Color", section: "Style", default: COLORS.theme.textPrimary },
-        footerTextColor: { type: "color", label: "Footer Text Color", section: "Style", default: COLORS.theme.textPrimary },
+        defaultTextColor: { type: "color", label: "Default Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
+        highlightTextColor: { type: "color", label: "Highlight Text Color", section: "Style", default: COLORS.theme.highlight, presets: PRESETS_COLORS.theme },
+        headerTextColor: { type: "color", label: "Header Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
+        bodyTextColor: { type: "color", label: "Body Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
+        footerTextColor: { type: "color", label: "Footer Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
 
         useTestData: { type: "bool", label: "Use Test Data", section: "Debug", default: true },
         showTableFullscreen: { type: "bool", label: "Show Table Fullscreen", section: "Debug", default: true },
@@ -920,6 +927,7 @@ module.exports = {
     const windDegree = getDegreeString(data.current.wind_dir)
     const windIcon = drawArrow(getDegString(data.current.wind_degree), null, true)
 
+    const rain = data.current.precip_mm
     const pop = Math.ceil(Math.max(...[ hours[1].chance_of_rain, hours[1].chance_of_snow ]) / 5) * 5
 
     const now = new Date()
@@ -959,7 +967,8 @@ module.exports = {
       pressure: pressure_current,
       pressureColor: getPressureColor(pressure_current, pressure_after),
 
-      precipMm: data.current.precip_mm.toFixed(1),
+      rain: rain.toFixed(rain > 1 ? 0 : 1),
+      rainColor: colorByThreshold(rain, LEVEL_THRESHOLDS.rain, LEVEL_THRESHOLDS.rainDef),
   
       pop,
       popColor: colorByThreshold(pop, LEVEL_THRESHOLDS.pop, LEVEL_THRESHOLDS.popDef),
@@ -1230,9 +1239,9 @@ function makeWeatherApiIcon(url) {
 function getDegreeString(wind_dir) { return [ ...wind_dir.replace(/E/g, '\u6771').replace(/W/g, '\u897f').replace(/S/g, '\u5357').replace(/N/g, '\u5317') + '\u3000\u3000' ].slice(0, 3).join('') }
 
 function trendIcon(curr, prev) {
-  if (curr > prev) return "↑"
-  if (curr < prev) return "↓"
-  return "→"
+  if (curr > prev) return "▲"
+  if (curr < prev) return "▼"
+  return "▶"
 }
 
 function colorByThreshold(v, table, defaultColor) {
@@ -1245,7 +1254,7 @@ function colorByThreshold(v, table, defaultColor) {
 function getPressureColor(curr, prev) {
   const diff = curr - prev
   const c = COLORS.pressure
-  let color = c.steady
+  let color = "" // c.steady
   if (diff > 2 || diff < -2) color = c.alart
   else if (diff > 0.5) color = c.rising
   else if (diff < -0.5) color = c.falling
