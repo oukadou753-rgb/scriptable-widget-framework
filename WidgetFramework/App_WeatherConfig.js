@@ -5,6 +5,10 @@
  * App_Config
  * UTF-8 日本語コメント
  **/
+/**
+ * App_Config
+ * UTF-8 日本語コメント
+ **/
 // ======================
 // Constat
 // ======================
@@ -237,6 +241,13 @@ const SIZES = {
   }
 }
 
+const MARK = {
+  mark: "■",
+  up: "▲",
+  down: "▼",
+  right: "▶"
+}
+
 // ======================
 // Header Block
 // ======================
@@ -250,7 +261,7 @@ const headerBlock = [
       { type: "image", src: "{{header_titleIcon_src}}", tint: "{{header_titleIcon_tint}}", size: SIZES.image.extraLarge },
       { type: "text", text: "{{header_titleStr}}", style: "headerText" },
       { type: "spacer" },
-      { type: "text", text: "●", style: { base: "headerText", fontSize: SIZES.image.small, color: "{{current_discomfortIndexColor}}" } },
+      { type: "text", text: MARK.mark, style: { base: "headerText", fontSize: SIZES.image.small, color: "{{current_discomfortIndexColor}}" } },
       { type: "text", text: "{{current_discomfortIndexStr}}", style: "headerText" },
       { type: "image", src: "{{status_icon}}", tint: "{{status_color}}", opacity: "{{status_opacity}}", size: SIZES.image.small }
     ]
@@ -369,7 +380,7 @@ const currentDataBlock2 = [
           { type: "text", text: "不快指数：", style: "currentColumnText" },
           { type: "spacer" },
           { type: "text", text: "{{current_discomfortIndex}}", style: "currentDataText" },
-          { type: "text", text: "●", style: { base: "currentDataText", fontSize: SIZES.image.small, color: "{{current_discomfortIndexColor}}" } },
+          { type: "text", text: MARK.mark, style: { base: "currentDataText", fontSize: SIZES.image.small, color: "{{current_discomfortIndexColor}}" } },
         ]
       },
       {
@@ -380,7 +391,7 @@ const currentDataBlock2 = [
           { type: "text", text: "降水確率：", style: "currentColumnText" },
           { type: "spacer" },
           { type: "text", text: "{{current_pop}}％", style: "currentDataText" },
-          { type: "text", text: "●", style: { base: "currentDataText", fontSize: SIZES.image.small, color: "{{current_popColor}}" } }
+          { type: "text", text: MARK.mark, style: { base: "currentDataText", fontSize: SIZES.image.small, color: "{{current_popColor}}" } }
         ]
       },
       {
@@ -391,7 +402,7 @@ const currentDataBlock2 = [
           { type: "text", text: "雨　　量：", style: "currentColumnText" },
           { type: "spacer" },
           { type: "text", text: "{{current_rain}}㎜", style: "currentDataText" },
-          { type: "text", text: "●", style: { base: "currentDataText", fontSize: SIZES.image.small, color: "{{current_rainColor}}" } }
+          { type: "text", text: MARK.mark, style: { base: "currentDataText", fontSize: SIZES.image.small, color: "{{current_rainColor}}" } }
         ]
       }
     ]
@@ -1235,9 +1246,9 @@ function makeWeatherApiIcon(url) {
 function getDegreeString(wind_dir) { return [ ...wind_dir.replace(/E/g, '\u6771').replace(/W/g, '\u897f').replace(/S/g, '\u5357').replace(/N/g, '\u5317') + '\u3000\u3000' ].slice(0, 3).join('') }
 
 function trendIcon(curr, prev) {
-  if (curr > prev) return "▲"
-  if (curr < prev) return "▼"
-  return "▶"
+  if (curr > prev) return MARK.up
+  if (curr < prev) return MARK.down
+  return MARK.right
 }
 
 function colorByThreshold(v, table, defaultColor) {
