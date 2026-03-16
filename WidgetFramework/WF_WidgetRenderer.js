@@ -165,9 +165,11 @@ module.exports = class WF_WidgetRenderer {
         repeatStack.spacing = block.spacing ?? 6
 
         // alignContent
-        if (block.align === "top") repeatStack.topAlignContent()
-        else if (block.align === "center") repeatStack.centerAlignContent()
-        else if (block.align === "bottom") repeatStack.bottomAlignContent()
+        const align = block.align ?? "center"
+
+        if (align === "top") repeatStack.topAlignContent()
+        else if (align === "bottom") repeatStack.bottomAlignContent()
+        else repeatStack.centerAlignContent()
 
         // template描画（再帰）
         for (let i = 0; i < items.length; i++) {
@@ -243,9 +245,12 @@ module.exports = class WF_WidgetRenderer {
 
       repeatStack.spacing = el.spacing ?? 6
 
-      if (el.align === "top") repeatStack.topAlignContent()
-      else if (el.align === "center") repeatStack.centerAlignContent()
-      else if (el.align === "bottom") repeatStack.bottomAlignContent()
+      // alignContent
+      const align = el.align ?? "center"
+
+      if (align === "top") repeatStack.topAlignContent()
+      else if (align === "bottom") repeatStack.bottomAlignContent()
+      else repeatStack.centerAlignContent()
 
       // template を repeatStack に再帰描画
       for (let i = 0; i < items.length; i++) {
