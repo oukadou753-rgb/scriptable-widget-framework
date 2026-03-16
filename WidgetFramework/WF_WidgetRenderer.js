@@ -190,7 +190,40 @@ module.exports = class WF_WidgetRenderer {
   // 要素描画
   // =========================
   async renderElement(container, el, context) {
-    if (!el || typeof el !== "object" || !el.type) return
+
+    if (!el) return
+
+    // -------------------------
+    // shorthand
+    // -------------------------
+
+    // "text"
+    if (typeof el === "string") {
+      el = { type: "text", text: el }
+    }
+
+    // { text:"abc" }
+    if (typeof el === "object" && !el.type) {
+
+      if (el.text !== undefined) {
+        el.type = "text"
+      }
+
+      else if (el.h) {
+        el.type = "hstack"
+        el.children = el.h
+      }
+
+      else if (el.v) {
+        el.type = "vstack"
+        el.children = el.v
+      }
+
+    }
+
+    if (!el.type) return
+
+    // show
     if (el.show !== undefined && !this.evaluate(el.show, context)) return
 
     // children 内 repeat でも描画される
