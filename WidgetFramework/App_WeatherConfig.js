@@ -818,24 +818,34 @@ module.exports = {
 
     if (v.useTestData) return this.testDataTransform(data, config)
 
-    const items = this.forecastDataTransform(data, config)
-    const meta = this.metaDataTransform(data, config)
-    const flat = flatObj(meta)
-//     console.log(Object.keys(flat))
-//     console.log(flat.current_windImage instanceof Image)
+    // 表示件数に制限された2時間毎のforecastday配列
+    const intervalHours = v.intervalHours || 2      // 取得したい時間間隔（2時間ごと）
+    const displayCount = v.displayCount || 4        // 表示件数（large widget）
+    const nowEpoch = Math.floor(Date.now() / 1000) - (3600 * (intervalHours + 1))
+
+    const forecastData = data.forecast.forecastday  // forecastday 配列
+
+    // hour 配列から現在時間以降のデータを flatten して抽出
+    const hours = forecastData.flatMap(day => day.hour)
+      .filter(h => h.time_epoch >= nowEpoch)         // 現在時間以降
+      .filter((h, i) => i % intervalHours === 0)     // 2時間毎に間引き
+      .slice(0, displayCount + 2)                    // 表示件数に制限
+
+
+    const items = this.forecastDataTransform(hours, config)
+    const meta = this.metaDataTransform(data, hours, config)
 
     // 共通データ返却（統一フォーマット）
     return {
       items,
-      ...flat
+      ...flatObj(meta)
     }
   },
 
   // meta 情報を整理
-  metaDataTransform(data, config) {
+  metaDataTransform(data, hours, config) {
 
     const v = config?.values || {}
-//     console.log(JSON.stringify(config, null, 2))
 
     const debug = false
 
@@ -859,7 +869,7 @@ module.exports = {
     const location = config?.location || null
 
     // current
-    const current = this.currentDataTransform(data, config)
+    const current = this.currentDataTransform(data, hours, config)
 
     // メタ情報
     const meta = {
@@ -876,9 +886,9 @@ module.exports = {
       footer: {
         updateStr
       },
-      current,
-      status,
       debug,
+      status,
+      current,
       location: {
         lat: location?.lat ?? null,
         lon: location?.lon ?? null,
@@ -892,57 +902,53 @@ module.exports = {
   },
 
   // current 情報を整理
-  currentDataTransform(data, config) {
-
-    const v = config?.values || {}
-    const defaultTextColor = v.defaultTextColor
-
-    const intervalHours = v.intervalHours || 2
-    const displayCount = 2
-    const nowEpoch = Math.floor(Date.now() / 1000) - (3600 * (intervalHours + 1))
-
-    const forecastData = data.forecast.forecastday
-    const hours = forecastData.flatMap(day => day.hour)
-      .filter(h => h.time_epoch >= nowEpoch)
-      .filter((h, i) => i % intervalHours === 0)
-      .slice(0, displayCount)
-
-//     console.log(JSON.stringify(hours[0], null, 2))
-//     console.log(JSON.stringify(data, null, 2))
-//     console.log(JSON.stringify(forecastData[ 0 ].day, null, 2))
-//     console.log(JSON.stringify(forecastData[ 0 ].astro, null, 2))
-
-    const pressure_current = data.current.pressure_mb
-    const pressure_after = hours[0].pressure_mb || pressure_current
-
-    const temp = Math.round(data.current.temp_c)
-    const tempMin = Math.round(forecastData[0].day.mintemp_c)
-    const tempMax = Math.round(forecastData[0].day.maxtemp_c)
-    const humidity = data.current.humidity
-
-    const discomfortIndex = getDiscomfortIndex(temp, humidity)
-    const [ discomfortIndexColor, discomfortIndexStr ] = colorByThreshold(discomfortIndex, LEVEL_THRESHOLDS.discomfort, LEVEL_THRESHOLDS.discomfortDef)
-
-    const windSpeed = (data.current.wind_kph / 3.6).toFixed(1)
-    const windDegree = getDegreeString(data.current.wind_dir)
-    const windIcon = drawArrow(getDegString(data.current.wind_degree), null, true)
-
-    const rain = data.current.precip_mm
-    const pop = Math.ceil(Math.max(...[ hours[1].chance_of_rain, hours[1].chance_of_snow ]) / 5) * 5
+  currentDataTransform(data, hours, config) {
 
     const now = new Date()
     const h = String(now.getHours()).padStart(2, '0')
     const m = String(now.getMinutes()).padStart(2, '0')
 
-    const sunriseTime = convert12to24(forecastData[ 0 ].astro.sunrise)
-    const sunsetTime = convert12to24(forecastData[ 0 ].astro.sunset)
+    const currentData = data.current
+    const forecastData = data.forecast.forecastday
+    const dayData = forecastData.flatMap(day => day.day)
+    const astroData = forecastData.flatMap(day => day.astro)
+
+//     console.log(JSON.stringify(dayData, null, 2))
+
+    const pressure_current = currentData.pressure_mb
+    const pressure_after = hours[1].pressure_mb || pressure_current
+
+    const temp = Math.round(currentData.temp_c)
+    const tempMin = Math.round(dayData[0].mintemp_c)
+    const tempMax = Math.round(dayData[0].maxtemp_c)
+
+    const feelslike = Math.round(currentData.feelslike_c)
+
+    const humidity = currentData.humidity
+
+    const discomfortIndex = getDiscomfortIndex(temp, humidity)
+    const [ discomfortIndexColor, discomfortIndexStr ] = colorByThreshold(discomfortIndex, LEVEL_THRESHOLDS.discomfort, LEVEL_THRESHOLDS.discomfortDef)
+
+    const windSpeed = (currentData.wind_kph / 3.6).toFixed(1)
+    const windDegree = getDegreeString(currentData.wind_dir)
+    const windIcon = drawArrow(getDegString(currentData.wind_degree), null, true)
+
+    const rain = currentData.precip_mm
+
+    const pop = Math.ceil(Math.max(...[ hours[1].chance_of_rain, hours[1].chance_of_snow ]) / 5) * 5
+
+    const sunriseTime = convert12to24(astroData[0].sunrise)
+    const sunsetTime = convert12to24(astroData[0].sunset)
 
     const isDay = isTimeInRangeAcrossDay(`${h}:${m}`, sunriseTime, sunsetTime)
     const isAm = now.getHours() < 12
 
     const current = {
-      updated: data.current.last_updated,
-      isDay: data.current.is_day,
+      updated: currentData.last_updated,
+      isDay: currentData.is_day,
+
+      pressure: pressure_current,
+      pressureColor: getPressureColor(pressure_current, pressure_after),
 
       temp,
       tempMin,
@@ -950,22 +956,19 @@ module.exports = {
       tempMax,
       tempMaxColor: colorByThreshold(tempMax, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef),
 
-      feelslike: Math.round(data.current.feelslike_c),
-      feelslikeColor: colorByThreshold(temp, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef),
+      feelslike,
+      feelslikeColor: colorByThreshold(feelslike, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef),
 
-      condition: data.current.condition.text,
-      conditionIcon: makeWeatherApiIcon(data.current.condition.icon),
+      condition: currentData.condition.text,
+      conditionIcon: makeWeatherApiIcon(currentData.condition.icon),
 
       humidity,
 
       windSpeed,
       windIcon,
       windSpeedColor: colorByThreshold(windSpeed, LEVEL_THRESHOLDS.wind, LEVEL_THRESHOLDS.windDef),
-      windDir: data.current.wind_dir,
-      windDegree: getDegreeString(data.current.wind_dir),
-
-      pressure: pressure_current,
-      pressureColor: getPressureColor(pressure_current, pressure_after),
+      windDir: currentData.wind_dir,
+      windDegree: getDegreeString(currentData.wind_dir),
 
       rain: rain.toFixed(rain > 1 ? 0 : 1),
       rainColor: colorByThreshold(rain, LEVEL_THRESHOLDS.rain, LEVEL_THRESHOLDS.rainDef),
@@ -989,33 +992,17 @@ module.exports = {
       sunsetColor: isAm ? "#999999" : "",
       sunsetOpacity: isAm ? 0.7 : 1,
 
-//       cloud: data.current.cloud,
-//       gustKph: data.current.gust_kph,
-//       visibilityKm: data.current.vis_km,
-//       uv: data.current.uv,
+//       cloud: currentData.cloud,
+//       gustKph: currentData.gust_kph,
+//       visibilityKm: currentData.vis_km,
+//       uv: currentData.uv,
     }
 
     return current
   },
 
   // forecast 情報を整理
-  forecastDataTransform(data, config) {
-
-    const v = config?.values || {}
-    const defaultTextColor = v.defaultTextColor
-//     console.log(JSON.stringify(config, null, 2))
-
-    const intervalHours = v.intervalHours || 2      // 取得したい時間間隔（2時間ごと）
-    const displayCount = v.displayCount || 4        // 表示件数（large widget）
-    const nowEpoch = Math.floor(Date.now() / 1000) - (3600 * (intervalHours + 1))
-
-    const forecastData = data.forecast.forecastday  // forecastday 配列
-
-    // hour 配列から現在時間以降のデータを flatten して抽出
-    const hours = forecastData.flatMap(day => day.hour)
-      .filter(h => h.time_epoch >= nowEpoch)          // 現在時間以降
-      .filter((h, i) => i % intervalHours === 0)      // 2時間毎に間引き
-      .slice(0, displayCount + 2)                     // 表示件数に制限
+  forecastDataTransform(hours, config) {
 
     // レンダラー用 JSON に transform
     const items = hours.map((h, idx) => {
