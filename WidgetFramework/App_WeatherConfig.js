@@ -55,7 +55,7 @@ const COLORS = {
   theme: {
     textPrimary: "#d1cdda",    // メイン文字
     textSecondary: "#a8b2c7",  // サブ文字
-    divider: "#2c4a72",       // 仕切り
+    divider: "#2c4a72",        // 仕切り
 
     accent: PALETTE.blue,      // 強調
     info: PALETTE.sky,         // 情報
