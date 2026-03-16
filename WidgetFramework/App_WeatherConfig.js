@@ -27,7 +27,7 @@ const PALETTE = Object.freeze({
   blue: "#4d8dff",
   purple: "#7a4dff",
 
-  whitew: "#d1cdda",
+  white: "#ffffff",
   gray: "#7f8fa6",
   litegGray: "#acb6c5",
   darkGray: "#596980",
@@ -129,19 +129,19 @@ const COLORS = {
   },
 
   level: {
-    normal: PALETTE.green,      // 普通
-    caution: PALETTE.yellow,    // 注意
-    alert: PALETTE.orange,      // 警戒
-    danger: PALETTE.red         // 危険
+    normal: ROLE.success,       // 普通
+    caution: ROLE.caution,      // 注意
+    alert: ROLE.warning,        // 警戒
+    danger: ROLE.danger         // 危険
   },
 
   status: {
-    ok: PALETTE.green,          // 正常
-    info: PALETTE.sky,          // 情報
-    notice: PALETTE.yellow,     // 軽注意
-    warning: PALETTE.orange,    // 注意
-    danger: PALETTE.red,        // 危険
-    critical: PALETTE.red       // 最危険
+    ok: ROLE.success,           // 正常
+    info: ROLE.ROLE.info,       // 情報
+    notice: ROLE.caution,       // 軽注意
+    warning: ROLE.warning,      // 注意
+    danger: ROLE.danger,        // 危険
+    critical: ROLE.danger       // 最危険
   },
 
   extra: {
