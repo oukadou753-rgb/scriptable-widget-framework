@@ -213,17 +213,28 @@ const LEVEL_THRESHOLDS = {
 // ======================
 // Font Size
 // ======================
-const SIZE_FONTS = {
-  default: 13,
+const SIZES = {
+  text: {
+    default: 13,
+  
+    header: 14,
+    body: 13,
+    footer: 9,
+  
+    extraLarge: 24,
+    large: 20,
+    normal: 16,
+    small: 10,
 
-  header: 14,
-  body: 13,
-  footer: 9,
-
-  extraLarge: 24,
-  large: 20,
-  normal: 16,
-  small: 10
+    column: 13,
+    data: 13
+  },
+  image: {
+    extraLarge: 24,
+    large: 20,
+    normal: 16,
+    small: 10
+  }
 }
 
 // ======================
@@ -234,15 +245,14 @@ const headerBlock = [
     type: "hstack",
     size: new Size(0, 24),
     align: "center",
+    spacing: 3,
     children: [
-      { type: "image", src: "{{header_titleIcon_src}}", tint: "{{header_titleIcon_tint}}", size: 24 },
-      { type: "spacer", size: 3 },
+      { type: "image", src: "{{header_titleIcon_src}}", tint: "{{header_titleIcon_tint}}", size: SIZES.image.extraLarge },
       { type: "text", text: "{{header_titleStr}}", style: "headerText" },
       { type: "spacer" },
-{ type: "text", text: "●", style: { base: "headerText", color: "{{current_discomfortIndexColor}}" } },
+      { type: "text", text: "●", style: { base: "headerText", fontSize: SIZES.image.small, color: "{{current_discomfortIndexColor}}" } },
       { type: "text", text: "{{current_discomfortIndexStr}}", style: "headerText" },
-      { type: "spacer", size: 5 },
-      { type: "image", src: "{{status_icon}}", tint: "{{status_color}}", opacity: "{{status_opacity}}", size: 14 }
+      { type: "image", src: "{{status_icon}}", tint: "{{status_color}}", opacity: "{{status_opacity}}", size: SIZES.image.small }
     ]
   }
 ]
@@ -257,7 +267,7 @@ const locationBlock = [
     size: new Size(0, 16),
     align: "center",
     children: [
-      { type: "text", text: "{{location_name}}", style: { base: "footerText", fontSize: SIZE_FONTS.normal, bold: true, color: "{{highlightTextColor}}" } },
+      { type: "text", text: "{{location_name}}", style: { base: "footerText", fontSize: SIZES.text.normal, bold: true, color: "{{highlightTextColor}}" } },
     ]
   }
 ]
@@ -359,7 +369,7 @@ const currentDataBlock2 = [
           { type: "text", text: "不快指数：", style: "currentColumnText" },
           { type: "spacer" },
           { type: "text", text: "{{current_discomfortIndex}}", style: "currentDataText" },
-          { type: "text", text: "●", style: { base: "currentDataText", color: "{{current_discomfortIndexColor}}" } },
+          { type: "text", text: "●", style: { base: "currentDataText", fontSize: SIZES.image.small, color: "{{current_discomfortIndexColor}}" } },
         ]
       },
       {
@@ -370,7 +380,7 @@ const currentDataBlock2 = [
           { type: "text", text: "降水確率：", style: "currentColumnText" },
           { type: "spacer" },
           { type: "text", text: "{{current_pop}}％", style: "currentDataText" },
-          { type: "text", text: "●", style: { base: "currentDataText", color: "{{current_popColor}}" } }
+          { type: "text", text: "●", style: { base: "currentDataText", fontSize: SIZES.image.small, color: "{{current_popColor}}" } }
         ]
       },
       {
@@ -381,7 +391,7 @@ const currentDataBlock2 = [
           { type: "text", text: "雨　　量：", style: "currentColumnText" },
           { type: "spacer" },
           { type: "text", text: "{{current_rain}}㎜", style: "currentDataText" },
-          { type: "text", text: "●", style: { base: "currentDataText", color: "{{current_rainColor}}" } }
+          { type: "text", text: "●", style: { base: "currentDataText", fontSize: SIZES.image.small, color: "{{current_rainColor}}" } }
         ]
       }
     ]
@@ -423,7 +433,7 @@ const currentDataBlock3 = [
           { type: "text", text: "m/s", style: "currentDataText" },
           { type: "spacer", size: 10 },
           { type: "text", text: "風向き：", style: "currentColumnText" },
-          { type: "image", src: "{{current_windIcon}}", tint: "{{highlightTextColor}}", size: 24 },
+          { type: "image", src: "{{current_windIcon}}", tint: "{{highlightTextColor}}", size: SIZES.image.extraLarge },
           { type: "spacer", size: 5 },
           { type: "text", text: "{{current_windDegree}}", style: "normalText" }
         ]
@@ -489,7 +499,7 @@ const forecastDataBlock = [
               ]
             },
             { type: "hstack", justify: "end", align: "center", children: [
-                { type: "image", src: "{{windIcon}}", tint: "{{highlightTextColor}}", size: 13 },
+                { type: "image", src: "{{windIcon}}", tint: "{{highlightTextColor}}", size: SIZES.image.normal },
                 { type: "spacer", size: 3 },
                 { type: "text", text: "{{windTrend }} ", style: { base: "smallText", bold: true, color: "{{windSpeedColor}}" } },
                 { type: "text", text: "{{windSpeed}}", style: "dataText" }
@@ -517,18 +527,17 @@ const astroBlock = [
   {
     type: "hstack",
     size: new Size(0, 28),
-    spacing: 3,
+    justify: "center",
     align: "center",
+    spacing: 3,
     children: [
-      { type: "spacer" },
       { type: "image", src: "{{current_sunriseIcon}}", tint: "{{current_sunriseColor}}", size: 28, opacity: "{{current_sunriseOpacity}}" },
       { type: "text", text: "{{current_sunriseTime}}", style: { base: "extraLargeText", color: "{{current_sunriseColor}}", opacity: "{{current_sunriseOpacity}}" } },
       { type: "spacer", size: 5 },
       { type: "text", text: "{{current_moonphaseIcon}}", style: { base: "extraLargeText", shadowColor: "#d1cdda", shadowRadius: 3, shadowOffset: { x: 0, y: 0 } } },
       { type: "spacer", size: 5 },
       { type: "image", src: "{{current_sunsetIcon}}", tint: "{{current_sunsetColor}}", size: 28, opacity: "{{current_sunsetOpacity}}" },
-      { type: "text", text: "{{current_sunsetTime}}", style: { base: "extraLargeText", color: "{{current_sunsetColor}}", opacity: "{{current_sunsetOpacity}}" } },
-      { type: "spacer" }
+      { type: "text", text: "{{current_sunsetTime}}", style: { base: "extraLargeText", color: "{{current_sunsetColor}}", opacity: "{{current_sunsetOpacity}}" } }
     ]
   }
 ]
@@ -548,28 +557,28 @@ module.exports = {
       colors: COLORS,
 
       styles: {
-        defaultText: { fontSize: SIZE_FONTS.default, bold: false, color: "{{defaultTextColor}}" },
-        HighlightText: { fontSize: SIZE_FONTS.default, bold: false, color: "{{highlightTextColor}}" },
+        defaultText: { fontSize: SIZES.text.default, bold: false, color: "{{defaultTextColor}}" },
+        HighlightText: { fontSize: SIZES.text.default, bold: false, color: "{{highlightTextColor}}" },
 
-        headerText: { fontSize: SIZE_FONTS.header, bold: true, color: "{{headerTextColor}}" },
-        bodyText: { fontSize: SIZE_FONTS.body, bold: false, color: "{{bodyTextColor}}" },
-        footerText: { fontSize: SIZE_FONTS.footer, bold: false, color: "{{footerTextColor}}" },
+        headerText: { fontSize: SIZES.text.header, bold: true, color: "{{headerTextColor}}" },
+        bodyText: { fontSize: SIZES.text.body, bold: false, color: "{{bodyTextColor}}" },
+        footerText: { fontSize: SIZES.text.footer, bold: false, color: "{{footerTextColor}}" },
 
-        titleText: { fontSize: SIZE_FONTS.header, bold: true, color: "{{highlightTextColor}}" },
-        versionText: { fontSize: SIZE_FONTS.footer, bold: false, color: "{{defaultTextColor}}" },
-        updateText: { fontSize: SIZE_FONTS.footer, bold: false, color: "{{highlightTextColor}}" },
-        locationText: { fontSize: SIZE_FONTS.body, bold: true, color: "{{highlightTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        titleText: { fontSize: SIZES.text.header, bold: true, color: "{{highlightTextColor}}" },
+        versionText: { fontSize: SIZES.text.footer, bold: false, color: "{{defaultTextColor}}" },
+        updateText: { fontSize: SIZES.text.footer, bold: false, color: "{{highlightTextColor}}" },
+        locationText: { fontSize: SIZES.text.body, bold: true, color: "{{highlightTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
 
         currentColumnText: { font:"monospace", fontSize: 13, bold: true, color: "{{highlightTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
         currentDataText: { font:"monospace", fontSize: 13, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
 
-        columnText: { font:"monospace", fontSize: 11, bold: true, color: "{{highlightTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
-        dataText: { font:"monospace", fontSize: 11, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        columnText: { font:"monospace", fontSize: SIZES.text.column, bold: true, color: "{{highlightTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        dataText: { font:"monospace", fontSize: SIZES.text.data, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
 
-        extraLargeText: { font:"monospace", fontSize: SIZE_FONTS.extraLarge, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
-        largeText: { font:"monospace", fontSize: SIZE_FONTS.large, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
-        normalText: { font:"monospace", fontSize: SIZE_FONTS.normal, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
-        smallText: { font:"monospace", fontSize: SIZE_FONTS.small, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8}
+        extraLargeText: { font:"monospace", fontSize: SIZES.text.extraLarge, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        largeText: { font:"monospace", fontSize: SIZES.text.large, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        normalText: { font:"monospace", fontSize: SIZES.text.normal, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8},
+        smallText: { font:"monospace", fontSize: SIZES.text.small, bold: true, color: "{{defaultTextColor}}", lineLimit: 1, minimumScaleFactor: 0.8}
       },
 
       defaultOpenSections: ["General", "Style"],
