@@ -137,7 +137,7 @@ const COLORS = {
 
   status: {
     ok: ROLE.success,           // 正常
-    info: ROLE.ROLE.info,       // 情報
+    info: ROLE.info,            // 情報
     notice: ROLE.caution,       // 軽注意
     warning: ROLE.warning,      // 注意
     danger: ROLE.danger,        // 危険
