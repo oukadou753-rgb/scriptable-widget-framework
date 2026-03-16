@@ -45,24 +45,17 @@ module.exports = class WF_AppCore {
 
   async start() {
 /*
-    const lastCheck = this.storage.readJSON("fw_update_check")
+    // Framework update check
+    const update = await this.checkFrameworkUpdate()
 
-    if (!lastCheck || Date.now() - lastCheck > 86400000) {
-  
-      // Framework update check
-      const update = await this.checkFrameworkUpdate()
+    if (update?.update) {
 
-      if (update?.update) {
+      console.log(
+        "Framework Update Available\n" +
+        "Local: " + update.local + "\n" +
+        "Remote: " + update.remote
+      )
 
-        console.log(
-          "Framework Update Available\n" +
-          "Local: " + update.local + "\n" +
-          "Remote: " + update.remote
-        )
-
-      }
-
-      this.storage.writeJSON("fw_update_check", Date.now())
     }
 */
     this.setupMenus()
