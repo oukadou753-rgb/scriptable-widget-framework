@@ -104,7 +104,7 @@ module.exports = class WF_AppCore {
       [
         { label: "Small", action: () => this.preview("small") },
         { label: "Medium", action: () => this.preview("medium") },
-        { label: "Large", action: () => this.preview("large") },
+        { label: "Large", action: () => this.preview("large"), return "exit" },
         { label: "ExtraLarge", action: () => this.preview("extraLarge") }
       ],
       { title: "Preview" }
