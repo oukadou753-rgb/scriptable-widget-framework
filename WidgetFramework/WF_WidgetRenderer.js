@@ -199,10 +199,6 @@ module.exports = class WF_WidgetRenderer {
     // shorthand
     // -------------------------
 
-    if (typeof el === "number") {
-      el = { type:"spacer", size: el }
-    }
-
     // "text"
     if (typeof el === "string") {
       el = { type: "text", text: el }
@@ -210,7 +206,10 @@ module.exports = class WF_WidgetRenderer {
 
     // spacer shorthand
     if (typeof el === "object" && el.spacer !== undefined) {
-      el = { type:"spacer", size: el.spacer }
+      el = {
+        type: "spacer",
+        size: el.spacer === true ? undefined : el.spacer
+      }
     }
 
     // object shorthand
