@@ -199,6 +199,10 @@ module.exports = class WF_WidgetRenderer {
     // shorthand
     // -------------------------
 
+    if (typeof el === "number") {
+      el = { type:"spacer", size: el }
+    }
+
     // "text"
     if (typeof el === "string") {
       el = { type: "text", text: el }
