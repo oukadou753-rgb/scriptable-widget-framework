@@ -204,11 +204,21 @@ module.exports = class WF_WidgetRenderer {
       el = { type: "text", text: el }
     }
 
-    // { text:"abc" }
+    // spacer shorthand
+    if (typeof el === "object" && el.spacer !== undefined) {
+      el = { type:"spacer", size: el.spacer }
+    }
+
+    // object shorthand
     if (typeof el === "object" && !el.type) {
 
       if (el.text !== undefined) {
         el.type = "text"
+      }
+
+      else if (el.image !== undefined) {
+        el.type = "image"
+        el.src = el.image
       }
 
       else if (el.h) {
@@ -220,8 +230,10 @@ module.exports = class WF_WidgetRenderer {
         el.type = "vstack"
         el.children = el.v
       }
-
     }
+
+    // style shorthand
+    if (el.s && !el.style) el.style = el.s
 
     if (!el.type) return
 
