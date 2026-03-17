@@ -119,6 +119,9 @@ module.exports = class WF_WidgetRenderer {
       // show判定
       if (block.show !== undefined && !this.evaluate(block.show, context)) continue
 
+      // hidden判定
+      if (block.hidden !== undefined && this.evaluate(block.hidden, context)) continue
+
       // =========================
       // repeat対応
       // =========================
@@ -242,6 +245,9 @@ module.exports = class WF_WidgetRenderer {
 
     // show
     if (el.show !== undefined && !this.evaluate(el.show, context)) return
+
+    // hidden
+    if (el.hidden !== undefined && this.evaluate(el.hidden, context)) return
 
     // children 内 repeat でも描画される
     if (el.type === "repeat") {
