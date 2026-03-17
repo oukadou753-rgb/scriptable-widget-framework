@@ -74,8 +74,7 @@ const Main = {
           WF_WidgetRenderer,
           WF_ProfileEngine,
           WF_DataProvider,
-          WF_CoreBase,
-          WF_WidgetCore
+          WF_CoreBase
         }
 
         const widgetCore = new WF_WidgetCore(APP_INFO, APP_CONFIG, MODULE_CACHE)
@@ -98,8 +97,7 @@ const Main = {
           WF_ProfileEngine,
           WF_ConfigUI,
           WF_DataProvider,
-          WF_CoreBase,
-          WF_AppCore
+          WF_CoreBase
         }
 
         const appCore = new WF_AppCore(APP_INFO, APP_CONFIG, MODULE_CACHE)
