@@ -124,7 +124,7 @@ module.exports = class WF_NotificationManager {
     const n = new Notification()
 
     n.title = payload.title || ""
-    n.subTitle = payload.subTitle || ""
+    n.subtitle = payload.subtitle || ""
     n.body = payload.body || ""
 
     if (payload.sound !== undefined) {
