@@ -20,6 +20,7 @@ module.exports = class WF_WidgetCore {
       WF_WidgetRenderer,
       WF_ProfileEngine,
       WF_DataProvider,
+      WF_NotificationManager,
       WF_CoreBase
     } = moduleCache
 
@@ -33,6 +34,7 @@ module.exports = class WF_WidgetCore {
     this.appConfig = appConfig
     this.defaultConfig = appConfig.getDefaultConfig()
     this.profile = new WF_ProfileEngine(this.storage, this.defaultConfig)
+    this.notification = new WF_NotificationManager(this.appId, this.storage)
 
     const core = new WF_CoreBase(appInfo, appConfig, moduleCache)
     WF_CoreBase.mixinCore(this, core)
