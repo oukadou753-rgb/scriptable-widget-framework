@@ -13,14 +13,14 @@ storageType = "local"
 // "local"
 // "bookmark"
 
-const loadMain = false
+const loadMain = true
 
-const useDiff = false
+const useDiff = true
 const useTarget = true
 const targetFiles = [
 //   "Main.js",
 //   "Tools/DevLoader.js",
-  "WidgetFramework/App_WeatherConfig.js",
+//   "WidgetFramework/App_WeatherConfig.js",
 //   "WidgetFramework/WF_AppCore.js",
 //   "WidgetFramework/WF_ConfigUI.js",
 //   "WidgetFramework/WF_CoreBase.js",
@@ -28,11 +28,12 @@ const targetFiles = [
 //   "WidgetFramework/WF_MenuEngine.js",
 //   "WidgetFramework/WF_ProfileEngine.js",
 //   "WidgetFramework/WF_StorageEngine.js",
+//   "WidgetFramework/WF_NotificationManager.js",
 //   "WidgetFramework/WF_WidgetCore.js",
 //   "WidgetFramework/WF_WidgetRenderer.js"
 ]
 const targetFolders = [
-//   "WidgetFramework",
+  "WidgetFramework",
 //   "Tools"
 ]
 
@@ -79,7 +80,10 @@ async function devLoader({
 
   // --- SHA 管理用 ---
   const githubDir = fm.joinPath(baseDir, "WidgetFramework")
+  if (!fm.fileExists(githubDir)) fm.createDirectory(githubDir)
+
   const shaFilePath = fm.joinPath(githubDir, "github_sha.json")
+
   let localSHA = {}
   if (fm.fileExists(shaFilePath)) {
     try { localSHA = JSON.parse(fm.readString(shaFilePath)) } catch(e) { localSHA = {} }
@@ -192,7 +196,8 @@ async function devLoader({
   // --- Main 実行 ---
   if (loadMain) {
     const Main = importModule("Main")
-    await Main.start(storageType)
+    Main.setAppInfo("storageType", storageType)
+    await Main.start()
   }
 }
 
