@@ -201,7 +201,14 @@ module.exports = class WF_CoreBase {
 
   async handleNotificationTap() {
 
+    console.log("=== TAP CHECK ===")
+
     const notif = args.notification
+
+    console.log("args: " + args)
+    console.log("notification: " + notif)
+
+    // const notif = args.notification
     if (!notif) return false
 
     const info = notif.userInfo || {}
