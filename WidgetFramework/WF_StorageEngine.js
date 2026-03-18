@@ -40,7 +40,7 @@ module.exports = class WF_StorageEngine {
     }
 
     // ルート（WF_Data固定）
-    const root = this.fm.joinPath(this.baseDir, "WF_Data")
+    this.root = this.fm.joinPath(this.baseDir, "WF_Data")
 
     // app単位ディレクトリ
     this.appRoot = this.fm.joinPath(this.root, this.appId)
