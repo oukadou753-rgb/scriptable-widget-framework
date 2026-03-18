@@ -56,7 +56,12 @@ module.exports = class WF_NotificationManager {
   async schedule(id, date, payload) {
     const n = this._createNotification(payload)
     n.identifier = id
-    n.triggerDate = date
+    
+    if (typeof n.setTriggerDate === "function") {
+      n.setTriggerDate(date)
+    } else {
+      n.triggerDate = date
+    }
 
     await n.schedule()
 
@@ -75,8 +80,8 @@ module.exports = class WF_NotificationManager {
    * 通知削除（予約含む）
    */
   async remove(id) {
-    Notification.removePendingNotificationRequests([id])
-    Notification.removeDeliveredNotifications([id])
+    await Notification.removePending([id])
+    await Notification.removeDelivered([id])
 
     delete this.history[id]
     this._save()
