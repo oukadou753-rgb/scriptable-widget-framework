@@ -202,23 +202,30 @@ module.exports = class WF_CoreBase {
   async handleNotificationTap() {
 
     const notif = args.notification
-    if (!notif) return false
+    const query = args.queryParameters
 
-    const info = notif.userInfo || {}
+    // 通常起動
+    if (!notif && !query) return false
 
-    console.log("Notification tapped: " + info)
+    // 統合
+    const info = {
+      ...(notif?.userInfo || {}),
+      ...(query || {})
+    }
+
+    console.log("Notification tapped: " + JSON.stringify(info))
 
     // =========================
     // 共通処理
     // =========================
 
-    // URL優先
+    // URL
     if (info.url) {
       Safari.open(info.url)
       return true
     }
 
-    // アプリ側にフック渡す
+    // アプリ側フック
     if (this.appConfig.onNotificationTap) {
       return await this.appConfig.onNotificationTap(info, this)
     }
