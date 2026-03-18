@@ -36,9 +36,7 @@ module.exports = class WF_CoreBase {
 
   async preview(size) {
 
-    const context = await this.buildContext({ size })
-
-    const widget = await this.renderer.render(context)
+    const widget = await this.run({ size })
 
     if (size === "small") await widget.presentSmall()
     else if (size === "medium") await widget.presentMedium()
