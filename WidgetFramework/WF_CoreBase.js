@@ -138,23 +138,61 @@ module.exports = class WF_CoreBase {
     return null
   }
 
-  async handleNotifications(ctx) {
+  async handleNotifications(data) {
 
     if (!this.notification) return
 
-    const list = ctx.data?.notifications
-    if (!Array.isArray(list)) return
+    const list = data?.notifications
+    if (!Array.isArray(list) || list.length === 0) return
 
     for (const n of list) {
-      if (n.when) {
-        await this.notification.notifyOnce(
-          n.id,
-          n,
-          n.cooldown
-        )
-      }
-      if (n.scheduleAt) {
-        await this.notification.schedule(n.id, new Date(n.scheduleAt), n)
+
+      try {
+
+        // =========================
+        // ① 予約通知
+        // =========================
+        if (n.scheduleAt) {
+
+          await this.notification.schedule(
+            n.id,
+            new Date(n.scheduleAt),
+            n
+          )
+
+          continue
+        }
+
+        // =========================
+        // ② ディレイ通知（即時を安定させる）
+        // =========================
+        if (n.delay) {
+
+          await this.notification.schedule(
+            n.id,
+            new Date(Date.now() + n.delay),
+            n
+          )
+
+          continue
+        }
+
+        // =========================
+        // ③ 条件通知（notifyOnce）
+        // =========================
+        if (n.when) {
+
+          await this.notification.notifyOnce(
+            n.id,
+            n,
+            n.cooldown
+          )
+
+          continue
+        }
+
+      } catch (e) {
+        console.log("Notification error:", e)
       }
     }
   }
