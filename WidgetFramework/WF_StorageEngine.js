@@ -14,26 +14,6 @@ module.exports = class WF_StorageEngine {
 
     // FileManager切替
     this.initStorage()
-
-    // ルート（WF_Data固定）
-    this.root = this.fm.joinPath(
-      this.baseDir,
-      "WF_Data"
-    )
-
-    // app単位ディレクトリ
-    this.appRoot = this.fm.joinPath(this.root, this.appId)
-
-    // サブディレクトリ
-    this.cacheRoot = this.fm.joinPath(this.appRoot, "cache")
-    this.profileRoot = this.fm.joinPath(this.appRoot, "profiles")
-    this.snapshotRoot = this.fm.joinPath(this.appRoot, "snapshots")
-
-    // システムファイル
-    this.activeFile = this.fm.joinPath(this.appRoot, "active.txt")
-    this.profilesFile = this.fm.joinPath(this.appRoot, "profiles.json")
-
-    this._ensureDirs()
   }
 
   // =========================
@@ -58,8 +38,25 @@ module.exports = class WF_StorageEngine {
         this.baseDir = this.fm.documentsDirectory()
 
     }
-  }
 
+    // ルート（WF_Data固定）
+    const root = this.fm.joinPath(this.baseDir, "WF_Data")
+
+    // app単位ディレクトリ
+    this.appRoot = this.fm.joinPath(this.root, this.appId)
+
+    // サブディレクトリ
+    this.cacheRoot = this.fm.joinPath(this.appRoot, "cache")
+    this.profileRoot = this.fm.joinPath(this.appRoot, "profiles")
+    this.snapshotRoot = this.fm.joinPath(this.appRoot, "snapshots")
+
+    // システムファイル
+    this.activeFile = this.fm.joinPath(this.appRoot, "active.txt")
+    this.profilesFile = this.fm.joinPath(this.appRoot, "profiles.json")
+
+    this._ensureDirs()
+  }
+  
   // =========================
   // 初期ディレクトリ生成（完全修正版）
   // =========================
