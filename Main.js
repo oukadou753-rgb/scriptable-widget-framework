@@ -5,19 +5,28 @@
  * Main
  * UTF-8 日本語コメント
  **/
-const DEFAULT_APP_ID = "Weather"
-const DEFAULT_STRAGE_TYPE = "local" // "icloud", "local", "bookmark"
-
 const APP_DEV_MODE = true
+
+const DEFAULT_APP_ID = "Weather"
+
 const APP_ID = args.widgetParameter || DEFAULT_APP_ID
 const APP_VERSION = "1.0.0"
 
+const DEFAULT_STRAGE_TYPE = "local" // "icloud", "local", "bookmark"
+const WF_MODULE_DIR = "WidgetFramework/"
+const WF_REPO = "oukadou753-rgb/scriptable-widget-framework"
+
 const APP_INFO = {
   debug: APP_DEV_MODE,
+
   id: APP_ID,
   version: APP_VERSION,
+
   storageType: DEFAULT_STRAGE_TYPE,
-  frameworkRepo: "oukadou753-rgb/scriptable-widget-framework"
+  moduleDir: WF_MODULE_DIR,
+  moduleCache: {},
+
+  frameworkRepo: WF_REPO
 }
 
 const ModuleLoader = importModule("ModuleLoader")
@@ -30,17 +39,20 @@ const Main = {
   // =========================
   // loadAppConfig
   // =========================
-  loadAppConfig(appId, moduleLoader) {
+  loadAppConfig(appInfo) {
+
+    const appId = appInfo.id
+    const moduleDir = appInfo.moduleDir
+    const moduleLoader = appInfo.moduleLoader
 
     try {
 
-      if (APP_DEV_MODE) return importModule(`App_${appId}Config`)
-      return moduleLoader.load(`WidgetFramework/App_${DEFAULT_APP_ID}Config`)
+      return importModule(`App_${appId}Config`)
 
     } catch (e) {
 
       console.error(`App config not found: ${appId}`)
-      return moduleLoader.load(`WidgetFramework/App_${DEFAULT_APP_ID}Config`)
+      return moduleLoader.load(`${moduleDir}App_${appId}Config`)
 
     }
   },
@@ -48,25 +60,31 @@ const Main = {
   // =========================
   // start
   // =========================
-  async start(storageType) {
+  async start(appInfo = APP_INFO) {
 
-    APP_INFO.storageType = storageType
+    const appId = appInfo.id
+    const storageType = appInfo.storageType
+    const moduleDir = appInfo.moduleDir
+
     const moduleLoader = new ModuleLoader(storageType)
-    const APP_CONFIG = Main.loadAppConfig(APP_ID, moduleLoader)
+    appInfo.moduleLoader = moduleLoader
+
+    const appConfig = Main.loadAppConfig(appInfo)
 
     try {
 
-      const WF_StorageEngine = moduleLoader.load("WidgetFramework/WF_StorageEngine")
-      const WF_WidgetRenderer = moduleLoader.load("WidgetFramework/WF_WidgetRenderer")
-      const WF_ProfileEngine = moduleLoader.load("WidgetFramework/WF_ProfileEngine")
-      const WF_DataProvider = moduleLoader.load("WidgetFramework/WF_DataProvider")
-      const WF_CoreBase = moduleLoader.load("WidgetFramework/WF_CoreBase")
+      const WF_StorageEngine = moduleLoader.load(`${moduleDir}WF_StorageEngine`)
+      const WF_WidgetRenderer = moduleLoader.load(`${moduleDir}WF_WidgetRenderer`)
+      const WF_ProfileEngine = moduleLoader.load(`${moduleDir}WF_ProfileEngine`)
+      const WF_DataProvider = moduleLoader.load(`${moduleDir}WF_DataProvider`)
+      const WF_NotificationManager = moduleLoader.load(`${moduleDir}WF_NotificationManager`)
+      const WF_CoreBase = moduleLoader.load(`${moduleDir}WF_CoreBase`)
 
       if (config.runsInWidget && !config.runsInApp) {
 
-        const WF_WidgetCore = moduleLoader.load("WidgetFramework/WF_WidgetCore")
+        const WF_WidgetCore = moduleLoader.load(`${moduleDir}WF_WidgetCore`)
 
-        const MODULE_CACHE = {
+        appInfo.moduleCache = {
           ModuleLoader,
           moduleLoader,
 
@@ -74,20 +92,21 @@ const Main = {
           WF_WidgetRenderer,
           WF_ProfileEngine,
           WF_DataProvider,
+          WF_NotificationManager,
           WF_CoreBase
         }
 
-        const widgetCore = new WF_WidgetCore(APP_INFO, APP_CONFIG, MODULE_CACHE)
+        const widgetCore = new WF_WidgetCore(appInfo, appConfig, appInfo.moduleCache)
         await widgetCore.start();
 
       } else {
 
-        const WF_MenuEngine = moduleLoader.load("WidgetFramework/WF_MenuEngine")
-        const WF_ConfigUI = moduleLoader.load("WidgetFramework/WF_ConfigUI")
+        const WF_MenuEngine = moduleLoader.load(`${moduleDir}WF_MenuEngine`)
+        const WF_ConfigUI = moduleLoader.load(`${moduleDir}WF_ConfigUI`)
 
-        const WF_AppCore = moduleLoader.load("WidgetFramework/WF_AppCore")
+        const WF_AppCore = moduleLoader.load(`${moduleDir}WF_AppCore`)
 
-        const MODULE_CACHE = {
+        appInfo.moduleCache = {
           ModuleLoader,
           moduleLoader,
 
@@ -97,10 +116,11 @@ const Main = {
           WF_ProfileEngine,
           WF_ConfigUI,
           WF_DataProvider,
+          WF_NotificationManager,
           WF_CoreBase
         }
 
-        const appCore = new WF_AppCore(APP_INFO, APP_CONFIG, MODULE_CACHE)
+        const appCore = new WF_AppCore(appInfo, appConfig, appInfo.moduleCache)
         await appCore.start()
 
       }
@@ -115,6 +135,15 @@ const Main = {
       Script.complete()
 
     }
+  },
+
+  // =========================
+  // setAppInfo
+  // =========================
+  setAppInfo(key, values) {
+
+    APP_INFO[key] = values
+
   },
 
   // =========================
@@ -162,7 +191,9 @@ module.exports = Main
 const module_name = module.filename.match(/[^\/]+$/ )[ 0 ].replace('.js', '');
 if (module_name == Script.name()) {
   (async() => {
-    console.log("USING: " + DEFAULT_STRAGE_TYPE)
-    await Main.start(DEFAULT_STRAGE_TYPE)
+    const appInfo = APP_INFO
+    
+    console.log("USING: " + appInfo.storageType)
+    await Main.start(appInfo)
   })()
 }
