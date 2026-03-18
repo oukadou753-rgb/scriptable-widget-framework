@@ -139,7 +139,20 @@ module.exports = class WF_CoreBase {
   }
 
   async handleNotifications(ctx) {
-    // App / Widgetでオーバーライド
+
+    if (!this.notification) return
+
+    const list = ctx.data?.notifications
+    if (!Array.isArray(list)) return
+
+    for (const n of list) {
+      if (n.when) {
+        await this.notification.notifyOnce(n.id, n)
+      }
+      if (n.scheduleAt) {
+        await this.notification.schedule(n.id, new Date(n.scheduleAt), n)
+      }
+    }
   }
 
 }
