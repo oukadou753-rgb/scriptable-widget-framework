@@ -66,6 +66,7 @@ module.exports = class WF_NotificationManager {
     await n.schedule()
 
     this.history[id] = {
+      lastSent: Date.now(),
       fireAt: date.getTime(),
       status: "pending",
       title: payload.title,
