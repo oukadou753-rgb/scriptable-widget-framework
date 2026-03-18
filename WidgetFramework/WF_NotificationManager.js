@@ -5,9 +5,6 @@
  * WF_NotificationManager
  * UTF-8 日本語コメント
  **/
-// WF_NotificationManager.js
-// シンプル & 拡張前提テンプレ
-
 module.exports = class WF_NotificationManager {
 
   constructor(appId, storage) {
@@ -24,26 +21,23 @@ module.exports = class WF_NotificationManager {
 
   /**
    * 一度だけ通知（重複防止）
+   * payload.cooldown により再通知を抑制
    */
-   async notifyOnce(id, payload, cooldown = 300000) {
+  async notifyOnce(payload) {
+    const id = payload.id
+    if (!id) throw new Error("notifyOnce: payload.id is required")
 
     const last = this.history[id]?.lastSent
+    const cooldown = payload.cooldown ?? 300_000 // デフォルト5分
 
     if (last && Date.now() - last < cooldown) return false
 
     await this._send(payload)
-
-    this.history[id] = {
-      lastSent: Date.now(),
-      status: "sent"
-    }
-
-    this._save()
     return true
   }
 
   /**
-   * 通常通知（制限なし）
+   * 即時通知（重複なし制限なし）
    */
   async notify(payload) {
     await this._send(payload)
@@ -53,27 +47,33 @@ module.exports = class WF_NotificationManager {
   /**
    * 予約通知
    */
-  async schedule(id, date, payload) {
+  async schedule(payload) {
+    const id = payload.id
+    if (!id) throw new Error("schedule: payload.id is required")
+    if (!payload.date || !(payload.date instanceof Date)) throw new Error("schedule: payload.date must be Date")
+
     const n = this._createNotification(payload)
     n.identifier = id
-    
+
+    // Scriptable 1.7.19 互換
     if (typeof n.setTriggerDate === "function") {
-      n.setTriggerDate(date)
+      n.setTriggerDate(payload.date)
     } else {
-      n.triggerDate = date
+      n.triggerDate = payload.date
     }
 
     await n.schedule()
 
+    // history に記録（送信前の予約）
     this.history[id] = {
-      lastSent: Date.now(),
-      fireAt: date.getTime(),
+      lastSent: this.history[id]?.lastSent || null, // 即時通知用の lastSent を保持
       status: "pending",
-      title: payload.title,
-      subtitle: payload.subtitle,
-      body: payload.body
+      fireAt: payload.date.getTime(),
+      title: payload.title || "",
+      subtitle: payload.subtitle || "",
+      body: payload.body || "",
+      meta: payload.meta || {}
     }
-
     this._save()
     return true
   }
@@ -90,7 +90,7 @@ module.exports = class WF_NotificationManager {
   }
 
   /**
-   * 全削除
+   * 全通知削除
    */
   async clearAll() {
     const ids = Object.keys(this.history)
@@ -113,13 +113,23 @@ module.exports = class WF_NotificationManager {
   // Private
   // =========================
 
-  _isNotified(id) {
-    return !!this.history[id]?.lastSent
-  }
-
   async _send(payload) {
+    const id = payload.id
+    if (!id) throw new Error("_send: payload.id required")
+
     const n = this._createNotification(payload)
     await n.schedule()
+
+    // 送信後に lastSent を更新
+    if (!this.history[id]) this.history[id] = {}
+    this.history[id].lastSent = Date.now()
+    this.history[id].status = "sent"
+    this.history[id].title = payload.title || ""
+    this.history[id].subtitle = payload.subtitle || ""
+    this.history[id].body = payload.body || ""
+    this.history[id].meta = payload.meta || {}
+
+    this._save()
   }
 
   _createNotification(payload) {
@@ -129,25 +139,19 @@ module.exports = class WF_NotificationManager {
     n.subtitle = payload.subtitle || ""
     n.body = payload.body || ""
 
-    if (payload.sound !== undefined) {
-      n.sound = payload.sound
-    }
+    if (payload.sound !== undefined) n.sound = payload.sound
 
-    // Scriptable起動URL（固定）
-    // URLSearchParams を使わずに手動で組み立て
-    function toQuery(obj) {
-      return Object.entries(obj)
-        .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
-        .join("&")
-    }
+    // Scriptable 起動 URL
+    const params = payload.meta?.params || {}
+    params.id = payload.id
+    const query = Object.entries(params)
+      .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
+      .join("&")
+    n.openURL = payload.meta?.url
+      ? payload.meta.url
+      : `scriptable:///run?scriptName=${encodeURIComponent(Script.name())}&${query}`
 
-    // payload例
-    // payload = { id: "rain_alert", meta: { url: "https://example.com" } }
-
-    const paramsStr = toQuery({ id: payload.id })
-    n.openURL = `scriptable:///run?scriptName=${encodeURIComponent(Script.name())}&${paramsStr}`
-
-    // userInfo
+    // userInfo に payload.meta をそのまま渡す
     n.userInfo = {
       id: payload.id,
       ...payload.meta
