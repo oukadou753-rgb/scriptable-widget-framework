@@ -15,7 +15,7 @@ module.exports = class WF_NotificationManager {
     this.storage = storage
 
     this.key = "wf_notifications"
-    this.history = this.storage.readJSON(this.key) || {}
+    this.history = this._load()
   }
 
   // =========================
@@ -25,8 +25,11 @@ module.exports = class WF_NotificationManager {
   /**
    * 一度だけ通知（重複防止）
    */
-  async notifyOnce(id, payload) {
-    if (this._isNotified(id)) return false
+  async notifyOnce(id, payload, cooldown = 300000) {
+
+    const last = this.history[id]?.lastSent
+
+    if (last && Date.now() - last < cooldown) return false
 
     await this._send(payload)
 
@@ -53,7 +56,7 @@ module.exports = class WF_NotificationManager {
   async schedule(id, date, payload) {
     const n = this._createNotification(payload)
     n.identifier = id
-    n.setTriggerDate(date)
+    n.triggerDate = date
 
     await n.schedule()
 
@@ -72,8 +75,8 @@ module.exports = class WF_NotificationManager {
    * 通知削除（予約含む）
    */
   async remove(id) {
-    await Notification.removePending([id])
-    await Notification.removeDelivered([id])
+    Notification.removePendingNotificationRequests([id])
+    Notification.removeDeliveredNotifications([id])
 
     delete this.history[id]
     this._save()
@@ -126,14 +129,10 @@ module.exports = class WF_NotificationManager {
   }
 
   _load() {
-    try {
-      return this.storage.get(this.key) || {}
-    } catch {
-      return {}
-    }
+    return this.storage.readJSON(this.key) || {}
   }
 
   _save() {
-    this.storage.set(this.key, this.history)
+    this.storage.writeJSON(this.key, this.history)
   }
 }
