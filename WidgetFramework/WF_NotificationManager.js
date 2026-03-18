@@ -132,6 +132,27 @@ module.exports = class WF_NotificationManager {
       n.sound = payload.sound
     }
 
+// Scriptable起動URL（固定）
+// URLSearchParams を使わずに手動で組み立て
+function toQuery(obj) {
+  return Object.entries(obj)
+    .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
+    .join("&")
+}
+
+// payload例
+// payload = { id: "rain_alert", meta: { url: "https://example.com" } }
+
+const paramsStr = toQuery({ id: payload.id })
+n.openURL = `scriptable:///run?scriptName=${encodeURIComponent(Script.name())}&${paramsStr}`
+
+// userInfo
+n.userInfo = {
+  id: payload.id,
+  ...payload.meta
+}
+
+/*
     // Scriptable起動URL（固定）
     const params = new URLSearchParams({
       id: payload.id
@@ -146,7 +167,7 @@ module.exports = class WF_NotificationManager {
       id: payload.id,
       ...payload.meta
     }
-
+*/
     return n
   }
 
