@@ -349,8 +349,8 @@ const headerBlock = [
     },
     { spacing:3, show: "{{ui_isMediumUp}}",
       h: [
-        textHelper(TEXT_ICON.mark, { base: "mediumText", color: "{{current_discomfortIndexColor}}" }),
-        textHelper("{{current_discomfortIndexStr}}", "largeText"),
+        textHelper(TEXT_ICON.mark, { base: "smallText", color: "{{current_discomfortIndexColor}}" }),
+        textHelper("{{current_discomfortIndexStr}}", "mediumText"),
         imageHelper("{{status_icon}}", SIZES.image.medium, "{{status_color}}", "{{status_opacity}}")
       ]
     }
@@ -391,7 +391,7 @@ const updateBlock = [
 // ======================
 // currentDataBlockSmall
 const currentDataBlockSmall = [
-  { size: new Size(120, 0), show: "{{ui_isSmall}}",
+  { size: new Size(0, 0), show: "{{ui_isSmall}}",
     v: [
       { size: new Size(0, 30), padding: pos(0, 5, 0, 0), justify: "center",
         h: [
@@ -411,8 +411,8 @@ const currentDataBlockSmall = [
         h: [
           { size: new Size(0, 0), justify: "start",
             v: [
-              textHelper("不快指数：", "columnSmallText"),
-              textHelper("降水確率：", "columnSmallText")
+              textHelper("不快指数", "columnSmallText"),
+              textHelper("降水確立", "columnSmallText")
             ]
           },
           {
@@ -527,6 +527,7 @@ const forecastDataBlock = [
         direction: "horizontal",
         spacing: 2,
         align: "center",
+        limit: "{{limit}}",
         template: {
           size: new Size(53, 0),
           v: [
@@ -809,6 +810,25 @@ module.exports = {
 
     const v = config?.values || {}
 
+    const levelMap = {
+      small: 1,
+      medium: 2,
+      large: 3,
+      extraLarge: 4
+    }
+
+    const level = levelMap[config.size] ?? 2
+
+    const isShow = true
+    const ui = {
+      isSmall: level === 1,
+      isMediumUp: level >= 2,
+      isLargeUp: level >= 3,
+    
+      showForecast: level >= 2 && isShow,
+      showDetail: level >= 3
+    }
+
     if (v.useTestData) return this.testDataTransform(data, config)
 
     // 表示件数に制限された2時間毎のforecastday配列
@@ -831,7 +851,7 @@ module.exports = {
     // 共通データ返却（統一フォーマット）
     return {
       items,
-      ...flatObj(meta)
+      ...flatObj({ ...meta, ui: ui })
     }
   },
 
@@ -841,25 +861,6 @@ module.exports = {
     const v = config?.values || {}
 
     const debug = false
-
-    const levelMap = {
-      small: 1,
-      medium: 2,
-      large: 3,
-      extraLarge: 4
-    }
-
-    const level = levelMap[config.size] ?? 2
-
-    const isShow = true
-    const ui = {
-      isSmall: level === 1,
-      isMediumUp: level >= 2,
-      isLargeUp: level >= 3,
-    
-      showForecast: level >= 2 && isShow,
-      showDetail: level >= 3
-    }
 
     // Online判定
     const online = v.isOnline ?? false
@@ -899,7 +900,6 @@ module.exports = {
         updateStr
       },
       debug,
-      ui,
       status,
       current,
       location: {
