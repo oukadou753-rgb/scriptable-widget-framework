@@ -194,9 +194,36 @@ module.exports = class WF_CoreBase {
         }
 
       } catch (e) {
-        console.log("Notification error:", e)
+        console.log("Notification error: " + e)
       }
     }
+  }
+
+  async handleNotificationTap() {
+
+    const notif = args.notification
+    if (!notif) return false
+
+    const info = notif.userInfo || {}
+
+    console.log("Notification tapped: " + info)
+
+    // =========================
+    // 共通処理
+    // =========================
+
+    // URL優先
+    if (info.url) {
+      Safari.open(info.url)
+      return true
+    }
+
+    // アプリ側にフック渡す
+    if (this.appConfig.onNotificationTap) {
+      return await this.appConfig.onNotificationTap(info, this)
+    }
+
+    return false
   }
 
 }
