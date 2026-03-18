@@ -10,7 +10,7 @@ module.exports = class WF_StorageEngine {
   constructor(appId, storageType) {
 
     this.appId = appId
-    this.storageType = storageType || "local"
+    this.storageType = storageType
 
     // FileManager切替
     switch (storageType) {
