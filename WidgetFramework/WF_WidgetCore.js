@@ -55,6 +55,8 @@ module.exports = class WF_WidgetCore {
 
     }
 */
+    if (await handleNotificationTap()) return
+
     if (config.runsInWidget && !config.runsInApp) {
       const widget = await this.run()
       Script.setWidget(widget)
