@@ -18,11 +18,20 @@ module.exports = class WF_CoreBase {
       WF_DataProvider,
     } = moduleCache
 
-    this.appId = appId || Script.name()
-    this.storageType = appInfo.storageType || "local"
+    this.appId = appId
+    this.storageType = appInfo.storageType
     this.frameworkRepo = appInfo.frameworkRepo
 
     this.WF_DataProvider = WF_DataProvider
+  }
+
+  async run({ size = null } = {}) {
+
+    const context = await this.buildContext({ size })
+
+    await this.handleNotifications(context)
+
+    return await this.renderer.render(context)
   }
 
   async preview(size) {
