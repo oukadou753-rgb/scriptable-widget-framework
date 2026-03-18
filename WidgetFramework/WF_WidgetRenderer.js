@@ -321,7 +321,7 @@ module.exports = class WF_WidgetRenderer {
     const stack = container.addStack()
 
     // background color
-    const bg = resolveProp(el, "backgroundColor")
+    const bg = this.resolveProp(el, "backgroundColor")
 
     if (bg !== undefined) {
       const color = this.resolveColor(this.bind(bg, context), context)
@@ -779,7 +779,7 @@ module.exports = class WF_WidgetRenderer {
   // =========================
   resolveStyleProp(el, style, key) {
     if (style && style[key] !== undefined) return style[key]
-    return resolveProp(el, key)
+    return this.resolveProp(el, key)
   }
 
   // =========================
