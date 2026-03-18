@@ -69,6 +69,7 @@ module.exports = class WF_NotificationManager {
       fireAt: date.getTime(),
       status: "pending",
       title: payload.title,
+      subtitle: payload.subtitle,
       body: payload.body
     }
 
