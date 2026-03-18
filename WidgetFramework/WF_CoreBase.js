@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
-// icon-color: orange; icon-glyph: magic;
+// icon-color: deep-gray; icon-glyph: magic;
 /**
  * WF_CoreBase
  * UTF-8 日本語コメント
