@@ -51,6 +51,7 @@ module.exports = class WF_WidgetRenderer {
     this.appRoot = this.fm.joinPath(root, this.appId)
     this.imageDir = this.fm.joinPath(this.appRoot, "img")
 
+    this._ensureDirs()
   }
 
   // =========================
