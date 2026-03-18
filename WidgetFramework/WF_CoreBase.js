@@ -141,7 +141,7 @@ module.exports = class WF_CoreBase {
   }
 
   async handleNotifications(data) {
-console.log("NOTIFICATIONS RAW: " + data.notifications)
+
     if (!this.notification) return
 
     const list = data?.notifications
@@ -149,9 +149,9 @@ console.log("NOTIFICATIONS RAW: " + data.notifications)
       console.log("NO NOTIFICATIONS")
       return
     }
-console.log("NOTIFICATIONS COUNT: " + list.length)
+
     for (const n of list) {
-console.log("PROCESS: " + n)
+
       try {
 
         // =========================
@@ -172,7 +172,7 @@ console.log("PROCESS: " + n)
         // ② ディレイ通知（即時を安定させる）
         // =========================
         if (n.delay) {
-console.log("DELAY: " + n.delay)
+
           await this.notification.schedule(
             n.id,
             new Date(Date.now() + n.delay),
@@ -186,7 +186,7 @@ console.log("DELAY: " + n.delay)
         // ③ 条件通知（notifyOnce）
         // =========================
         if (n.when) {
-console.log("WHEN: " + n.when)
+
           await this.notification.notifyOnce(
             n.id,
             n,
