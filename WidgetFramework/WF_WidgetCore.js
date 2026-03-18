@@ -56,8 +56,7 @@ module.exports = class WF_WidgetCore {
     }
 */
     if (config.runsInWidget && !config.runsInApp) {
-      const context = await this.buildContext()
-      const widget = await this.renderer.render(context)
+      const widget = await this.run()
       Script.setWidget(widget)
       Script.complete()
       return
