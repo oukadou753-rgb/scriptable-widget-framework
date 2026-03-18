@@ -132,10 +132,16 @@ module.exports = class WF_NotificationManager {
       n.sound = payload.sound
     }
 
-    const url = `scriptable:///run?scriptName=${encodeURIComponent(Script.name())}&id=${payload.id}`
+    // Scriptable起動URL（固定）
+    const params = new URLSearchParams({
+      id: payload.id
+    })
 
-    n.openURL = url
+    n.openURL =
+      `scriptable:///run?scriptName=${encodeURIComponent(Script.name())}` +
+      `&${params.toString()}`
 
+    // userInfo
     n.userInfo = {
       id: payload.id,
       ...payload.meta
