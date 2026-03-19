@@ -7,45 +7,23 @@
  **/
 module.exports = {
 
-  async showMenu(core) {
-
-    const alert = new Alert()
-    alert.title = "Notification Manager"
-
-    alert.addAction("予定一覧")
-    alert.addAction("履歴一覧")
-    alert.addCancelAction("閉じる")
-
-    const res = await alert.presentSheet()
-
-    if (res === 0) return this.showScheduled(core)
-    if (res === 1) return this.showHistory(core)
-  },
-
-  async showScheduled(core) {
-
+  async present(core) {
     const table = new UITable()
     table.showSeparators = true
+    table.dismissOnSelect = false
 
-    // 仮：空テーブル
-    const row = new UITableRow()
-    row.addText("No Scheduled Notifications")
-    table.addRow(row)
+    await this.createTable(table, core)
 
     await table.present()
   },
 
-  async showHistory(core) {
+  async createTable(table, core) {
+    table.removeAllRows()
 
-    const table = new UITable()
-    table.showSeparators = true
-
-    // 仮：空テーブル
     const row = new UITableRow()
-    row.addText("No History")
+    row.addText("Notification UI (empty)")
     table.addRow(row)
 
-    await table.present()
+    table.reload()
   }
-
 }
