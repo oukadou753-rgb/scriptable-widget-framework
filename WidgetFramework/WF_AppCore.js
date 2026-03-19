@@ -141,9 +141,7 @@ module.exports = class WF_AppCore {
 
   async openNotifications() {
     try {
-      const NotificationUI = importModule("WF_NotificationUI")
-
-      await NotificationUI.showMenu(this)
+      await this.notificationUI.showMenu(this)
 
       return true
 
