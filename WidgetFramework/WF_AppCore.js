@@ -111,6 +111,15 @@ module.exports = class WF_AppCore {
     )
 
     this.menu.register(
+      "Config",
+      [
+        { label: "Edit", action: () => this.editConfig() },
+        { label: "Reset", action: () => this.resetConfig() },
+      ],
+      { title: "Config" }
+    )
+
+    this.menu.register(
       "Preview",
       [
         { label: "Small", action: () => this.preview("small") },
