@@ -100,12 +100,8 @@ module.exports = class WF_AppCore {
       "Notifications",
       [
         {
-          label: "予定一覧",
-          action: () => NotificationUI.showScheduled(this)
-        },
-        {
-          label: "履歴一覧",
-          action: () => NotificationUI.showHistory(this)
+          label: "Open",
+          action: () => this.openNotifications()
         }
       ],
       { title: "Notifications" }
@@ -142,7 +138,37 @@ module.exports = class WF_AppCore {
       { title: "Snapshot" }
     )
   }
-  
+
+  async openNotifications() {
+    try {
+      const NotificationUI = importModule("WF_NotificationUI")
+
+      await NotificationUI.showMenu(this)
+
+      return true
+
+    } catch (e) {
+      log(e.message)
+
+      const table = new UITable()
+      const row = new UITableRow()
+
+      row.addText("Error (tap to view)")
+      row.onSelect = () => {
+        const a = new Alert()
+        a.title = "Error"
+        a.message = String(e)
+        a.addAction("OK")
+        a.present()
+      }
+
+      table.addRow(row)
+      await table.present()
+
+      return true
+    }
+  }
+
   async editConfig() {
     try {
       const active = this.profile.getActive()
@@ -158,6 +184,7 @@ module.exports = class WF_AppCore {
 
     } catch (e) {
       log(e.message)
+
       const table = new UITable()
       const row = new UITableRow()
 
