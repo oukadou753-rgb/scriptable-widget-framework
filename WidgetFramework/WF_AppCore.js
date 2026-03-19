@@ -88,6 +88,7 @@ module.exports = class WF_AppCore {
       [
         { label: "Preview", next: "Preview" },
         { label: "Notif Manage", next: "Notifications" },
+        { label: "Notif Manage 2", next: "Notifications 2" },
         { label: "Config Manage", next: "Config" },
         { label: "Snapshot Manage", next: "Snapshot" },
         { label: "Profile Manage", action: () => this.manageProfiles() },
@@ -105,6 +106,21 @@ module.exports = class WF_AppCore {
         }
       ],
       { title: "Notifications" }
+    )
+
+    this.menu.register(
+      "Notifications 2",
+      [
+        {
+          label: "予定一覧",
+          action: () => this.notificationUI.showScheduled(this)
+        },
+        {
+          label: "履歴一覧",
+          action: () => this.notificationUI.showHistory(this)
+        }
+      ],
+      { title: "Notifications 2" }
     )
 
     this.menu.register(
