@@ -94,7 +94,7 @@ module.exports = class WF_AppCore {
       ],
       { title: "Main Menu" }
     )
-c
+
     this.menu.register(
       "Notifications",
       [
