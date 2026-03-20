@@ -20,6 +20,34 @@ module.exports = (core) => ({
     await core.notificationUI.present(core, {
       openId: info.id
     })
+  },
+
+  openPreview: async (info) => {
+
+    if (info.type === "image") {
+      let img
+
+      if (info.src.startsWith("http")) {
+        const req = new Request(info.src)
+        img = await req.loadImage()
+      } else {
+        img = Image.fromFile(info.src)
+      }
+
+      if (img) QuickLook.present(img)
+    }
+
+    if (info.type === "list") {
+      const table = new UITable()
+
+      for (const item of info.items || []) {
+        const row = new UITableRow()
+        row.addText(String(item))
+        table.addRow(row)
+      }
+
+      await table.present(true)
+    }
   }
 
 })
