@@ -25,8 +25,13 @@ module.exports = class WF_NotificationManager {
   async notifyOnce(payload) {
     if (!payload?.id) throw new Error("notifyOnce: payload.id is required")
 
+    const uid = `${payload.id}_${Date.now()}`
+
     const cooldown = payload.cooldown ?? 300_000
-    const last = this.history[payload.id]?.lastSent
+    const last = Object.values(this.history)
+      .filter(v => v.groupId === payload.id && v.lastSent)
+      .sort((a, b) => b.lastSent - a.lastSent)[0]?.lastSent
+
     if (last && Date.now() - last < cooldown) return false
 
     if (payload.delay) {
@@ -34,7 +39,8 @@ module.exports = class WF_NotificationManager {
       await this.schedule(payload.id, fireDate, payload)
     } else {
       await this._send(payload)
-      this.history[payload.id] = {
+      this.history[uid] = {
+        groupId: payload.id,
         lastSent: Date.now(),
         status: "sent",
         title: payload.title,
@@ -65,12 +71,25 @@ module.exports = class WF_NotificationManager {
   // =========================
   async schedule(id, date, payload) {
     if (!id) throw new Error("schedule: id is required")
-    if (!payload) throw new Error("schedule: payload is required")
 
-    // cooldown 判定
     const cooldown = payload.cooldown ?? 0
-    const last = this.history[id]?.lastSent
+
+    const last = Object.values(this.history)
+      .filter(v => v.groupId === id && v.lastSent)
+      .sort((a, b) => b.lastSent - a.lastSent)[0]?.lastSent
+
     if (last && Date.now() - last < cooldown) return false
+
+    // ★ pending削除（JSON）
+    for (const key in this.history) {
+      const item = this.history[key]
+      if (item.groupId === id && item.status === "pending") {
+        delete this.history[key]
+      }
+    }
+
+    // ★ iOS削除
+    await Notification.removePending([id])
 
     const n = this._createNotification(payload)
     n.identifier = id
@@ -83,7 +102,9 @@ module.exports = class WF_NotificationManager {
 
     await n.schedule()
 
+    // ★ id固定保存
     this.history[id] = {
+      groupId: id,
       fireAt: date.getTime(),
       status: "pending",
       title: payload.title,
@@ -91,6 +112,7 @@ module.exports = class WF_NotificationManager {
       body: payload.body,
       meta: payload.meta
     }
+
     this._save()
 
     return true
@@ -105,14 +127,19 @@ module.exports = class WF_NotificationManager {
     try {
       await Notification.removePending([id])
       await Notification.removeDelivered([id])
-    } catch (e) {
-      // Scriptable側の失敗は無視
+    } catch (e) {}
+
+    // ★ groupIdで全削除
+    let changed = false
+
+    for (const key in this.history) {
+      if (this.history[key].groupId === id) {
+        delete this.history[key]
+        changed = true
+      }
     }
 
-    if (this.history[id]) {
-      delete this.history[id]
-      this._save()
-    }
+    if (changed) this._save()
 
     return true
   }
@@ -137,6 +164,7 @@ module.exports = class WF_NotificationManager {
 
     return Object.entries(this.history).map(([id, v]) => ({
       id,
+      groupId: v?.groupId ?? id,
       title: v?.title ?? "",
       subtitle: v?.subtitle ?? "",
       body: v?.body ?? "",
@@ -145,6 +173,42 @@ module.exports = class WF_NotificationManager {
       lastSent: v?.lastSent ?? null,
       meta: v?.meta ?? {}
     }))
+  }
+
+  // =========================
+  // getUIList
+  // =========================
+  getUIList(type = "all") {
+    this.syncStatus()
+
+    let list = this.list().map(item => {
+      const now = Date.now()
+
+      const isExpired =
+        item.status === "pending" &&
+        item.fireAt &&
+        item.fireAt < now
+
+      return {
+        ...item,
+        date: item.fireAt || item.lastSent || null,
+        isExpired,
+        isPending: item.status === "pending",
+        isSent: item.status === "sent"
+      }
+    })
+
+    if (type === "scheduled") {
+      list = list.filter(v => v.isPending)
+      list.sort((a, b) => (a.date || 0) - (b.date || 0))
+    }
+
+    if (type === "history") {
+      list = list.filter(v => v.isSent)
+      list.sort((a, b) => (b.date || 0) - (a.date || 0))
+    }
+
+    return list
   }
 
   // =========================
@@ -170,6 +234,14 @@ module.exports = class WF_NotificationManager {
   }
 
   // =========================
+  // removeAndRefresh
+  // =========================
+  async removeAndRefresh(id) {
+    await this.remove(id)
+    this.refresh()
+  }
+
+  // =========================
   // syncStatus
   // =========================
   syncStatus() {
@@ -190,6 +262,53 @@ module.exports = class WF_NotificationManager {
   }
 
   // =========================
+  // getStateMap
+  // =========================
+  getStateMap() {
+    const map = {}
+
+    for (const v of Object.values(this.history)) {
+      const gid = v.groupId
+      if (!gid) continue
+
+      if (!map[gid]) {
+        map[gid] = {
+          hasPending: false,
+          hasSent: false,
+          pendingAt: null,
+          lastSentAt: null
+        }
+      }
+
+      // pending
+      if (v.status === "pending") {
+        map[gid].hasPending = true
+
+        if (
+          !map[gid].pendingAt ||
+          v.fireAt > map[gid].pendingAt
+        ) {
+          map[gid].pendingAt = v.fireAt
+        }
+      }
+
+      // sent
+      if (v.status === "sent") {
+        map[gid].hasSent = true
+
+        if (
+          !map[gid].lastSentAt ||
+          v.lastSent > map[gid].lastSentAt
+        ) {
+          map[gid].lastSentAt = v.lastSent
+        }
+      }
+    }
+
+    return map
+  }
+
+  // =========================
   // Private
   // =========================
 
@@ -198,10 +317,18 @@ module.exports = class WF_NotificationManager {
   // =========================
   async _send(payload) {
     const n = this._createNotification(payload)
+
+    if (payload.id) {
+      n.identifier = payload.id
+    }
+
     await n.schedule()
 
+    const uid = `${payload.id}_${Date.now()}`
+
     if (payload?.id) {
-      this.history[payload.id] = {
+      this.history[uid] = {
+        groupId: payload.id, // ★修正
         lastSent: Date.now(),
         status: "sent",
         title: payload.title,
