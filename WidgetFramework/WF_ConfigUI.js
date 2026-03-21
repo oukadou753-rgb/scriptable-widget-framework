@@ -7,347 +7,310 @@
  **/
 module.exports = {
 
+  // =========================
+  // 状態
+  // =========================
+  table: null,
+
+  // =========================
+  // present
+  // =========================
   async present(activeCfg, profileEngine, activeProfile) {
     const table = new UITable()
-          table.dismissOnSelect = false
-          table.showSeparators = true
+    table.dismissOnSelect = false
+    table.showSeparators = true
+
+    this.table = table
+
     await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
     await table.present(activeCfg.values.showTableFullscreen ?? false)
   },
 
+  // =========================
+  // createTable
+  // =========================
   async createTable(table, activeCfg, profileEngine, activeProfile) {
     table.removeAllRows()
-    await this.createItemsCell(table, {...activeCfg}, profileEngine, activeProfile)
+    await this.renderContent(table, activeCfg, profileEngine, activeProfile)
+    table.reload()
   },
 
-  async createItemsCell(table, activeCfg, profileEngine, activeProfile) {
+  // =========================
+  // 共通UI部品
+  // =========================
+  createRow() {
+    const row = new UITableRow()
+    row.dismissOnSelect = false
+    row.cellSpacing = 10
+    return row
+  },
 
-    const UI_ICON = {
-      open: "▼",
-      close: "▶",
-      on: "■",
-      off: "□",
-      selected: "●",
-      unselected: "○",
-      reload: "↺"
+  createKeyValueRow(label, value) {
+    const row = this.createRow()
+
+    const left = row.addText(label)
+    left.widthWeight = 70
+    left.titleFont = Font.systemFont(16)
+
+    const right = row.addText(String(value))
+    right.widthWeight = 30
+    right.rightAligned()
+    right.titleFont = Font.systemFont(14)
+
+    return { row, left, right }
+  },
+
+  createSectionHeader(title, isOpen) {
+    const row = this.createRow()
+    const txt = row.addText(`${isOpen ? "▼" : "▶"} ${title}`)
+    txt.titleFont = Font.mediumSystemFont(12)
+    return row
+  },
+
+  createActionRow(buttons) {
+    const row = this.createRow()
+
+    for (const btn of buttons) {
+      const b = row.addButton(btn.label)
+      if (btn.onTap) b.onTap = btn.onTap
+      if (btn.dismiss) b.dismissOnTap = true
     }
 
-    function createSectionHeader(row, sectionName, isOpen) {
-      const icon = isOpen ? UI_ICON.open : UI_ICON.close
+    return row
+  },
 
-      const txt = row.addText(`${icon} ${sectionName}`)
-      txt.titleFont = Font.mediumSystemFont(12)
-      row.isHeader = true
-    }
+  applyColor(row, left, right, value) {
+    try {
+      const color = new Color(value)
 
-    function createItemRow(row, item, value) {
-      const icon = item.readonly ? UI_ICON.off : UI_ICON.on
-      const label = item.label || item.key
-    
-      const left = row.addText(`    ${icon} ${label}`)
-      left.titleFont = Font.systemFont(16)
-      left.widthWeight = 70
-    
-      const display = formatValue(value, item.type)
-    
-      const right = row.addText(display)
-      right.titleFont = Font.systemFont(14)
-      right.widthWeight = 30
-      right.rightAligned()
-    
-      // BOOL
-      if (item.type === "bool") {
-        right.titleColor = value ? Color.green() : Color.red()
-      }
-    
-      // COLOR
-      if (item.type === "color") {
-        try {
-          const color = new Color(value)
-      
-          row.backgroundColor = color
-      
-          const brightness =
-            color.red * 0.299 +
-            color.green * 0.587 +
-            color.blue * 0.114
-      
-          const textColor =
-            brightness > 0.55
-              ? Color.black()
-              : Color.white()
-      
-          left.titleColor = textColor
-          right.titleColor = textColor
-      
-        } catch {}
-      }
-    
-      // Select
-      if (item.type === "select") {
-        right.titleColor = Color.blue()
-      }
-      // readonly
-      if (item.readonly) {
-        left.titleColor = Color.gray()
-        right.titleColor = Color.gray()
-      }
-    }
+      row.backgroundColor = color
 
-    function formatValue(val, type) {
-      if (type === "bool") return val ? "ON" : "OFF"
-      if (type === "color") return val || "#ffffff"
-      return String(val)
-    }
+      const brightness =
+        color.red * 0.299 +
+        color.green * 0.587 +
+        color.blue * 0.114
 
-    // Table
+      const textColor =
+        brightness > 0.55
+          ? Color.black()
+          : Color.white()
+
+      left.titleColor = textColor
+      right.titleColor = textColor
+
+    } catch {}
+  },
+
+  createSpacer(height = 12) {
+    const row = new UITableRow()
+    row.height = height
+    row.dismissOnSelect = false
+    return row
+  },
+
+  // =========================
+  // メイン描画
+  // =========================
+  async renderContent(table, activeCfg, profileEngine, activeProfile) {
+
     const schemaObj = activeCfg.schema
     const values = activeCfg.values
-    const version = profileEngine.version
     const defaultOpenSections = activeCfg.defaultOpenSections
 
+    // -------------------------
+    // セクション構築
+    // -------------------------
     const sections = {}
-    let selected = null
-
-    // sections構築（最初）
     for (const key in schemaObj) {
       const item = schemaObj[key]
       const sec = item.section || "General"
-
       if (!sections[sec]) sections[sec] = []
-
-      sections[sec].push({
-        key,
-        ...item
-      })
+      sections[sec].push({ key, ...item })
     }
 
-    // sectionState初期化
+    // -------------------------
+    // セクション状態
+    // -------------------------
     let sectionState = {}
-
     for (const sec in sections) {
-      const key = `section_${sec}`
-      sectionState[sec] = values[key] === true
+      sectionState[sec] = values[`section_${sec}`] === true
     }
 
-    // Profile
-    const profileRow = new UITableRow()
-    const left = profileRow.addText(`${UI_ICON.open} Profile v.${version}`)
-    left.titleFont = Font.systemFont(16)
-    
-    const right = profileRow.addText(`${activeProfile} ›`)
-    right.titleFont = Font.semiboldSystemFont(14)
+    // -------------------------
+    // Profile 行
+    // -------------------------
+    const { row, left, right } = this.createKeyValueRow(
+      "▼ Profile",
+      `${activeProfile} ›`
+    )
     right.titleColor = Color.blue()
-    right.rightAligned()
-    
-    profileRow.dismissOnSelect = false
-    profileRow.onSelect = async() => {
+
+    row.onSelect = async () => {
 
       const list = profileEngine.list()
 
       const a = new Alert()
       a.title = "Select Profile"
 
-      list.forEach(p => a.addAction(p === activeProfile ? `${UI_ICON.selected} ${p}` : String(p)))
+      list.forEach(p => a.addAction(p))
       a.addCancelAction("Cancel")
 
       const r = await a.present()
 
       if (r !== -1) {
-        const selectedProfile = list[r]
+        const selected = list[r]
 
-        profileEngine.setActive(selectedProfile)
-        activeProfile = selectedProfile
-
+        profileEngine.setActive(selected)
         const cfg = profileEngine.getConfig()
 
-        await this.createTable(table, {...cfg}, profileEngine, activeProfile)
+        await this.createTable(this.table, {...cfg}, profileEngine, selected)
       }
     }
-    table.addRow(profileRow)
 
-    // Sections Close All / Sections Open All
-    const controlRow = new UITableRow()
+    table.addRow(row)
 
-    const allOpen = Object.values(sectionState).every(v => v === true)
-    const toggleBtn = controlRow.addButton(allOpen ? `${UI_ICON.close} Close All` : `${UI_ICON.open} Open All`)
-    toggleBtn.centerAligned()
-    toggleBtn.onTap = async () => {
+    // -------------------------
+    // 操作行
+    // -------------------------
+    const allOpen = Object.values(sectionState).every(v => v)
 
-      const allOpen = Object.values(sectionState).every(v => v === true)
-
-      for (const sec in sections) {
-        const newState = !allOpen
-        sectionState[sec] = newState
-        values[`section_${sec}`] = newState
+    table.addRow(this.createActionRow([
+      {
+        label: allOpen ? "▶ Close All" : "▼ Open All",
+        onTap: async () => {
+          for (const sec in sections) {
+            const state = !allOpen
+            sectionState[sec] = state
+            values[`section_${sec}`] = state
+          }
+          await this.reload(activeCfg, profileEngine, activeProfile)
+        }
+      },
+      {
+        label: "↺ Default",
+        onTap: async () => {
+          for (const sec in sections) {
+            const isOpen = defaultOpenSections.includes(sec)
+            sectionState[sec] = isOpen
+            values[`section_${sec}`] = isOpen
+          }
+          await this.reload(activeCfg, profileEngine, activeProfile)
+        }
       }
+    ]))
 
-      activeCfg.values = JSON.parse(JSON.stringify(values))
-      await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
-    }
-
-    // Sections Default Open
-    const restoreBtn = controlRow.addButton(`${UI_ICON.reload} Default`)
-    restoreBtn.centerAligned()
-    restoreBtn.onTap = async () => {
-
-      for (const sec in sections) {
-        const isOpen = defaultOpenSections.includes(sec)
-        sectionState[sec] = isOpen
-        values[`section_${sec}`] = isOpen
-      }
-
-      activeCfg.values = JSON.parse(JSON.stringify(values))
-      await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
-    }
-
-    table.addRow(controlRow)
-
-    // Sections
+    // -------------------------
+    // セクション描画
+    // -------------------------
     for (const sectionName in sections) {
 
       const isOpen = sectionState[sectionName]
-      const iconArrow = isOpen ? UI_ICON.close : UI_ICON.open
 
-      // Section Header
-      const header = new UITableRow()
-      createSectionHeader(header, sectionName, isOpen)
-      header.dismissOnSelect = false
-      header.onSelect = async() => {
-        const newState = !sectionState[sectionName]
-        sectionState[sectionName] = !sectionState[sectionName]
-        values[`section_${sectionName}`] = newState
-
-        activeCfg.values = JSON.parse(JSON.stringify(values))
-        await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
+      const header = this.createSectionHeader(sectionName, isOpen)
+      header.onSelect = async () => {
+        values[`section_${sectionName}`] = !isOpen
+        await this.reload(activeCfg, profileEngine, activeProfile)
       }
+
       table.addRow(header)
 
-      // Section Items
-      if (!sectionState[sectionName]) continue
+      if (!isOpen) continue
 
       for (const item of sections[sectionName]) {
 
         if (item.hidden) continue
-
-        const iconState = item.readonly ? UI_ICON.on : UI_ICON.off
-        const row = new UITableRow()
 
         const current =
           values[item.key] ??
           item.default ??
           ""
 
-        createItemRow(row, item, current)
+        const indent = "    " // スペースでもOK
 
-        if (item.readonly) {
-          row.onSelect = null
-        } else {
-          row.dismissOnSelect = false
-          row.onSelect = async() => {
-            selected = item
+        const icon = item.readonly ? "□" : "■"
+        const label = item.label || item.key
 
-            const current =
-              values[item.key] ??
-              item.default ??
-              ""
+        const { row, left, right } =
+          this.createKeyValueRow(`${indent}${icon} ${label}`, current)
 
-            // BOOL
-            if (item.type === "bool" || item.type === "boolean") {
-              values[item.key] = !Boolean(current)
+        // COLOR
+        if (item.type === "color") {
+          this.applyColor(row, left, right, current)
+        }
 
-              activeCfg.values = JSON.parse(JSON.stringify(values))
-              await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
-              return
+        // BOOL色分け
+        if (item.type === "bool" || item.type === "boolean") {
+          right.titleColor = current ? Color.green() : Color.red()
+        }
+
+        // SELECT
+        if (item.type === "select") {
+          right.titleColor = Color.blue()
+        }
+
+        row.onSelect = async () => {
+
+          // BOOL
+          if (item.type === "bool" || item.type === "boolean") {
+            values[item.key] = !Boolean(current)
+            await this.reload(activeCfg, profileEngine, activeProfile)
+            return
+          }
+
+          // SELECT
+          if (item.type === "select") {
+            const opts = item.options || []
+
+            const a = new Alert()
+            a.title = item.label || item.key
+
+            opts.forEach(o => {
+              const mark = (o === current) ? "● " : ""
+              a.addAction(mark + String(o))
+            })
+
+            a.addCancelAction("Cancel")
+
+            const r = await a.present()
+            if (r !== -1) values[item.key] = opts[r]
+
+            await this.reload(activeCfg, profileEngine, activeProfile)
+            return
+          }
+
+          // COLOR
+          if (item.type === "color") {
+            const presets = item.presets || [
+              "#ffffff", "#000000", "#ff3b30",
+              "#34c759", "#007aff", "#ffcc00"
+            ]
+
+            const a = new Alert()
+            a.title = item.label || item.key
+
+            presets.forEach(c => a.addAction(c))
+            a.addAction("Custom HEX")
+            a.addCancelAction("Cancel")
+
+            const r = await a.present()
+            if (r === -1) return
+
+            if (r < presets.length) {
+              values[item.key] = presets[r]
+            } else {
+              const input = await this.prompt("HEX Color", current)
+              if (input !== null) values[item.key] = input
             }
 
-            // SELECT
-            else if (item.type === "select") {
+            await this.reload(activeCfg, profileEngine, activeProfile)
+            return
+          }
 
-              const opts = item.options || []
-
-              const a = new Alert()
-              a.title = item.label || item.key
-              opts.forEach(o => {
-                const mark = (o === current) ? `${UI_ICON.selected} ` : ""
-                a.addAction(mark + String(o))
-              })
-              a.addCancelAction("Cancel")
-              const r = await a.present()
-
-              if (r !== -1) {
-                values[item.key] = opts[r]
-              }
-
-              activeCfg.values = JSON.parse(JSON.stringify(values))
-              await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
-              return
-            }
-
-            // COLOR
-            else if (item.type === "color") {
-
-              const presets = item.presets || [
-                "#ffffff",
-                "#000000",
-                "#ff3b30",
-                "#34c759",
-                "#007aff",
-                "#ffcc00"
-              ]
-
-              const a = new Alert()
-              a.title = item.label || item.key
-              presets.forEach(c => a.addAction(c))
-              a.addAction("Custom HEX")
-              a.addCancelAction("Cancel")
-              const r = await a.present()
-
-              if (r === -1) {
-
-                activeCfg.values = JSON.parse(JSON.stringify(values))
-                await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
-                return
-              } else if (r < presets.length) {
-                values[item.key] = presets[r]
-
-                activeCfg.values = JSON.parse(JSON.stringify(values))
-                await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
-                return
-              } else {
-                const input = await this.prompt("HEX Color", current)
-
-                if (input !== null) {
-                  try {
-                    new Color(input)
-                    values[item.key] = input
-                  } catch {
-                    const err = new Alert()
-                    err.title = "Invalid HEX"
-                    err.addAction("OK")
-                    await err.present()
-                  }
-                }
-
-                activeCfg.values = JSON.parse(JSON.stringify(values))
-                await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
-                return
-              }
-            }
-
-            // DEFAULT
-            const input = await this.prompt(item.label, current)
-
-            if (input !== null) {
-              values[item.key] = this.castSafe(
-                input,
-                item.type,
-                current
-              )
-
-              activeCfg.values = JSON.parse(JSON.stringify(values))
-              await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
-            }
+          // DEFAULT
+          const input = await this.prompt(item.label, current)
+          if (input !== null) {
+            values[item.key] = this.castSafe(input, item.type, current)
+            await this.reload(activeCfg, profileEngine, activeProfile)
           }
         }
 
@@ -355,63 +318,62 @@ module.exports = {
       }
     }
 
-    // スペース
-    const spaceRow = new UITableRow()
-    table.addRow(spaceRow)
+    table.addRow(this.createSpacer(16))
 
-    // キャンセル
-    let resValues = null
-    const actionRow = new UITableRow()
-    const cancelBtn = actionRow.addButton("Cancel")
-    cancelBtn.centerAligned()
-    cancelBtn.dismissOnTap = true
-
-    // 保存
-    const saveBtn = actionRow.addButton("Save & Close")
-    saveBtn.centerAligned()
-    saveBtn.dismissOnTap = true
-    saveBtn.onTap = async() => {
-      const cfg = profileEngine.getConfig()
-      cfg.values = JSON.parse(JSON.stringify(values))
-      profileEngine.saveConfig(activeProfile, cfg)
-    }
-    table.addRow(actionRow)
-    table.reload()
+    // -------------------------
+    // フッター
+    // -------------------------
+    table.addRow(this.createActionRow([
+      { label: "Cancel", dismiss: true },
+      {
+        label: "Save & Close",
+        dismiss: true,
+        onTap: async () => {
+          const cfg = profileEngine.getConfig()
+          cfg.values = JSON.parse(JSON.stringify(values))
+          profileEngine.saveConfig(activeProfile, cfg)
+        }
+      }
+    ]))
   },
 
-  async prompt(title, def) {
+  // =========================
+  // reload
+  // =========================
+  async reload(activeCfg, profileEngine, activeProfile) {
+    await this.createTable(this.table, {...activeCfg}, profileEngine, activeProfile)
+  },
 
+  // =========================
+  // prompt
+  // =========================
+  async prompt(title, def) {
     const a = new Alert()
     a.title = title
-
     a.addTextField("", String(def ?? ""))
-
     a.addAction("OK")
     a.addCancelAction("Cancel")
 
     const r = await a.present()
-
     if (r === -1) return null
 
     return a.textFieldValue(0)
   },
 
-  isEqual(a, b) {
-    return JSON.stringify(a) === JSON.stringify(b)
-  },
-
+  // =========================
+  // cast
+  // =========================
   castSafe(val, type, fallback) {
-
     if (type === "number") {
       const n = Number(val)
       return isNaN(n) ? Number(fallback || 0) : n
     }
 
     if (type === "bool" || type === "boolean") {
-      if (typeof val === "boolean") return val
-      return val === "true"
+      return val === "true" || val === true
     }
 
     return val
   }
+
 }
