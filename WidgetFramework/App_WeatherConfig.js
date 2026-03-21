@@ -9,6 +9,7 @@
 // Constat
 // ======================
 const APP_VERSION = "2.0.0"
+const APP_ID = "Weather"
 const DEFAULT_STRAGE_TYPE = "local" // "icloud", "local", "bookmark"
 
 // ======================
@@ -350,7 +351,7 @@ const headerBlock = [
     { spacing:3, show: "{{ui_isMediumUp}}",
       h: [
         textHelper(TEXT_ICON.mark, { base: "smallText", color: "{{current_discomfortIndexColor}}" }),
-        textHelper("{{current_discomfortIndexStr}}", "mediumText"),
+        textHelper("{{current_discomfortStr}}", "mediumText"),
         imageHelper("{{status_icon}}", SIZES.image.medium, "{{status_color}}", "{{status_opacity}}")
       ]
     }
@@ -400,10 +401,10 @@ const currentDataBlockSmall = [
       },
       { size: new Size(0, 25), justify: "center",
         h: [
-          textHelper("{{current_temp}}", { base: "dataLargeText", color: COLORS.extra.temp }),
+          textHelper("{{current_tempStr}}", { base: "dataLargeText", color: COLORS.extra.temp }),
           textHelper("°C", { base: "dataText", color: COLORS.extra.temp }),
           { spacer: 10 },
-          textHelper("{{current_humidity}}", { base: "dataLargeText", color: COLORS.extra.humidity }),
+          textHelper("{{current_humidityStr}}", { base: "dataLargeText", color: COLORS.extra.humidity }),
           textHelper("％", { base: "dataText", color: COLORS.extra.humidity })
         ]
       },
@@ -441,10 +442,10 @@ const currentDataBlock2 = [
     v: [
       { size: new Size(0, 25), justify: "center", spacing: 2,
         h: [
-          textHelper("{{current_temp}}", { base: "dataExtraLargeText", color: COLORS.extra.temp }),
+          textHelper("{{current_tempStr}}", { base: "dataExtraLargeText", color: COLORS.extra.temp }),
           textHelper("°C", { base: "dataText", color: COLORS.extra.temp }),
           { spacer: 5 },
-          textHelper("{{current_humidity}}", { base: "dataExtraLargeText", color: COLORS.extra.humidity }),
+          textHelper("{{current_humidityStr}}", { base: "dataExtraLargeText", color: COLORS.extra.humidity }),
           textHelper("％", { base: "dataText", color: COLORS.extra.humidity })
         ]
       },
@@ -459,9 +460,9 @@ const currentDataBlock2 = [
           },
           {
             v: [
-              unitHelper("{{current_discomfortIndex}}", "　", { mark: true, color: "{{current_discomfortIndexColor}}" }),
-              unitHelper("{{current_pop}}", "％", { mark: true, color: "{{current_popColor}}" }),
-              unitHelper("{{current_rain}}", "㎜", { mark: true, color: "{{current_rainColor}}" })
+              unitHelper("{{current_discomfortIndexStr}}", "　", { mark: true, color: "{{current_discomfortIndexColor}}" }),
+              unitHelper("{{current_popStr}}", "％", { mark: true, color: "{{current_popColor}}" }),
+              unitHelper("{{current_rainStr}}", "㎜", { mark: true, color: "{{current_rainColor}}" })
             ]
           }
         ]
@@ -474,30 +475,30 @@ const currentDataBlock2 = [
 const currentDataBlock3 = [
   { size: new Size(0, 50), show: "{{ui_isLargeUp}}",
     v: [
-      { justify: "center", spacing: 1,
+      { justify: "center", spacing: 2,
         h: [
           textHelper("日較差：", "columnLargeText"),
-          textHelper("{{current_tempMax}}", { base: "dataLargeText", color: "{{current_tempMaxColor}}" }),
+          textHelper("{{current_tempMaxStr}}", { base: "dataLargeText", color: "{{current_tempMaxColor}}" }),
           textHelper("°C", "dataText"),
           textHelper(" / ", "columnText"),
-          textHelper("{{current_tempMin}}", { base: "dataLargeText", color: "{{current_tempMinColor}}" }),
+          textHelper("{{current_tempMinStr}}", { base: "dataLargeText", color: "{{current_tempMinColor}}" }),
           textHelper("°C", "dataText"),
           { spacer: 10 },
           textHelper("体感温度：", "columnLargeText"),
-          textHelper("{{current_feelslike}}", { base: "dataLargeText", color: "{{current_feelslikeColor}}" }),
+          textHelper("{{current_feelslikeStr}}", { base: "dataLargeText", color: "{{current_feelslikeColor}}" }),
           textHelper("°C", "dataText")
         ]
       },
-      { justify: "center", spacing: 1,
+      { justify: "center", spacing: 2,
         h: [
           textHelper("風速：", "columnLargeText"),
-          textHelper("{{current_windSpeed}}", { base: "dataLargeText", color: "{{current_windSpeedColor}}" }),
+          textHelper("{{current_windStr}}", { base: "dataLargeText", color: "{{current_windColor}}" }),
           textHelper("m/s", "dataText"),
           { spacer: 10 },
           textHelper("風向き：", "columnLargeText"),
           imageHelper("{{current_windIcon}}", SIZES.image.large, "{{highlightTextColor}}"),
           { spacer: 2 },
-          textHelper("{{current_windDegree}}", "dataLargeText"),
+          textHelper("{{current_winDirStr}}", "dataLargeText"),
         ]
       }
     ]
@@ -533,20 +534,20 @@ const forecastDataBlock = [
           v: [
             { justify: "end",
               h: [
-                textHelper("{{hour}}", "columnExtraSmallText")
+                textHelper("{{hourStr}}", "columnExtraSmallText")
               ]
             },
-            rowHelper("{{pressure}}", "{{pressureTrend}}", "{{pressureColor}}"),
+            rowHelper("{{pressureStr}}", "{{pressureTrend}}", "{{pressureColor}}"),
             { justify: "end",
               h: [
                 imageHelper("{{windIcon}}", SIZES.image.medium, "{{highlightTextColor}}"),
                 { spacer: 3 },
                 textHelper("{{windTrend}} ", { base: "dataSmallText", color: "{{windSpeedColor}}" }),
-                textHelper("{{windSpeed}}", "dataText")
+                textHelper("{{windStr}}", "dataText")
               ]
             },
-            rowHelper("{{temp}}", "{{tempTrend}}", "{{tempColor}}"),
-            rowHelper("{{pop}}", "{{popTrend}}", "{{popColor}}")
+            rowHelper("{{tempStr}}", "{{tempTrend}}", "{{tempColor}}"),
+            rowHelper("{{popStr}}", "{{popTrend}}", "{{popColor}}")
           ]
         }
       }
@@ -559,12 +560,12 @@ const astroBlock = [
   { size: new Size(0, 35), padding: pos(5, 0, 0, 0), justify: "center", spacing: 3, show: "{{ui_isLargeUp}}",
     h: [
       imageHelper("{{current_sunriseIcon}}", SIZES.image.extraLarge, "{{current_sunriseColor}}", "{{current_sunriseOpacity}}"),
-      textHelper("{{current_sunriseTime}}", { base: "dataText", fontSize: 24, color: "{{current_sunriseColor}}", opacity: "{{current_sunriseOpacity}}" }),
+      textHelper("{{current_sunriseTimeStr}}", { base: "dataText", fontSize: 24, color: "{{current_sunriseColor}}", opacity: "{{current_sunriseOpacity}}" }),
       { spacer: 5 },
-      textHelper("{{current_moonphaseIcon}}", { base: "dataExtraLargeText", shadowColor: "#d1cdda", shadowRadius: 3, shadowOffset: { x: 0, y: 0 } }),
+      textHelper("{{current_moonphaseTextIcon}}", { base: "dataExtraLargeText", shadowColor: "#d1cdda", shadowRadius: 3, shadowOffset: { x: 0, y: 0 } }),
       { spacer: 5 },
       imageHelper("{{current_sunsetIcon}}", SIZES.image.extraLarge, "{{current_sunsetColor}}", "{{current_sunsetOpacity}}"),
-      textHelper("{{current_sunsetTime}}", { base: "dataText", fontSize: 24, color: "{{current_sunsetColor}}", opacity: "{{current_sunsetOpacity}}" })
+      textHelper("{{current_sunsetTimeStr}}", { base: "dataText", fontSize: 24, color: "{{current_sunsetColor}}", opacity: "{{current_sunsetOpacity}}" })
     ]
   }
 ]
@@ -574,7 +575,9 @@ const astroBlock = [
 // ======================
 module.exports = {
 
-  // Default Config
+  // ======================
+  // getDefaultConfig
+  // ======================
   getDefaultConfig() {
 
     return {
@@ -642,9 +645,10 @@ module.exports = {
         useCacheData: { type: "bool", label: "Use Cache Data", section: "API", default: true },
         refreshMinutes: { type: "number", label: "Refresh Minutes", section: "API", default: 5 },
         forceRefresh: { type: "bool", label: "Force Refresh in App", section: "API", default: false },
-
         intervalHours: { type: "number", label: "Interval Hours", section: "API", default: 2 },
         displayCount: { type: "number", label: "Display Count", section: "API", default: 4 },
+
+        useNotification: { type: "bool", label: "Use Notification Data", section: "Notification", default: true },
 
         useCurrentLocation: { type: "bool", label: "現在地を使用", section: "Location", default: true },
         lat: { type: "number", label: "緯度（固定地点）", section: "Location", default: 35.6812, show: "{{!useCurrentLocation}}" },
@@ -712,7 +716,9 @@ module.exports = {
     cacheMinutes: 60
   },
 
-  // Layout
+  // ======================
+  // getLayout
+  // ======================
   getLayout(layoutId = "default") {
 
     const layouts = {
@@ -805,51 +811,129 @@ module.exports = {
     return layouts[layoutId] || layouts.default
   },
 
-  // Notification Tap
+  // =========================
+  // onNotificationTap
+  // =========================
   onNotificationTap: async (info, core) => {
-
-    if (info.action === "openProfile") {
-      core.profile.setActive(info.profile)
-      await core.preview(info.widgetFamily)
+    const handler = core.notificationHandlers[info.action]
+    if (handler) {
+      await handler(info)
       return true
     }
-
     return false
   },
 
-  // Data変換
+  // =========================
+  // transform
+  // =========================
   transform(data, config) {
 
-    const appId = config?.appId || "WidgetFramework"
     const v = config?.values || {}
 
     if (v.useTestData) return this.testDataTransform(data, config)
 
-    // 表示件数に制限された2時間毎のforecastday配列
-    const intervalHours = v.intervalHours || 2      // 取得したい時間間隔（2時間ごと）
-    const displayCount = v.displayCount || 4        // 表示件数（large widget）
-    const nowEpoch = Math.floor(Date.now() / 1000) - (3600 * (intervalHours + 1))
+    const hours = this.secondaryData(data, config)
 
-    const forecastData = data.forecast.forecastday  // forecastday 配列
+    const items = this.dataTransform(hours, config)
+    const meta = this.metaTransform(data, config, hours)
 
-    // hour 配列から現在時間以降のデータを flatten して抽出
-    const hours = forecastData.flatMap(day => day.hour)
-      .filter(h => h.time_epoch >= nowEpoch)         // 現在時間以降
-      .filter((h, i) => i % intervalHours === 0)     // 2時間毎に間引き
-      .slice(0, displayCount + 2)                    // 表示件数に制限
-
-    const items = this.forecastDataTransform(hours, config)
-    const meta = this.metaDataTransform(data, hours, config)
-
-    // 共通データ返却（統一フォーマット）
     return {
       items,
       ...flatObj(meta)
     }
   },
 
-  // meta 情報を整理
-  metaDataTransform(data, hours, config) {
+  // =========================
+  // secondaryData
+  // =========================
+  secondaryData(data, config) {
+
+    const v = config?.values || {}
+
+    const intervalHours = v.intervalHours || 2
+    const displayCount = v.displayCount || 4
+    const nowEpoch = Math.floor(Date.now() / 1000) - (3600 * (intervalHours + 1))
+
+    const obj = data.forecast.forecastday
+
+    const items = obj.flatMap(day => day.hour)
+      .filter(h => h.time_epoch >= nowEpoch)
+      .filter((h, i) => i % intervalHours === 0)
+      .slice(0, displayCount + 2)
+
+    return items
+  },
+
+  // =========================
+  // dataTransform
+  // =========================
+  dataTransform(hours, config) {
+
+    const items = hours.map((h, idx) => {
+      if (idx <= 1) return null
+      const prev = idx > 0 ? hours[idx - 1] : h
+
+      const hour = Number(h.time.split(" ")[1].slice(0, 2))
+
+      const pressure = h.pressure_mb
+      const wind = h.wind_kph / 3.6
+      const temp = h.temp_c
+      const pop = Math.max(...[ h.chance_of_rain, h.chance_of_snow ])
+
+      const hourStr = `${hour}時`
+      const pressureStr = Math.round(pressure)
+      const windStr = Math.round(wind)
+      const tempStr = Math.round(temp)
+      const popStr = Math.ceil(pop / 5) * 5
+
+      const pressureColor = getPressureColor(h.pressure_mb, prev.pressure_mb)
+      const windColor = colorByThreshold(wind, LEVEL_THRESHOLDS.wind, LEVEL_THRESHOLDS.windDef)
+      const tempColor = colorByThreshold(temp, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef)
+      const popColor = colorByThreshold(pop, LEVEL_THRESHOLDS.pop, LEVEL_THRESHOLDS.popDef)
+
+      const pressureTrend = trendIcon(pressure, prev.pressure_mb)
+      const windTrend = trendIcon(wind, (prev.wind_kph / 3.6))
+      const tempTrend = trendIcon(temp, prev.temp_c)
+      const popTrend = trendIcon(pop, Math.max(...[ prev.chance_of_rain, prev.chance_of_snow ]))
+
+      const windIcon = drawArrow(getDegString(h.wind_degree), null, true)
+
+      return {
+
+        hour: hour,
+        hourStr: hourStr,
+
+        pressure: pressure,
+        pressureStr: pressureStr,
+        pressureColor: pressureColor,
+        pressureTrend: pressureTrend,
+
+        wind: wind,
+        windStr: windStr,
+        windColor: windColor,
+        windTrend: windTrend,
+        windIcon: windIcon,
+
+        temp: temp,
+        tempStr: tempStr,
+        tempColor: tempColor,
+        tempTrend: tempTrend,
+
+        pop: pop,
+        popStr: popStr,
+        popColor: popColor,
+        popTrend: popTrend
+
+      }
+    }).filter(v => v)
+
+    return items
+  },
+
+  // =========================
+  // metaTransform
+  // =========================
+  metaTransform(data, config, hours) {
 
     const v = config?.values || {}
 
@@ -873,7 +957,7 @@ module.exports = {
       showDetail: level >= 3
     }
 
-    // Online判定
+    // Online/Offline
     const online = v.isOnline ?? false
     const dayTime = true
     const status = {
@@ -882,7 +966,7 @@ module.exports = {
       opacity: online ? 1.0 : 0.7
     }
 
-    // 更新時間生成
+    // Update Time
     const updateStr = formatTime(
       data.current?.last_updated_epoch ??
       data.last_updated_epoch,
@@ -893,10 +977,50 @@ module.exports = {
     const location = config?.location || null
 
     // current
-    const current = this.currentDataTransform(data, hours, config)
+    const current = this.currentDataTransform(data, config, hours)
+
+    const appId = config?.appId || "WidgetFramework"
 
     // notifications
+//     const notify = core.notification.getStateMap()
+//     const state = notify["forecast_0"]
+
+//     if (state?.hasPending) {
+      // 予約あり
+//     }
+
+//     if (state?.hasSent) {
+      // 通知済み
+//     }
+/*
+{
+  id: string,          // ★必須（グループID）
+  title: string,       // 表示タイトル
+  subtitle?: string,   // サブタイトル
+  body?: string,       // 本文
+
+  delay?: number,      // ms後に通知（schedule化）
+  cooldown?: number,   // 再通知防止時間(ms)
+
+  sound?: string,      // 通知音（任意）
+
+  meta?: object        // ★拡張領域（重要）
+}
+*/
     const notifications = [
+//       {
+//         id: appId + "-" + formatTime(new Date(), "HH"),
+//         delay: 5000,
+//         title: "title",
+//         subtitle: "subtitle",
+//         body: "body",
+//         cooldown: 3*60*1000,
+//         meta: {
+//           action: "openProfile",
+//           profile: "default",
+//           widgetFamily: "large"
+//         }
+//       },
 //       {
 //         id: "rain_alert3",
 //         delay: 10000,
@@ -908,20 +1032,44 @@ module.exports = {
 //           action: "openExternal",
 //           url: "https://example.com"
 //         }
-//       }
+//       },
+      {
+        id: appId + "-" + formatTime(new Date(), "HH"),
+        delay: 10000,
+        title: "通知UIを開く",
+        subtitle: "サブタイトル",
+        body: "タップで開く",
+        cooldown: 25000,
+        meta: {
+          action: "openNotificationUI"
+        }
+      },
+      {
+        id: appId,
+        delay: 10000,
+        title: "通知UIで詳細を開く",
+        subtitle: "サブタイトル",
+        body: "タップで開く",
+        cooldown: 25000,
+        meta: {
+          action: "openNotificationDetail"
+        }
+      }
     ]
 
-//     const notifications = hours.map((h, i) => ({
-//       id: `forecast_${i}_${h.time_epoch}`,
-//       scheduleAt: new Date(h.time_epoch * 1000),
-//       title: "予報",
-//       body: `${h.temp_c}°`
-//     }))
+// const notifications = hours.map((h, i) => ({
+//   id: `forecast_${i}_${h.time_epoch}`,
+//   delay: 10000,
+//   scheduleAt: new Date(h.time_epoch * 1000),
+//   title: "予報" + h.time_epoch,
+//   body: `${h.temp_c}°`,
+//   cooldown: 25000,
+// }))
 
     // メタ情報
     const meta = {
       header: {
-        titleStr: current.condition,
+        titleStr: current.conditionStr,
         titleIcon: {
           src: current.conditionIcon,
           tint: current.isDay ? "" : "#ffffff"
@@ -936,7 +1084,7 @@ module.exports = {
 
       ui,
       status,
-      notifications,
+//       notifications,
 
       current,
       location: {
@@ -951,150 +1099,142 @@ module.exports = {
     return meta
   },
 
-  // current 情報を整理
-  currentDataTransform(data, hours, config) {
-
-    const now = new Date()
-    const h = String(now.getHours()).padStart(2, '0')
-    const m = String(now.getMinutes()).padStart(2, '0')
+  // =========================
+  // currentDataTransform
+  // =========================
+  currentDataTransform(data, config, hours) {
 
     const currentData = data.current
     const forecastData = data.forecast.forecastday
     const dayData = forecastData.flatMap(day => day.day)
     const astroData = forecastData.flatMap(day => day.astro)
 
-//     console.log(JSON.stringify(dayData, null, 2))
+    const pressure = currentData.pressure_mb
+    const pressureAfter = hours[1].pressure_mb || pressure
 
-    const pressure_current = currentData.pressure_mb
-    const pressure_after = hours[1].pressure_mb || pressure_current
-
-    const temp = Math.round(currentData.temp_c)
-    const tempMin = Math.round(dayData[0].mintemp_c)
-    const tempMax = Math.round(dayData[0].maxtemp_c)
-
-    const feelslike = Math.round(currentData.feelslike_c)
-
+    const temp = currentData.temp_c
+    const tempMin = dayData[0].mintemp_c
+    const tempMax = dayData[0].maxtemp_c
+    const feelslike = currentData.feelslike_c
     const humidity = currentData.humidity
-
-    const discomfortIndex = getDiscomfortIndex(temp, humidity)
-    const [ discomfortIndexColor, discomfortIndexStr ] = colorByThreshold(discomfortIndex, LEVEL_THRESHOLDS.discomfort, LEVEL_THRESHOLDS.discomfortDef)
-
-    const windSpeed = (currentData.wind_kph / 3.6).toFixed(1)
-    const windDegree = getDegreeString(currentData.wind_dir)
-    const windIcon = drawArrow(getDegString(currentData.wind_degree), null, true)
-
+    const wind = currentData.wind_kph / 3.6
+    const winDir = currentData.wind_dir
+    const windDegree = currentData.wind_degree
     const rain = currentData.precip_mm
-
-    const pop = Math.ceil(Math.max(...[ hours[1].chance_of_rain, hours[1].chance_of_snow ]) / 5) * 5
-
+    const pop = Math.max(...[ hours[1].chance_of_rain, hours[1].chance_of_snow ])
+    const discomfortIndex = getDiscomfortIndex(temp, humidity)
     const sunriseTime = convert12to24(astroData[0].sunrise)
     const sunsetTime = convert12to24(astroData[0].sunset)
 
-    const isDay = isTimeInRangeAcrossDay(`${h}:${m}`, sunriseTime, sunsetTime)
-    const isAm = now.getHours() < 12
+    const pressureStr = Math.round(pressure)
+    const tempStr= Math.round(temp)
+    const tempMinStr = Math.round(tempMin)
+    const tempMaxStr = Math.round(tempMax)
+    const feelslikeStr = Math.round(feelslike)
+    const humidityStr = Math.round(humidity)
+    const windStr = wind.toFixed(1)
+    const winDirStr = getDegreeString(winDir)
+    const windDegreeStr = getDegString(windDegree)
+    const rainStr = rain.toFixed(rain > 1 ? 0 : 1)
+    const popStr = Math.ceil(pop / 5) * 5
+    const discomfortIndexStr = discomfortIndex.toFixed(1)
+    const conditionStr = currentData.condition.text
+    const sunriseTimeStr = convert12to24(astroData[0].sunrise)
+    const sunsetTimeStr = convert12to24(astroData[0].sunset)
+
+    const pressureColor = getPressureColor(pressure, pressureAfter)
+    const tempColor = colorByThreshold(temp, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef)
+    const tempMinColor = colorByThreshold(tempMin, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef)
+    const tempMaxColor = colorByThreshold(tempMax, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef)
+    const feelslikeColor = colorByThreshold(feelslike, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef)
+    const humidityColor = "#ffffff"
+    const windColor = colorByThreshold(wind, LEVEL_THRESHOLDS.wind, LEVEL_THRESHOLDS.windDef)
+    const rainColor = colorByThreshold(rain, LEVEL_THRESHOLDS.rain, LEVEL_THRESHOLDS.rainDef)
+    const popColor = colorByThreshold(pop, LEVEL_THRESHOLDS.pop, LEVEL_THRESHOLDS.popDef)
+    const [ discomfortIndexColor, discomfortStr ] = colorByThreshold(discomfortIndex, LEVEL_THRESHOLDS.discomfort, LEVEL_THRESHOLDS.discomfortDef)
+
+    const windIcon = drawArrow(getDegString(currentData.wind_degree), null, true)
+    const conditionIcon = makeWeatherApiIcon(currentData.condition.icon)
+
+    const date = new Date()
+    const isDay = isTimeInRangeAcrossDay(`${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`, sunriseTime, sunsetTime)
+    const isAm = date.getHours() < 12
+    const moonphaseTextIcon = getMoonphaseImage(date, true)
+    const sunriseIcon = "sunrise.fill"
+    const sunsetIcon = "sunset.fill"
+    const sunriseColor = isAm ? "" : "#999999"
+    const sunsetColor = isAm ? "#999999" : ""
+    const sunriseOpacity = isAm ? 1 : 0.7
+    const sunsetOpacity = isAm ? 0.7 : 1
 
     const current = {
-      updated: currentData.last_updated,
-      isDay: currentData.is_day,
 
-      pressure: pressure_current,
-      pressureColor: getPressureColor(pressure_current, pressure_after),
+      isDay: isDay,
 
-      temp,
-      tempMin,
-      tempMinColor: colorByThreshold(tempMin, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef),
-      tempMax,
-      tempMaxColor: colorByThreshold(tempMax, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef),
+      pressure: pressure,
+      temp: temp,
+      tempMin: tempMin,
+      tempMax: tempMax,
+      feelslike: feelslike,
+      humidity: humidity,
+      wind: wind,
+      winDir: winDir,
+      windDegree: windDegree,
+      rain: rain,
+      pop: pop,
+      discomfortIndex: discomfortIndex,
 
-      feelslike,
-      feelslikeColor: colorByThreshold(feelslike, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef),
+      pressureStr: pressureStr,
+      tempStr: tempStr,
+      tempMinStr: tempMinStr,
+      tempMaxStr: tempMaxStr,
+      feelslikeStr: feelslikeStr,
+      humidityStr: humidityStr,
+      windStr: windStr,
+      winDirStr: winDirStr,
+      windDegreeStr: windDegreeStr,
+      rainStr: rainStr,
+      popStr: popStr,
+      discomfortIndexStr: discomfortIndexStr,
+      discomfortStr: discomfortStr,
+      conditionStr: conditionStr,
+      sunriseTimeStr: sunriseTimeStr,
+      sunsetTimeStr: sunsetTimeStr,
 
-      condition: currentData.condition.text,
-      conditionIcon: makeWeatherApiIcon(currentData.condition.icon),
+      pressureColor: pressureColor,
+      tempColor: tempColor,
+      tempMinColor: tempMinColor,
+      tempMaxColor: tempMaxColor,
+      feelslikeColor: feelslikeColor,
+      humidityColor: humidityColor,
+      windColor: windColor,
+      rainColor: rainColor,
+      popColor: popColor,
+      discomfortIndexColor: discomfortIndexColor,
+      sunriseColor: sunriseColor,
+      sunsetColor: sunsetColor,
 
-      humidity,
+      sunriseOpacity: sunriseOpacity,
+      sunsetOpacity: sunsetOpacity,
 
-      windSpeed,
-      windIcon,
-      windSpeedColor: colorByThreshold(windSpeed, LEVEL_THRESHOLDS.wind, LEVEL_THRESHOLDS.windDef),
-      windDir: currentData.wind_dir,
-      windDegree: getDegreeString(currentData.wind_dir),
+      windIcon: windIcon,
+      conditionIcon: conditionIcon,
+      moonphaseTextIcon: moonphaseTextIcon,
+      sunriseIcon: sunriseIcon,
+      sunsetIcon: sunsetIcon,
 
-      rain: rain.toFixed(rain > 1 ? 0 : 1),
-      rainColor: colorByThreshold(rain, LEVEL_THRESHOLDS.rain, LEVEL_THRESHOLDS.rainDef),
-  
-      pop,
-      popColor: colorByThreshold(pop, LEVEL_THRESHOLDS.pop, LEVEL_THRESHOLDS.popDef),
-
-      discomfortIndex: discomfortIndex.toFixed(0),
-      discomfortIndexColor,
-      discomfortIndexStr,
-
-      moonphaseIcon: getMoonphaseImage(now, true),
-
-      sunriseTime,
-      sunriseIcon: "sunrise.fill",
-      sunriseColor: isAm ? "" : "#999999",
-      sunriseOpacity: isAm ? 1 : 0.7,
-
-      sunsetTime,
-      sunsetIcon: "sunset.fill",
-      sunsetColor: isAm ? "#999999" : "",
-      sunsetOpacity: isAm ? 0.7 : 1,
-
-//       cloud: currentData.cloud,
-//       gustKph: currentData.gust_kph,
-//       visibilityKm: currentData.vis_km,
-//       uv: currentData.uv,
     }
 
     return current
   },
 
-  // forecast 情報を整理
-  forecastDataTransform(hours, config) {
+  // ======================
+  // Use Test Data
+  // ======================
 
-    // レンダラー用 JSON に transform
-    const items = hours.map((h, idx) => {
-      if (idx <= 1) return null
-      const prev = idx > 0 ? hours[idx - 1] : h
-
-      const tempTrend = trendIcon(h.temp_c, prev.temp_c)
-      const pressureTrend = trendIcon(h.pressure_mb, prev.pressure_mb)
-      const windTrend = trendIcon(h.wind_kph, prev.wind_kph)
-      const popTrend = trendIcon(h.chance_of_rain, prev.chance_of_rain)
-      const pop = Math.ceil(Math.max(...[ h.chance_of_rain, h.chance_of_snow ]) / 5) * 5
-
-      const temp = Math.round(h.temp_c)
-      const windSpeed = Math.round(h.wind_kph / 3.6)
-      const windIcon = drawArrow(getDegString(h.wind_degree), null, true)
-
-      return {
-        hour: Number(h.time.split(" ")[1].slice(0, 2)) + "時",
-
-        pressure: Math.round(h.pressure_mb),
-        pressureColor: getPressureColor(h.pressure_mb, prev.pressure_mb),
-        pressureTrend,
-
-        windSpeed,
-        windSpeedColor: colorByThreshold(windSpeed, LEVEL_THRESHOLDS.wind, LEVEL_THRESHOLDS.windDef),
-        windTrend,
-        windIcon,
-
-        temp,
-        tempColor: colorByThreshold(temp, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef),
-        tempTrend,
-
-        pop,
-        popColor: colorByThreshold(pop, LEVEL_THRESHOLDS.pop, LEVEL_THRESHOLDS.popDef),
-        popTrend
-      }
-    }).filter(v => v)
-
-    return items
-  },
-
-  // Test Data
+  // ======================
+  // getTestData
+  // ======================
   getTestData() {
 
     return {
@@ -1117,7 +1257,9 @@ module.exports = {
     }
   },
 
-  // Test Data Transform
+  // ======================
+  // testDataTransform
+  // ======================
   testDataTransform(data, config) {
 
     const v = config?.values || {}
@@ -1181,7 +1323,10 @@ module.exports = {
       ...flatObj(meta)
     }
   },
-  // ランキング
+
+  // ======================
+  // getRank
+  // ======================
   getRank(score) {
 
     if (score >= 90) return "S"
@@ -1194,6 +1339,17 @@ module.exports = {
 // ======================
 // Function
 // ======================
+
+// ======================
+// printf
+// ======================
+function printf(data) {
+  return console.log(JSON.stringify(data, null, 2))
+}
+
+// ======================
+// pos
+// ======================
 function pos(a,b,c,d){
   if (b === undefined)
     return {top:a,left:a,bottom:a,right:a}
@@ -1204,23 +1360,17 @@ function pos(a,b,c,d){
   return {top:a,left:b,bottom:c,right:d}
 }
 
-// function degreeTo16Compass(deg) {
-//   const dirs = [
-//     "N", "NNE", "NE", "ENE",
-//     "E", "ESE", "SE", "SSE",
-//     "S", "SSW", "SW", "WSW",
-//     "W", "WNW", "NW", "NNW"
-//   ]
-//   const index = Math.floor(((deg + 11.25) % 360) / 22.5)
-//   return dirs[index]
-// }
-
+// ======================
+// DrawContext
+// ======================
 function getDegString(deg) { return Math.floor((deg + 11.25) / 22.5) * 22.5 + 180 }
 function drawCircle(t,e,a,r,i,n,s,o,l){let c,u,d,$,m,h,p,g,f,w,y,_;d=e.width/2,$=e.height/2,r=r||0,i=i||0,n=n||0,o=o||0,p=1,w=l&&l.strokeColor?l.strokeColor:"#000",y=l&&l.strokeWidth?l.strokeWidth:0,_=l&&l.fillColor?l.fillColor:"#000";let S=new Path,T=[];for(let k=0;k<360;k++)g=(a-y/2)*Math.cos(m=(h=-90+p*k+o)*(Math.PI/180)),f=(a-y/2)*Math.sin(m),c=d+g,u=$+f,T.push(new Point(c,u));S.addLines(T),S.closeSubpath(),"transparent"!==_&&(t.addPath(S),t.setFillColor(new Color(_)),t.fillPath(S)),"transparent"!==w&&y>0&&(t.addPath(S),t.setStrokeColor(new Color(w)),t.setLineWidth(y),t.strokePath())}
 function drawTriangle(t,e,a,r,i,n,s,o,l){let c,u,d,$,m,h,p,g,f,w,y,_;d=e.width/2,$=e.height/2,r=r||0,i=i||0,n=n||0,o=o||0,w=l&&l.strokeColor?l.strokeColor:"#000",y=l&&l.strokeWidth?l.strokeWidth:0,_=l&&l.fillColor?l.fillColor:"#000";let S=new Path,T=[],k=[];for(let F=0;F<4;F++)0==F?h=-90+o:1==F?h=-90+o+n:2==F?p=(h+(360-2*n)/2)*(Math.PI/180):3==F&&(h=-90+o+(360-n)),m=h*(Math.PI/180),2==F?(g=(a-i)*Math.cos(p),f=(a-i)*Math.sin(p)):(g=(a+r)*Math.cos(m),f=(a+r)*Math.sin(m)),c=d+g,u=$+f,T.push(new Point(c,u)),k.push([c,u]);S.addLines(T),S.closeSubpath(),"transparent"!==_&&(t.addPath(S),t.setFillColor(new Color(_)),t.fillPath(S)),"transparent"!==w&&y>0&&(t.addPath(S),t.setStrokeColor(new Color(w)),t.setLineWidth(y),t.strokePath())}
 function drawArrow(t,e,a){let r=new Size(32,32),i=new DrawContext;i.opaque=!1,i.respectScreenScale=!0,i.size=r;let n={triangle:{strokeColor:e,strokeWidth:0,fillColor:e},circle:{strokeColor:e,strokeWidth:2,fillColor:"transparent"}};return a&&drawCircle(i,r,15,0,0,0,360,t,n.circle),drawTriangle(i,r,12,0,9,140,0,t,n.triangle),i.getImage()}
 
+// ======================
 // Object 平坦化
+// ======================
 function flatObj(obj, prefix = '') {
   const result = {}
   for (const key in obj) {
@@ -1241,7 +1391,9 @@ function flatObj(obj, prefix = '') {
   return result
 }
 
+// ======================
 // Epoch Date Formatter
+// ======================
 function formatTime(epoch, format = "HH:mm") {
   if (!epoch) return "--:--"
   const ts = new Date(
@@ -1252,7 +1404,14 @@ function formatTime(epoch, format = "HH:mm") {
   return df.string(ts)
 }
 
+// ======================
+// parseURL 
+// ======================
 function parseURL(t){let e={href:t},a=["protocol host hostname port pathname query hash".split(" "),"directory filename query".split(" "),"basename extension".split(" ")];return[/^(?:(https?:)?(?:\/\/(([^\/:]+)(?::([0-9]+))?)))?(\/?[^?#]*)(\??[^?#]*)(#?.*)/,/^(?:[^:\/?#]+:)?(?:\/\/[^\/?#]*)?(?:([^?#]*\/)([^\/?#]*))?(\?[^#]*)?(?:#.*)?$/,/^([^/]*)\.([^.]+)?$/].map((r,i)=>{let n=String(2==i?e.filename:t).match(r);n&&a[i].forEach(function(t,a){e[t]=void 0===n[a+1]?null:n[a+1]})}),e}
+
+// ======================
+// makeWeatherApiIcon 
+// ======================
 function makeWeatherApiIcon(url) {
   let {  protocol, host, pathname, filename } = parseURL(url)
   url = (protocol || 'https') + '://' + host + pathname
@@ -1261,21 +1420,14 @@ function makeWeatherApiIcon(url) {
   return url
 }
 
-// 例：風向きをアイコンに変換する関数
-// function _convertWindDegToIcon(deg) {
-//   if (deg >= 337.5 || deg < 22.5) return "↑"
-//   if (deg >= 22.5 && deg < 67.5) return "↗"
-//   if (deg >= 67.5 && deg < 112.5) return "→"
-//   if (deg >= 112.5 && deg < 157.5) return "↘"
-//   if (deg >= 157.5 && deg < 202.5) return "↓"
-//   if (deg >= 202.5 && deg < 247.5) return "↙"
-//   if (deg >= 247.5 && deg < 292.5) return "←"
-//   if (deg >= 292.5 && deg < 337.5) return "↖"
-//   return "↑"
-// }
-
+// ======================
+// getDegreeString 
+// ======================
 function getDegreeString(wind_dir) { return [ ...wind_dir.replace(/E/g, '\u6771').replace(/W/g, '\u897f').replace(/S/g, '\u5357').replace(/N/g, '\u5317') + '\u3000\u3000' ].slice(0, 3).join('') }
 
+// ======================
+// trendIcon 
+// ======================
 function trendIcon(curr, prev) {
   const arr = TEXT_ICON
   if (curr > prev) return arr.up
@@ -1283,6 +1435,9 @@ function trendIcon(curr, prev) {
   return arr.right
 }
 
+// ======================
+// colorByThreshold 
+// ======================
 function colorByThreshold(v, table, defaultColor) {
   for (const [limit, color] of table) {
     if (v >= limit) return color
@@ -1290,6 +1445,9 @@ function colorByThreshold(v, table, defaultColor) {
   return defaultColor
 }
 
+// ======================
+// getPressureColor 
+// ======================
 function getPressureColor(curr, prev) {
   const diff = curr - prev
   const c = COLORS.pressure
@@ -1300,16 +1458,25 @@ function getPressureColor(curr, prev) {
   return color
 }
 
+// ======================
+// getDiscomfortIndex 
+// ======================
 function getDiscomfortIndex(temp, humidity) {
   const index = 0.81 * temp + 0.01 * humidity * (0.99 * temp - 14.3) + 46.3
   return Number(index.toFixed(1))
 }
 
+// ======================
+// timeToMinutes
+// ======================
 function timeToMinutes(timeString) {
   const [hours, minutes] = timeString.split(':').map(Number);
   return hours * 60 + minutes;
 }
 
+// ======================
+// convert12to24
+// ======================
 function convert12to24(time12h) {
   const [_, hours, minutes, modifier] = time12h.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
   let hours24 = parseInt(hours, 10);
@@ -1321,6 +1488,9 @@ function convert12to24(time12h) {
   return `${String(hours24).padStart(2, '0')}:${minutes}`;
 }
 
+// ======================
+// isTimeInRangeAcrossDay
+// ======================
 function isTimeInRangeAcrossDay(checkTime, startTime, endTime) {
   let start = timeToMinutes(startTime);
   let end = timeToMinutes(endTime);
@@ -1334,6 +1504,9 @@ function isTimeInRangeAcrossDay(checkTime, startTime, endTime) {
   return check >= start && check <= end;
 }
 
+// ======================
+// Module Test
+// ======================
 function getMoonphaseImage( dt, isMoonUp = true ) {
   Date.prototype.getMoonphase=function(){let t=0,e=0,$=0,o=0,n=this.getFullYear(),h=this.getMonth()+1,r=this.getDate();return h<3&&(n--,h+=12),++h,$=(t=365.25*n)+(e=30.6*h)+r-694039.09,$/=29.5305882,o=parseInt($),$-=o,(o=Math.round(8*$))>=8&&(o=0),o}
   const sunIcon = '\ud83d\udfe0';
@@ -1348,6 +1521,7 @@ const module_name = module.filename.match(/[^\/]+$/ )[ 0 ].replace('.js', '');
 if (module_name == Script.name()) {
   (async() => {
     const Main = importModule("Main")
+    Main.setAppInfo("id", APP_ID)
     Main.setAppInfo("storageType", DEFAULT_STRAGE_TYPE)
     await Main.start()
   })()
