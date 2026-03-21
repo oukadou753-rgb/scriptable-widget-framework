@@ -55,14 +55,10 @@ module.exports = class WF_WidgetCore {
 
     }
 */
+    const widget = await this.run()
+    Script.setWidget(widget)
+    Script.complete()
+    return
 
-    if (config.runsInWidget && !config.runsInApp) {
-      const widget = await this.run()
-      Script.setWidget(widget)
-      Script.complete()
-      return
-    }
-
-    await this.preview("large")
   }
 }
