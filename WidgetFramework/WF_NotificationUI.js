@@ -19,6 +19,10 @@ module.exports = {
   // present
   // =========================
   async present(core, options = {}) {
+
+    this.core = core
+    this.tableUI = core.tableUI
+
     const table = new UITable()
     table.showSeparators = true
     table.dismissOnSelect = false
@@ -74,46 +78,6 @@ module.exports = {
   // =========================
   // 共通部品
   // =========================
-  createRow() {
-    const row = new UITableRow()
-    row.dismissOnSelect = false
-    row.cellSpacing = 10
-    return row
-  },
-
-  createKeyValueRow(label, value) {
-    const row = this.createRow()
-
-    const left = row.addText(label)
-    left.widthWeight = 70
-    left.titleFont = Font.semiboldSystemFont(16)
-
-    const right = row.addText(String(value))
-    right.widthWeight = 30
-    right.rightAligned()
-    right.titleFont = Font.systemFont(12)
-
-    return { row, left, right }
-  },
-
-  createActionRow(buttons) {
-    const row = this.createRow()
-
-    for (const btn of buttons) {
-      const b = row.addButton(btn.label)
-      if (btn.onTap) b.onTap = btn.onTap
-      if (btn.dismiss) b.dismissOnTap = true
-    }
-
-    return row
-  },
-
-  createSpacer(height = 12) {
-    const row = new UITableRow()
-    row.height = height
-    row.dismissOnSelect = false
-    return row
-  },
 
   // =========================
   // データ取得
@@ -129,7 +93,7 @@ module.exports = {
   // タブ
   // =========================
   renderTabs(table, core) {
-    table.addRow(this.createActionRow([
+    table.addRow(this.tableUI.createButtonRow([
       {
         label: this.mode === "scheduled" ? "●予定" : "予定",
         onTap: async () => {
@@ -150,18 +114,14 @@ module.exports = {
           await this.reload(core)
         }
       }
-    ]))
+    ]).row)
   },
 
   // =========================
   // 件数
   // =========================
   renderCount(table, list) {
-    const { row, right } =
-      this.createKeyValueRow("件数", list.length)
-
-    right.rightAligned()
-    table.addRow(row)
+    table.addRow(this.tableUI.createKeyValueRow("件数", list.length).row)
   },
 
   // =========================
@@ -170,31 +130,18 @@ module.exports = {
   renderList(table, list, core) {
 
     if (!Array.isArray(list) || list.length === 0) {
-      const { row } = this.createKeyValueRow("状態", "通知はありません")
-      table.addRow(row)
+      table.addRow(this.tableUI.createKeyValueRow("状態", "通知はありません").row)
       return
     }
 
     for (const item of list) {
-      const row = this.createRow()
-      row.height = 60
 
-      const left = row.addText(
-        item.title || "",
-        `${item.subtitle || ""} ${item.body || ""}`
-      )
-      left.widthWeight = 70
-      left.titleFont = Font.semiboldSystemFont(16)
-      left.subtitleFont = Font.systemFont(14)
-
-      const right = row.addText(
-        this.formatTimeAgo(item.date),
-        this.formatDate(item.date)
-      )
-      right.widthWeight = 30
-      right.rightAligned()
-      right.titleFont = Font.systemFont(14)
-      right.subtitleFont = Font.systemFont(12)
+      const { row, left, right } = this.tableUI.createListRow({
+        title: item.title,
+        subtitle: `${item.subtitle || ""} ${item.body || ""}`,
+        rightTitle: this.formatTimeAgo(item.date),
+        rightSubtitle: this.formatDate(item.date)
+      })
 
       if (item.isExpired) {
         left.titleColor = Color.gray()
@@ -208,6 +155,7 @@ module.exports = {
 
       table.addRow(row)
     }
+
   },
 
   // =========================
@@ -218,7 +166,7 @@ module.exports = {
     if (!item) return
 
     // 戻る
-    table.addRow(this.createActionRow([
+    table.addRow(this.tableUI.createButtonRow([
       {
         label: "← 一覧",
         onTap: async () => {
@@ -227,27 +175,27 @@ module.exports = {
           await this.reload(core)
         }
       }
-    ]))
+    ]).row)
 
     // 内容
-    table.addRow(this.createKeyValueRow("Title", item.title).row)
+    table.addRow(this.tableUI.createKeyValueRow("Title", item.title).row)
 
     if (item.body) {
-      table.addRow(this.createKeyValueRow("Body", item.body).row)
+      table.addRow(this.tableUI.createKeyValueRow("Body", item.body).row)
     }
 
-    table.addRow(this.createKeyValueRow(
+    table.addRow(this.tableUI.createKeyValueRow(
       "状態",
       item.isPending ? "予約中" : "送信済み"
     ).row)
 
-    table.addRow(this.createKeyValueRow(
+    table.addRow(this.tableUI.createKeyValueRow(
       "時刻",
       this.formatDate(item.date)
     ).row)
 
     // 削除
-    table.addRow(this.createActionRow([
+    table.addRow(this.tableUI.createButtonRow([
       {
         label: "削除",
         onTap: async () => {
@@ -256,13 +204,13 @@ module.exports = {
           await this.reload(core)
         }
       }
-    ]))
+    ]).row)
 
-    table.addRow(this.createSpacer(16))
+    table.addRow(this.tableUI.createSpacer(16))
 
     // スヌーズ
     if (item.isPending) {
-      table.addRow(this.createActionRow([
+      table.addRow(this.tableUI.createButtonRow([
         {
           label: "+5分",
           onTap: async () => {
@@ -281,7 +229,7 @@ module.exports = {
             await this.snoozeCustom(item, core)
           }
         }
-      ]))
+      ]).row)
     }
   },
 
@@ -289,26 +237,28 @@ module.exports = {
   // フッター
   // =========================
   renderFooter(table, core) {
-    table.addRow(this.createSpacer(16))
+    table.addRow(this.tableUI.createSpacer(16))
 
-    table.addRow(this.createActionRow([
-      {
-        label: "全削除",
-        onTap: async () => {
-          const a = new Alert()
-          a.title = "全削除しますか？"
-          a.addDestructiveAction("削除")
-          a.addCancelAction("キャンセル")
+    table.addRow(
+      this.tableUI.createButtonRow([
+        {
+          label: "全削除",
+          onTap: async () => {
+            const a = new Alert()
+            a.title = "全削除しますか？"
+            a.addDestructiveAction("削除")
+            a.addCancelAction("キャンセル")
 
-          const r = await a.presentAlert()
-          if (r === -1) return
+            const r = await a.presentAlert()
+            if (r === -1) return
 
-          await core.notification.clearAll()
-          await this.reload(core)
-        }
-      },
-      { label: "Close", dismiss: true }
-    ]))
+            await core.notification.clearAll()
+            await this.reload(core)
+          }
+        },
+        { label: "Close", dismiss: true }
+      ]).row
+    )
   },
 
   // =========================
@@ -316,6 +266,7 @@ module.exports = {
   // =========================
   async reload(core) {
     await this.createTable(this.table, core)
+    this.table.reload()
   },
 
   // =========================
