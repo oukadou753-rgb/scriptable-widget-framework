@@ -15,15 +15,23 @@ module.exports = {
   // =========================
   // present
   // =========================
-  async present(activeCfg, profileEngine, activeProfile) {
+  async present(core, options = {}) {
+
+    this.core = core
+    this.tableUI = core.tableUI
+
+    const profileEngine = core.profile
+    const activeProfile = profileEngine.getActive()
+    const activeCfg = options.config || profileEngine.getConfig()
+
     const table = new UITable()
     table.dismissOnSelect = false
     table.showSeparators = true
 
     this.table = table
 
-    await this.createTable(table, {...activeCfg}, profileEngine, activeProfile)
-    await table.present(activeCfg.values.showTableFullscreen ?? false)
+    await this.createTable(table, activeCfg, profileEngine, activeProfile)
+    await table.present(true)
   },
 
   // =========================
@@ -38,47 +46,6 @@ module.exports = {
   // =========================
   // 共通UI部品
   // =========================
-  createRow() {
-    const row = new UITableRow()
-    row.dismissOnSelect = false
-    row.cellSpacing = 10
-    return row
-  },
-
-  createKeyValueRow(label, value) {
-    const row = this.createRow()
-
-    const left = row.addText(label)
-    left.widthWeight = 70
-    left.titleFont = Font.systemFont(16)
-
-    const right = row.addText(String(value))
-    right.widthWeight = 30
-    right.rightAligned()
-    right.titleFont = Font.systemFont(14)
-
-    return { row, left, right }
-  },
-
-  createSectionHeader(title, isOpen) {
-    const row = this.createRow()
-    const txt = row.addText(`${isOpen ? "▼" : "▶"} ${title}`)
-    txt.titleFont = Font.mediumSystemFont(12)
-    return row
-  },
-
-  createActionRow(buttons) {
-    const row = this.createRow()
-
-    for (const btn of buttons) {
-      const b = row.addButton(btn.label)
-      if (btn.onTap) b.onTap = btn.onTap
-      if (btn.dismiss) b.dismissOnTap = true
-    }
-
-    return row
-  },
-
   applyColor(row, left, right, value) {
     try {
       const color = new Color(value)
@@ -99,13 +66,6 @@ module.exports = {
       right.titleColor = textColor
 
     } catch {}
-  },
-
-  createSpacer(height = 12) {
-    const row = new UITableRow()
-    row.height = height
-    row.dismissOnSelect = false
-    return row
   },
 
   // =========================
@@ -139,7 +99,7 @@ module.exports = {
     // -------------------------
     // Profile 行
     // -------------------------
-    const { row, left, right } = this.createKeyValueRow(
+    const { row, left, right } = this.tableUI.createKeyValueRow(
       "▼ Profile",
       `${activeProfile} ›`
     )
@@ -178,7 +138,7 @@ module.exports = {
     // -------------------------
     const allOpen = Object.values(sectionState).every(v => v)
 
-    table.addRow(this.createActionRow([
+    table.addRow(this.tableUI.createButtonRow([
       {
         label: allOpen ? "▶ Close All" : "▼ Open All",
         onTap: async () => {
@@ -201,7 +161,7 @@ module.exports = {
           await this.reload(activeCfg, profileEngine, activeProfile)
         }
       }
-    ]))
+    ]).row)
 
     // -------------------------
     // セクション描画
@@ -210,13 +170,13 @@ module.exports = {
 
       const isOpen = sectionState[sectionName]
 
-      const header = this.createSectionHeader(sectionName, isOpen)
-      header.onSelect = async () => {
+      const { row: headerRow } = this.tableUI.createSectionHeader(sectionName, isOpen)
+      headerRow.onSelect = async () => {
         values[`section_${sectionName}`] = !isOpen
         await this.reload(activeCfg, profileEngine, activeProfile)
       }
 
-      table.addRow(header)
+      table.addRow(headerRow)
 
       if (!isOpen) continue
 
@@ -234,8 +194,12 @@ module.exports = {
         const icon = item.readonly ? "□" : "■"
         const label = item.label || item.key
 
-        const { row, left, right } =
-          this.createKeyValueRow(`${indent}${icon} ${label}`, current)
+        const display =
+          (item.type === "bool" || item.type === "boolean")
+            ? (current ? "ON" : "OFF")
+            : current
+
+        const { row, left, right } = this.tableUI.createKeyValueRow(`${indent}${icon} ${label}`, display)
 
         // COLOR
         if (item.type === "color") {
@@ -322,12 +286,12 @@ module.exports = {
       }
     }
 
-    table.addRow(this.createSpacer(16))
+    table.addRow(this.tableUI.createSpacer(16))
 
     // -------------------------
     // フッター
     // -------------------------
-    table.addRow(this.createActionRow([
+    table.addRow(this.tableUI.createButtonRow([
       { label: "Cancel", dismiss: true },
       {
         label: "Save & Close",
@@ -338,7 +302,7 @@ module.exports = {
           profileEngine.saveConfig(activeProfile, cfg)
         }
       }
-    ]))
+    ]).row)
   },
 
   // =========================
