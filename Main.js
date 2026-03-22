@@ -38,6 +38,7 @@ const MODULES = {
   WF_ConfigUI: { type: "app", path: WF_MODULE_DIR },
   WF_NotificationHandlers: { type: "app", path: WF_MODULE_DIR },
   WF_NotificationUI: { type: "app", path: WF_MODULE_DIR },
+  WF_TableUI: { type: "app", path: WF_MODULE_DIR },
 
   WF_AppCore: { type: "app", path: WF_MODULE_DIR },
   WF_WidgetCore: { type: "widget", path: WF_MODULE_DIR },
