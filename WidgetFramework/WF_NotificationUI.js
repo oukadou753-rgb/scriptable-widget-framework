@@ -194,6 +194,8 @@ module.exports = {
       this.formatDate(item.date)
     ).row)
 
+    table.addRow(this.tableUI.createSpacer(16))
+
     // 削除
     table.addRow(this.tableUI.createButtonRow([
       {
@@ -205,8 +207,6 @@ module.exports = {
         }
       }
     ]).row)
-
-    table.addRow(this.tableUI.createSpacer(16))
 
     // スヌーズ
     if (item.isPending) {
