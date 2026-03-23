@@ -392,7 +392,7 @@ module.exports = class WF_WidgetRenderer {
   // =========================
   renderSpacer(container, el){
 
-    if(el.size)
+    if (el.size)
       container.addSpacer(el.size)
     else
       container.addSpacer()
@@ -419,7 +419,7 @@ module.exports = class WF_WidgetRenderer {
     }
 
     // URL
-    else if(typeof rawSrc === "string" && rawSrc.startsWith("http")){
+    else if (typeof rawSrc === "string" && rawSrc.startsWith("http")){
 
       try {
         image = await this.fetchImage(rawSrc)
@@ -466,13 +466,13 @@ module.exports = class WF_WidgetRenderer {
 
     const node = container.addImage(image)
 
-    if(tint != "")
+    if (tint != "")
       node.tintColor = new Color(tint)
 
-    if(size)
+    if (size)
       node.imageSize = new Size(size, size)
   
-    if(opacity)
+    if (opacity)
       node.imageOpacity = Number(opacity)
 
   }
