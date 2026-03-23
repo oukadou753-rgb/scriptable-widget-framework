@@ -53,15 +53,27 @@ module.exports = class WF_CoreBase {
 
     const configData = cfg ?? this.profile.getConfig()
 
-    configData.values.isOnline = await this.checkOnline()
-    configData.layout = this.appConfig.getLayout(configData.values.layoutId)
+    // =========================
+    // runtime
+    // =========================
+    const isOnline = await this.checkOnline()
+    const layout = this.appConfig.getLayout(configData.values.layoutId)
 
+    configData.values.isOnline = isOnline
+    configData.layout = layout
+
+    // =========================
+    // size
+    // =========================
     const finalSize =
       size ??
       (config.runsInWidget && !config.runsInApp
         ? config.widgetFamily
         : "medium")
 
+    // =========================
+    // data取得
+    // =========================
     const { data, location } = configData.values.useTestData
       ? this.appConfig.getTestData()
       : await new this.WF_DataProvider(
@@ -73,20 +85,43 @@ module.exports = class WF_CoreBase {
           }
         ).fetchAll(this.appConfig.api)
 
+    // =========================
+    // transformContext（整理版）
+    // =========================
     const transformContext = {
-      appId: this.appId,
-      config: configData,
-      values: configData.values,
-      location,
-      size: finalSize
+
+      env: {
+        appId: this.appId,
+        size: finalSize
+      },
+
+      config: {
+        values: configData.values,
+        layout: layout
+      },
+
+      runtime: {
+        isOnline,
+        location
+      }
+
     }
 
+    // =========================
+    // transform
+    // =========================
     const finalData = this.appConfig.transform
       ? this.appConfig.transform(data, transformContext)
       : data
 
+    // =========================
+    // 通知
+    // =========================
     await this.handleNotifications(finalData)
 
+    // =========================
+    // 最終context
+    // =========================
     return {
       appId: this.appId,
       size: finalSize,
