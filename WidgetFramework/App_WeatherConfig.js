@@ -9,6 +9,7 @@
 // Constat
 // ======================
 const APP_VERSION = "2.0.0"
+const APP_MAIN = "Main"
 const APP_ID = "Weather"
 const DEFAULT_STRAGE_TYPE = "local" // "icloud", "local", "bookmark"
 
@@ -352,7 +353,7 @@ const headerBlock = [
       h: [
         textHelper(TEXT_ICON.mark, { base: "smallText", color: "{{current_discomfortIndexColor}}" }),
         textHelper("{{current_discomfortStr}}", "mediumText"),
-        imageHelper("{{status_icon}}", SIZES.image.medium, "{{status_color}}", "{{status_opacity}}")
+        imageHelper("{{onlineIcon_name}}", SIZES.image.medium, "{{onlineIcon_color}}", "{{onlineIcon_opacity}}")
       ]
     }
   )
@@ -725,7 +726,7 @@ module.exports = {
 
       // Default Layout
       default: {
-        padding: pos(10, 16, 10, 16),
+        padding: pos(10, 13, 16, 13),
 
         header: headerBlock,
         body: [
@@ -826,16 +827,16 @@ module.exports = {
   // =========================
   // transform
   // =========================
-  transform(data, config) {
+  transform(data, ctx) {
 
-    const v = config?.values || {}
+    const v = ctx?.config?.values ?? {}
 
-    if (v.useTestData) return this.testDataTransform(data, config)
+    const useTestData = v?.useTestData ?? false
+    if (useTestData) return this.testDataTransform(data, ctx)
 
-    const hours = this.secondaryData(data, config)
-
-    const items = this.dataTransform(hours, config)
-    const meta = this.metaTransform(data, config, hours)
+    const hours = this.secondaryData(data, ctx)
+    const items = this.dataTransform(hours, ctx)
+    const meta = this.metaTransform(data, ctx, hours)
 
     return {
       items,
@@ -846,15 +847,15 @@ module.exports = {
   // =========================
   // secondaryData
   // =========================
-  secondaryData(data, config) {
+  secondaryData(data, ctx) {
 
-    const v = config?.values || {}
+    const v = config?.values ?? {}
 
-    const intervalHours = v.intervalHours || 2
-    const displayCount = v.displayCount || 4
+    const intervalHours = v?.intervalHours ?? 2
+    const displayCount = v?.displayCount ?? 4
     const nowEpoch = Math.floor(Date.now() / 1000) - (3600 * (intervalHours + 1))
 
-    const obj = data.forecast.forecastday
+    const obj = data?.forecast?.forecastday ?? {}
 
     const items = obj.flatMap(day => day.hour)
       .filter(h => h.time_epoch >= nowEpoch)
@@ -867,18 +868,18 @@ module.exports = {
   // =========================
   // dataTransform
   // =========================
-  dataTransform(hours, config) {
+  dataTransform(hours, ctx) {
 
     const items = hours.map((h, idx) => {
       if (idx <= 1) return null
       const prev = idx > 0 ? hours[idx - 1] : h
 
-      const hour = Number(h.time.split(" ")[1].slice(0, 2))
+      const hour = Number(h?.time.split(" ")[1].slice(0, 2))
 
-      const pressure = h.pressure_mb
-      const wind = h.wind_kph / 3.6
-      const temp = h.temp_c
-      const pop = Math.max(...[ h.chance_of_rain, h.chance_of_snow ])
+      const pressure = h?.pressure_mb
+      const wind = h?.wind_kph / 3.6
+      const temp = h?.temp_c
+      const pop = Math.max(...[ h?.chance_of_rain, h?.chance_of_snow ])
 
       const hourStr = `${hour}時`
       const pressureStr = Math.round(pressure)
@@ -886,17 +887,17 @@ module.exports = {
       const tempStr = Math.round(temp)
       const popStr = Math.ceil(pop / 5) * 5
 
-      const pressureColor = getPressureColor(h.pressure_mb, prev.pressure_mb)
+      const pressureColor = getPressureColor(h?.pressure_mb, prev?.pressure_mb)
       const windColor = colorByThreshold(wind, LEVEL_THRESHOLDS.wind, LEVEL_THRESHOLDS.windDef)
       const tempColor = colorByThreshold(temp, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef)
       const popColor = colorByThreshold(pop, LEVEL_THRESHOLDS.pop, LEVEL_THRESHOLDS.popDef)
 
       const pressureTrend = trendIcon(pressure, prev.pressure_mb)
-      const windTrend = trendIcon(wind, (prev.wind_kph / 3.6))
-      const tempTrend = trendIcon(temp, prev.temp_c)
-      const popTrend = trendIcon(pop, Math.max(...[ prev.chance_of_rain, prev.chance_of_snow ]))
+      const windTrend = trendIcon(wind, (prev?.wind_kph / 3.6))
+      const tempTrend = trendIcon(temp, prev?.temp_c)
+      const popTrend = trendIcon(pop, Math.max(...[ prev?.chance_of_rain, prev?.chance_of_snow ]))
 
-      const windIcon = drawArrow(getDegString(h.wind_degree), null, true)
+      const windIcon = drawArrow(getDegString(h?.wind_degree), null, true)
 
       return {
 
@@ -927,15 +928,53 @@ module.exports = {
       }
     }).filter(v => v)
 
-    return items
+    return items ?? []
   },
 
   // =========================
   // metaTransform
   // =========================
-  metaTransform(data, config, hours) {
+  metaTransform(data, ctx, hours) {
 
-    const v = config?.values || {}
+    const v = ctx?.values ?? {}
+    const env = ctx?.env ?? {}
+    const runtime = ctx?.runtime ?? {}
+    const appId = env?.appId ?? "WidgetFramework"
+
+    // current
+    const current = this.currentDataTransform(data, ctx, hours)
+
+    // titl
+    const titleStr = current?.conditionStr ?? ""
+    const titleIcon =  {
+      src: current?.conditionIcon ?? "",
+      tint: current?.isDay ? "" : "#ffffff"
+    }
+
+    // update
+    const updateStr = formatTime(
+      data?.current?.last_updated_epoch ??
+      data?.last_updated_epoch,
+      "HH時mm分"
+    )
+
+    // online
+    const isOnline = runtime?.isOnline ?? false
+    const onlineIcon = {
+      name: "location.fill",
+      color: "#d1cdda",
+      opacity: isOnline ? 1.0 : 0.7
+    }
+
+    // location
+    const l = runtime?.location ?? null
+    const location = {
+        lat: l?.lat ?? null,
+        lon: l?.lon ?? null,
+        latStr: l?.lat != null ? l.lat.toFixed(4) : "",
+        lonStr: l?.lon != null ? l.lon.toFixed(4) : "",
+        name: l?.full != null ? l.full.split(" ").slice(1).join("") : ""
+      }
 
     // ui
     const levelMap = {
@@ -944,10 +983,8 @@ module.exports = {
       large: 3,
       extraLarge: 4
     }
-
-    const level = levelMap[config.size] ?? 2
+    const level = levelMap[env?.size] ?? 2
     const isShow = true
-
     const ui = {
       isSmall: level === 1,
       isMediumUp: level >= 2,
@@ -957,143 +994,66 @@ module.exports = {
       showDetail: level >= 3
     }
 
-    // Online/Offline
-    const online = v.isOnline ?? false
-    const dayTime = true
-    const status = {
-      icon: "location.fill",
-      color: "#d1cdda",
-      opacity: online ? 1.0 : 0.7
-    }
-
-    // Update Time
-    const updateStr = formatTime(
-      data.current?.last_updated_epoch ??
-      data.last_updated_epoch,
-      "HH時mm分"
-    )
-
-    // location
-    const location = config?.location || null
-
-    // current
-    const current = this.currentDataTransform(data, config, hours)
-
-    const appId = config?.appId || "WidgetFramework"
-
     // notifications
-//     const notify = core.notification.getStateMap()
-//     const state = notify["forecast_0"]
-
-//     if (state?.hasPending) {
-      // 予約あり
-//     }
-
-//     if (state?.hasSent) {
-      // 通知済み
-//     }
 /*
 {
   id: string,          // ★必須（グループID）
   title: string,       // 表示タイトル
   subtitle?: string,   // サブタイトル
   body?: string,       // 本文
-
   delay?: number,      // ms後に通知（schedule化）
   cooldown?: number,   // 再通知防止時間(ms)
-
   sound?: string,      // 通知音（任意）
-
   meta?: object        // ★拡張領域（重要）
+
+  meta: {
+    action: "openNotificationUI"
+  }
+  meta: {
+    action: "openNotificationDetail"
+  }
+  meta: {
+    action: "openProfile",
+    profile: "default",
+    widgetFamily: "large"
+  }
+  meta: {
+    action: "openExternal",
+    url: "https://example.com"
+  }
 }
 */
-    const notifications = [
-//       {
-//         id: appId + "-" + formatTime(new Date(), "HH"),
-//         delay: 5000,
-//         title: "title",
-//         subtitle: "subtitle",
-//         body: "body",
-//         cooldown: 3*60*1000,
-//         meta: {
-//           action: "openProfile",
-//           profile: "default",
-//           widgetFamily: "large"
-//         }
-//       },
-//       {
-//         id: "rain_alert3",
-//         delay: 10000,
-//         title: "タイトル",
-//         subtitle: "サブタイトル",
-//         body: "開く",
-//         cooldown: 25000,
-//         meta: {
-//           action: "openExternal",
-//           url: "https://example.com"
-//         }
-//       },
-      {
-        id: appId + "-" + formatTime(new Date(), "HH"),
-        delay: 10000,
-        title: "通知UIを開く",
-        subtitle: "サブタイトル",
-        body: "タップで開く",
-        cooldown: 25000,
-        meta: {
-          action: "openNotificationUI"
-        }
-      },
-      {
-        id: appId,
-        delay: 10000,
-        title: "通知UIで詳細を開く",
-        subtitle: "サブタイトル",
-        body: "タップで開く",
-        cooldown: 25000,
-        meta: {
-          action: "openNotificationDetail"
-        }
-      }
-    ]
-
-// const notifications = hours.map((h, i) => ({
-//   id: `forecast_${i}_${h.time_epoch}`,
-//   delay: 10000,
-//   scheduleAt: new Date(h.time_epoch * 1000),
-//   title: "予報" + h.time_epoch,
-//   body: `${h.temp_c}°`,
-//   cooldown: 25000,
-// }))
+    const notifications = []
+//     const notifications = hours.map((h, i) => ({
+//       id: `forecast_${i}_${h.time_epoch}`,
+//       delay: 10000,
+//       scheduleAt: new Date(h.time_epoch * 1000),
+//       title: "予報" + h.time_epoch,
+//       body: `${h.temp_c}°`,
+//       cooldown: 25000,
+//     }))
 
     // メタ情報
     const meta = {
       header: {
-        titleStr: current.conditionStr,
-        titleIcon: {
-          src: current.conditionIcon,
-          tint: current.isDay ? "" : "#ffffff"
-        }
+        titleStr: titleStr,
+        titleIcon: titleIcon
       },
       body: {
         
       },
       footer: {
-        updateStr
+        updateStr: updateStr
       },
 
-      ui,
-      status,
-//       notifications,
+      current: current,
 
-      current,
-      location: {
-        lat: location?.lat ?? null,
-        lon: location?.lon ?? null,
-        latStr: location?.lat != null ? location.lat.toFixed(4) : "",
-        lonStr: location?.lon != null ? location.lon.toFixed(4) : "",
-        name: location?.full != null ? location.full.split(" ").slice(1).join("") : ""
-      }
+      isOnline: isOnline,
+      onlineIcon: onlineIcon,
+      location: location,
+      ui: ui,
+
+      notifications: notifications
     }
 
     return meta
@@ -1104,27 +1064,27 @@ module.exports = {
   // =========================
   currentDataTransform(data, config, hours) {
 
-    const currentData = data.current
-    const forecastData = data.forecast.forecastday
-    const dayData = forecastData.flatMap(day => day.day)
-    const astroData = forecastData.flatMap(day => day.astro)
+    const currentData = data?.current ?? {}
+    const forecastData = data?.forecast?.forecastday ?? {}
+    const dayData = forecastData?.flatMap(day => day?.day)
+    const astroData = forecastData?.flatMap(day => day?.astro)
 
-    const pressure = currentData.pressure_mb
-    const pressureAfter = hours[1].pressure_mb || pressure
+    const pressure = currentData?.pressure_mb
+    const pressureAfter = hours[1]?.pressure_mb ?? pressure
 
-    const temp = currentData.temp_c
-    const tempMin = dayData[0].mintemp_c
-    const tempMax = dayData[0].maxtemp_c
-    const feelslike = currentData.feelslike_c
-    const humidity = currentData.humidity
-    const wind = currentData.wind_kph / 3.6
-    const winDir = currentData.wind_dir
-    const windDegree = currentData.wind_degree
-    const rain = currentData.precip_mm
-    const pop = Math.max(...[ hours[1].chance_of_rain, hours[1].chance_of_snow ])
+    const temp = currentData?.temp_c
+    const tempMin = dayData[0]?.mintemp_c
+    const tempMax = dayData[0]?.maxtemp_c
+    const feelslike = currentData?.feelslike_c
+    const humidity = currentData?.humidity
+    const wind = currentData?.wind_kph / 3.6
+    const winDir = currentData?.wind_dir
+    const windDegree = currentData?.wind_degree
+    const rain = currentData?.precip_mm
+    const pop = Math.max(...[ hours[1]?.chance_of_rain, hours[1]?.chance_of_snow ])
     const discomfortIndex = getDiscomfortIndex(temp, humidity)
-    const sunriseTime = convert12to24(astroData[0].sunrise)
-    const sunsetTime = convert12to24(astroData[0].sunset)
+    const sunriseTime = astroData[0]?.sunrise
+    const sunsetTime = astroData[0]?.sunset
 
     const pressureStr = Math.round(pressure)
     const tempStr= Math.round(temp)
@@ -1138,9 +1098,9 @@ module.exports = {
     const rainStr = rain.toFixed(rain > 1 ? 0 : 1)
     const popStr = Math.ceil(pop / 5) * 5
     const discomfortIndexStr = discomfortIndex.toFixed(1)
-    const conditionStr = currentData.condition.text
-    const sunriseTimeStr = convert12to24(astroData[0].sunrise)
-    const sunsetTimeStr = convert12to24(astroData[0].sunset)
+    const conditionStr = currentData?.condition?.text
+    const sunriseTimeStr = convert12to24(sunriseTime)
+    const sunsetTimeStr = convert12to24(sunsetTime)
 
     const pressureColor = getPressureColor(pressure, pressureAfter)
     const tempColor = colorByThreshold(temp, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef)
@@ -1153,8 +1113,8 @@ module.exports = {
     const popColor = colorByThreshold(pop, LEVEL_THRESHOLDS.pop, LEVEL_THRESHOLDS.popDef)
     const [ discomfortIndexColor, discomfortStr ] = colorByThreshold(discomfortIndex, LEVEL_THRESHOLDS.discomfort, LEVEL_THRESHOLDS.discomfortDef)
 
-    const windIcon = drawArrow(getDegString(currentData.wind_degree), null, true)
-    const conditionIcon = makeWeatherApiIcon(currentData.condition.icon)
+    const windIcon = drawArrow(windDegreeStr, null, true)
+    const conditionIcon = makeWeatherApiIcon(currentData?.condition?.icon)
 
     const date = new Date()
     const isDay = isTimeInRangeAcrossDay(`${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`, sunriseTime, sunsetTime)
@@ -1371,11 +1331,14 @@ function drawArrow(t,e,a){let r=new Size(32,32),i=new DrawContext;i.opaque=!1,i.
 // ======================
 // Object 平坦化
 // ======================
-function flatObj(obj, prefix = '') {
+function flatObj(obj, prefix = "") {
   const result = {}
-  for (const key in obj) {
+
+  for (const key of Object.keys(obj)) {
+
     const value = obj[key]
-    const newKey = prefix ? `${prefix}${key}` : key
+    const newKey = prefix + key
+
     if (
       typeof value === "object" &&
       value !== null &&
@@ -1384,10 +1347,14 @@ function flatObj(obj, prefix = '') {
       !(value instanceof Image)
     ) {
       Object.assign(result, flatObj(value, newKey + "_"))
-    } else {
-      result[newKey] = value
+    }
+    else {
+      if (value !== undefined) {
+        result[newKey] = value
+      }
     }
   }
+
   return result
 }
 
@@ -1520,7 +1487,7 @@ function getMoonphaseImage( dt, isMoonUp = true ) {
 const module_name = module.filename.match(/[^\/]+$/ )[ 0 ].replace('.js', '');
 if (module_name == Script.name()) {
   (async() => {
-    const Main = importModule("Main")
+    const Main = importModule(APP_MAIN)
     Main.setAppInfo("id", APP_ID)
     Main.setAppInfo("storageType", DEFAULT_STRAGE_TYPE)
     await Main.start()
