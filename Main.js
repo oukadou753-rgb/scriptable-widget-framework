@@ -4,12 +4,12 @@
 /**
  * DevWidget
  * UTF-8 日本語コメント
- * 2026/03/21 21:30
+ * 2026/03/23 11:50
  */
 const DEFAULT_APP_ID = "Weather"
 const DEFAULT_STRAGE_TYPE = "local"
 
-const APP_DEV_MODE = false
+const APP_DEV_MODE = true
 const APP_ID = args.widgetParameter || DEFAULT_APP_ID
 const APP_VERSION = "1.0.0"
 const APP_CONFIG = `App_${APP_ID}Config`
@@ -26,26 +26,6 @@ const APP_INFO = {
   frameworkRepo: WF_REPO,
 }
 
-const MODULES = {
-  WF_StorageEngine: { type: "both", path: WF_MODULE_DIR },
-  WF_WidgetRenderer: { type: "both", path: WF_MODULE_DIR },
-  WF_ProfileEngine: { type: "both", path: WF_MODULE_DIR },
-  WF_DataProvider: { type: "both", path: WF_MODULE_DIR },
-  WF_NotificationManager: { type: "both", path: WF_MODULE_DIR },
-  WF_CoreBase: { type: "both", path: WF_MODULE_DIR },
-
-  WF_MenuEngine: { type: "app", path: WF_MODULE_DIR },
-  WF_ConfigUI: { type: "app", path: WF_MODULE_DIR },
-  WF_NotificationHandlers: { type: "app", path: WF_MODULE_DIR },
-  WF_NotificationUI: { type: "app", path: WF_MODULE_DIR },
-  WF_TableUI: { type: "app", path: WF_MODULE_DIR },
-
-  WF_AppCore: { type: "app", path: WF_MODULE_DIR },
-  WF_WidgetCore: { type: "widget", path: WF_MODULE_DIR },
-
-  [APP_CONFIG]: { type: "both", path: "" },
-}
-
 module.exports = {
   
   // =========================
@@ -53,9 +33,31 @@ module.exports = {
   // =========================
   async start(appInfo = APP_INFO) {
 
+    appInfo.appConfig = `App_${appInfo.id}Config`
+
+    const modules = {
+      WF_StorageEngine: { type: "both", path: WF_MODULE_DIR },
+      WF_WidgetRenderer: { type: "both", path: WF_MODULE_DIR },
+      WF_ProfileEngine: { type: "both", path: WF_MODULE_DIR },
+      WF_DataProvider: { type: "both", path: WF_MODULE_DIR },
+      WF_NotificationManager: { type: "both", path: WF_MODULE_DIR },
+      WF_CoreBase: { type: "both", path: WF_MODULE_DIR },
+    
+      WF_MenuEngine: { type: "app", path: WF_MODULE_DIR },
+      WF_ConfigUI: { type: "app", path: WF_MODULE_DIR },
+      WF_NotificationHandlers: { type: "app", path: WF_MODULE_DIR },
+      WF_NotificationUI: { type: "app", path: WF_MODULE_DIR },
+      WF_TableUI: { type: "app", path: WF_MODULE_DIR },
+    
+      WF_AppCore: { type: "app", path: WF_MODULE_DIR },
+      WF_WidgetCore: { type: "widget", path: WF_MODULE_DIR },
+    
+      [appInfo.appConfig]: { type: "both", path: "" },
+    }
+    
     try {
 
-      await this.init(appInfo)
+      await this.init(appInfo, modules)
 
     } catch(e) {
 
@@ -72,36 +74,31 @@ module.exports = {
   // =========================
   // init
   // =========================
-  async init(appInfo) {
+  async init(appInfo, modules) {
 
       const ModuleLoader = importModule("ModuleLoader")
       const moduleLoader = new ModuleLoader(appInfo.storageType)
 
       let obj = {}
 
-      for (key in MODULES) {
+      for (key in modules) {
 
-        const value = MODULES[key]
+        const value = modules[key]
         const path = value.path + key
         const type = value.type
 
         if (this.isImport(type)) {
-          try {
-            obj[key] = moduleLoader.load(path)
-          } catch(e) {
-            throw new Error(`Module not found: ${key}`)
-            obj[key] = importModule(key)
-          }
+          obj[key] = moduleLoader.load(path)
         }
 
       }
 
       if (config.runsInWidget) {
-        const widgetCore = new obj.WF_WidgetCore(appInfo, obj[APP_CONFIG], obj)
-        await widgetCore.start()
+        const core = new obj.WF_WidgetCore(appInfo, obj[appInfo.appConfig], obj)
+        await core.start()
       } else {
-        const appCore = new obj.WF_AppCore(appInfo, obj[APP_CONFIG], obj)
-        await appCore.start()
+        const core = new obj.WF_AppCore(appInfo, obj[appInfo.appConfig], obj)
+        await core.start()
       }
 
   },
