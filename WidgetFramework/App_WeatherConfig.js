@@ -419,8 +419,8 @@ const currentDataBlockSmall = [
           },
           {
             v: [
-              unitHelper("{{current_discomfortIndex}}", "　", { mark: true, color: "{{current_discomfortIndexColor}}" }),
-              unitHelper("{{current_pop}}", "％", { mark: true, color: "{{current_popColor}}" })
+              unitHelper("{{current_discomfortIndexStr}}", "　", { mark: true, color: "{{current_discomfortIndexColor}}" }),
+              unitHelper("{{current_popStr}}", "％", { mark: true, color: "{{current_popColor}}" })
             ]
           }
         ]
@@ -834,47 +834,70 @@ module.exports = {
     const useTestData = v?.useTestData ?? false
     if (useTestData) return this.testDataTransform(data, ctx)
 
-    const hours = this.secondaryData(data, ctx)
-    const items = this.dataTransform(hours, ctx)
-    const meta = this.metaTransform(data, ctx, hours)
+    const items = this.dataTransform(data, ctx)
+    const meta = this.metaTransform(data, ctx)
+    const notifications = this.notificationTranceform(data, ctx, {items, meta})
 
     return {
       items,
-      ...flatObj(meta)
+      ...flatObj(meta),
+      notifications
     }
   },
 
   // =========================
   // secondaryData
   // =========================
+  allHours: null,
+  hours: null,
   secondaryData(data, ctx) {
 
-    const v = config?.values ?? {}
+    if (this.allHours != null && this.hours != null) 
+      return {
+        allHours: this.allHours,
+        hours: this.hours
+      }
+
+    const v = ctx?.config?.values ?? {}
 
     const intervalHours = v?.intervalHours ?? 2
     const displayCount = v?.displayCount ?? 4
-    const nowEpoch = Math.floor(Date.now() / 1000) - (3600 * (intervalHours + 1))
+    const nowEpoch = Math.floor(Date.now() / 1000) + 3600
 
     const obj = data?.forecast?.forecastday ?? {}
 
-    const items = obj.flatMap(day => day.hour)
+    const allHours = obj.flatMap(day => day.hour) ?? []
+    const hours = allHours
       .filter(h => h.time_epoch >= nowEpoch)
       .filter((h, i) => i % intervalHours === 0)
-      .slice(0, displayCount + 2)
+      .slice(0, displayCount) ?? []
 
-    return items
+    this.allHours = allHours
+    this.hours = hours
+
+    return {allHours, hours}
   },
 
   // =========================
   // dataTransform
   // =========================
-  dataTransform(hours, ctx) {
+  dataTransform(data, ctx) {
 
+    const v = ctx?.config?.values ?? {}
+
+    // hours
+    const intervalHours = v?.intervalHours ?? 2
+    const {allHours, hours} = this.secondaryData(data, ctx)
+
+    // items
     const items = hours.map((h, idx) => {
-      if (idx <= 1) return null
-      const prev = idx > 0 ? hours[idx - 1] : h
+
+      const prev = allHours.find(p =>
+        p.time_epoch === h.time_epoch - intervalHours * 3600
+      ) ?? h
 
       const hour = Number(h?.time.split(" ")[1].slice(0, 2))
+      const timeEpoch = h?.time_epoch
 
       const pressure = h?.pressure_mb
       const wind = h?.wind_kph / 3.6
@@ -904,6 +927,8 @@ module.exports = {
         hour: hour,
         hourStr: hourStr,
 
+        timeEpoch: timeEpoch,
+
         pressure: pressure,
         pressureStr: pressureStr,
         pressureColor: pressureColor,
@@ -926,23 +951,23 @@ module.exports = {
         popTrend: popTrend
 
       }
-    }).filter(v => v)
+    })
 
-    return items ?? []
+    return items
   },
 
   // =========================
   // metaTransform
   // =========================
-  metaTransform(data, ctx, hours) {
+  metaTransform(data, ctx) {
 
-    const v = ctx?.values ?? {}
+    const v = ctx?.config?.values ?? {}
     const env = ctx?.env ?? {}
     const runtime = ctx?.runtime ?? {}
     const appId = env?.appId ?? "WidgetFramework"
 
     // current
-    const current = this.currentDataTransform(data, ctx, hours)
+    const current = this.currentDataTransform(data, ctx)
 
     // titl
     const titleStr = current?.conditionStr ?? ""
@@ -994,45 +1019,6 @@ module.exports = {
       showDetail: level >= 3
     }
 
-    // notifications
-/*
-{
-  id: string,          // ★必須（グループID）
-  title: string,       // 表示タイトル
-  subtitle?: string,   // サブタイトル
-  body?: string,       // 本文
-  delay?: number,      // ms後に通知（schedule化）
-  cooldown?: number,   // 再通知防止時間(ms)
-  sound?: string,      // 通知音（任意）
-  meta?: object        // ★拡張領域（重要）
-
-  meta: {
-    action: "openNotificationUI"
-  }
-  meta: {
-    action: "openNotificationDetail"
-  }
-  meta: {
-    action: "openProfile",
-    profile: "default",
-    widgetFamily: "large"
-  }
-  meta: {
-    action: "openExternal",
-    url: "https://example.com"
-  }
-}
-*/
-    const notifications = []
-//     const notifications = hours.map((h, i) => ({
-//       id: `forecast_${i}_${h.time_epoch}`,
-//       delay: 10000,
-//       scheduleAt: new Date(h.time_epoch * 1000),
-//       title: "予報" + h.time_epoch,
-//       body: `${h.temp_c}°`,
-//       cooldown: 25000,
-//     }))
-
     // メタ情報
     const meta = {
       header: {
@@ -1051,9 +1037,7 @@ module.exports = {
       isOnline: isOnline,
       onlineIcon: onlineIcon,
       location: location,
-      ui: ui,
-
-      notifications: notifications
+      ui: ui
     }
 
     return meta
@@ -1062,29 +1046,36 @@ module.exports = {
   // =========================
   // currentDataTransform
   // =========================
-  currentDataTransform(data, config, hours) {
+  currentDataTransform(data, ctx) {
 
+    const v = ctx?.config?.values ?? {}
+
+    // hours
+    const intervalHours = v?.intervalHours ?? 2
+    const nowEpoch = Math.floor(Date.now() / 1000) - 3600 * 3
+    const {allHours, hours} = this.secondaryData(data, ctx)
+
+    // current
     const currentData = data?.current ?? {}
     const forecastData = data?.forecast?.forecastday ?? {}
-    const dayData = forecastData?.flatMap(day => day?.day)
+    const dayData = forecastData?.flatMap(day => day?.day)[0]
     const astroData = forecastData?.flatMap(day => day?.astro)
+    const prevData = allHours.find(h => h?.time_epoch >= nowEpoch) ?? allHours[allHours.length - 1]
 
     const pressure = currentData?.pressure_mb
-    const pressureAfter = hours[1]?.pressure_mb ?? pressure
+    const pressureAfter = prevData?.pressure_mb ?? pressure
 
     const temp = currentData?.temp_c
-    const tempMin = dayData[0]?.mintemp_c
-    const tempMax = dayData[0]?.maxtemp_c
+    const tempMin = dayData?.mintemp_c
+    const tempMax = dayData?.maxtemp_c
     const feelslike = currentData?.feelslike_c
     const humidity = currentData?.humidity
     const wind = currentData?.wind_kph / 3.6
     const winDir = currentData?.wind_dir
     const windDegree = currentData?.wind_degree
     const rain = currentData?.precip_mm
-    const pop = Math.max(...[ hours[1]?.chance_of_rain, hours[1]?.chance_of_snow ])
+    const pop = Math.max(...[ prevData?.chance_of_rain, prevData?.chance_of_snow ])
     const discomfortIndex = getDiscomfortIndex(temp, humidity)
-    const sunriseTime = astroData[0]?.sunrise
-    const sunsetTime = astroData[0]?.sunset
 
     const pressureStr = Math.round(pressure)
     const tempStr= Math.round(temp)
@@ -1097,10 +1088,8 @@ module.exports = {
     const windDegreeStr = getDegString(windDegree)
     const rainStr = rain.toFixed(rain > 1 ? 0 : 1)
     const popStr = Math.ceil(pop / 5) * 5
-    const discomfortIndexStr = discomfortIndex.toFixed(1)
+    const discomfortIndexStr = discomfortIndex.toFixed(0)
     const conditionStr = currentData?.condition?.text
-    const sunriseTimeStr = convert12to24(sunriseTime)
-    const sunsetTimeStr = convert12to24(sunsetTime)
 
     const pressureColor = getPressureColor(pressure, pressureAfter)
     const tempColor = colorByThreshold(temp, LEVEL_THRESHOLDS.temp, LEVEL_THRESHOLDS.tempDef)
@@ -1116,10 +1105,11 @@ module.exports = {
     const windIcon = drawArrow(windDegreeStr, null, true)
     const conditionIcon = makeWeatherApiIcon(currentData?.condition?.icon)
 
+    // astro
     const date = new Date()
-    const isDay = isTimeInRangeAcrossDay(`${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`, sunriseTime, sunsetTime)
     const isAm = date.getHours() < 12
     const moonphaseTextIcon = getMoonphaseImage(date, true)
+
     const sunriseIcon = "sunrise.fill"
     const sunsetIcon = "sunset.fill"
     const sunriseColor = isAm ? "" : "#999999"
@@ -1127,9 +1117,25 @@ module.exports = {
     const sunriseOpacity = isAm ? 1 : 0.7
     const sunsetOpacity = isAm ? 0.7 : 1
 
+    const now = new Date()
+    const nowStr = `${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`
+
+    const todayAstro = astroData[0]
+    const tomorrowAstro = astroData[1]
+
+    const sunriseToday = convert12to24(todayAstro?.sunrise)
+    const sunsetToday = convert12to24(todayAstro?.sunset)
+
+    const isAfterSunset = !isTimeInRangeAcrossDay(nowStr, "00:00", sunsetToday)
+
+    const sunriseTimeStr = isAfterSunset
+      ? convert12to24(tomorrowAstro?.sunrise)
+      : sunriseToday
+    const sunsetTimeStr = sunsetToday
+
     const current = {
 
-      isDay: isDay,
+      isAfterSunset: isAfterSunset,
 
       pressure: pressure,
       temp: temp,
@@ -1188,6 +1194,58 @@ module.exports = {
     return current
   },
 
+  // =========================
+  // notificationTranceform
+  // =========================
+/*
+{
+  id: string,          // ★必須（グループID）
+  title: string,       // 表示タイトル
+  subtitle?: string,   // サブタイトル
+  body?: string,       // 本文
+  delay?: number,      // ms後に通知（schedule化）
+  cooldown?: number,   // 再通知防止時間(ms)
+  sound?: string,      // 通知音（任意）
+  meta?: object        // ★拡張領域（重要）
+
+  meta: {
+    action: "openNotificationUI"
+  }
+  meta: {
+    action: "openNotificationDetail"
+  }
+  meta: {
+    action: "openProfile",
+    profile: "default",
+    widgetFamily: "large"
+  }
+  meta: {
+    action: "openExternal",
+    url: "https://example.com"
+  }
+}
+*/
+  notificationTranceform(data, ctx, {items, meta}) {
+
+    const current = meta?.current ?? {}
+
+    const notifications = []
+
+    items.map((h, i) => {
+      notifications.push({ 
+        id: `forecast_${i}_${h.timeEpoch}`,
+        delay: 10000,
+        scheduleAt: new Date(h.timeEpoch * 1000),
+        title: `${h.hourStr}の予報`,
+        body: `［気圧］${h.pressureStr}hPa　［気温］${h.tempStr}°　［降水確率］${h.popStr}%`,
+        sound: "default",
+        cooldown: 25000
+      })
+    })
+
+    return notifications
+  },
+
   // ======================
   // Use Test Data
   // ======================
@@ -1220,13 +1278,25 @@ module.exports = {
   // ======================
   // testDataTransform
   // ======================
-  testDataTransform(data, config) {
+  testDataTransform(data, ctx) {
 
-    const v = config?.values || {}
+    const v = ctx?.config?.values ?? {}
+    const env = ctx?.env ?? {}
+    const runtime = ctx?.runtime ?? {}
+    const appId = env?.appId ?? "WidgetFramework"
 
     const minScore = Number(v.minScore) || 0
     const limit = Number(v.limit) || 0
 
+    // location
+    const l = runtime?.location ?? null
+    const location = {
+        lat: l?.lat ?? null,
+        lon: l?.lon ?? null,
+        latStr: l?.lat != null ? l.lat.toFixed(4) : "",
+        lonStr: l?.lon != null ? l.lon.toFixed(4) : "",
+        name: l?.full != null ? l.full.split(" ").slice(1).join("") : ""
+      }
     // 元データ正規化
     const rawList = Array.isArray(data?.news)
       ? data.news
@@ -1251,7 +1321,7 @@ module.exports = {
     })
 
     // Online判定
-    const online = v.isOnline ?? false
+    const online = runtime?.isOnline ?? false
     const status = {
       icon: "location.fill",
       color: "#d1cdda",
@@ -1271,10 +1341,10 @@ module.exports = {
         
       },
       footer: {
-        updateStr
+        updateStr: updateStr,
       },
-        status,
-        debug: false
+        status: status,
+        location: location
     }
 
     // 共通データ返却（統一フォーマット）
@@ -1430,7 +1500,7 @@ function getPressureColor(curr, prev) {
 // ======================
 function getDiscomfortIndex(temp, humidity) {
   const index = 0.81 * temp + 0.01 * humidity * (0.99 * temp - 14.3) + 46.3
-  return Number(index.toFixed(1))
+  return Number(index)
 }
 
 // ======================
@@ -1445,14 +1515,17 @@ function timeToMinutes(timeString) {
 // convert12to24
 // ======================
 function convert12to24(time12h) {
-  const [_, hours, minutes, modifier] = time12h.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-  let hours24 = parseInt(hours, 10);
+  if (!time12h) return null
+  const match = time12h.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i)
+  if (!match) return null
+  const [_, hours, minutes, modifier] = match
+  let hours24 = parseInt(hours, 10)
   if (modifier.toUpperCase() === 'PM' && hours24 < 12) {
-    hours24 += 12;
+    hours24 += 12
   } else if (modifier.toUpperCase() === 'AM' && hours24 === 12) {
-    hours24 = 0;
+    hours24 = 0
   }
-  return `${String(hours24).padStart(2, '0')}:${minutes}`;
+  return `${String(hours24).padStart(2, '0')}:${minutes}`
 }
 
 // ======================
