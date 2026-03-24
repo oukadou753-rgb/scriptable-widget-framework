@@ -686,7 +686,6 @@ module.exports = {
 
     params: {
       key: "{{myApiKey}}",
-      days: "2",
       alerts: "no",
       lang: "ja"
     },
@@ -695,6 +694,12 @@ module.exports = {
       q: (ctx) => {
         if (!ctx.location) return null
         return `${ctx.location.lat},${ctx.location.lon}`
+      },
+      days: (ctx) => {
+        const now = Date.now()
+        const span = (ctx.values.intervalHours * ctx.values.displayCount) * 3600000
+      
+        return new Date(now).getDate() === new Date(now + span).getDate() ? 1 : 2
       }
     }
   },
@@ -1107,18 +1112,8 @@ module.exports = {
 
     // astro
     const date = new Date()
-    const isAm = date.getHours() < 12
-    const moonphaseTextIcon = getMoonphaseImage(date, true)
-
-    const sunriseIcon = "sunrise.fill"
-    const sunsetIcon = "sunset.fill"
-    const sunriseColor = isAm ? "" : "#999999"
-    const sunsetColor = isAm ? "#999999" : ""
-    const sunriseOpacity = isAm ? 1 : 0.7
-    const sunsetOpacity = isAm ? 0.7 : 1
-
-    const now = new Date()
     const nowStr = `${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}`
+    const isAm = date.getHours() < 12
 
     const todayAstro = astroData[0]
     const tomorrowAstro = astroData[1]
@@ -1132,6 +1127,15 @@ module.exports = {
       ? convert12to24(tomorrowAstro?.sunrise)
       : sunriseToday
     const sunsetTimeStr = sunsetToday
+
+    const sunriseIcon = "sunrise.fill"
+    const sunsetIcon = "sunset.fill"
+    const sunriseColor = isAm ? "" : "#999999"
+    const sunsetColor = isAm ? "#999999" : ""
+    const sunriseOpacity = isAm ? 1 : 0.7
+    const sunsetOpacity = isAm ? 0.7 : 1
+
+    const moonphaseTextIcon = getMoonphaseImage(date, true)
 
     const current = {
 
