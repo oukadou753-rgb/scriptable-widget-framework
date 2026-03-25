@@ -840,11 +840,9 @@ module.exports = {
     if (useTestData) return this.testDataTransform(data, ctx)
 
     const items = this.dataTransform(data, ctx)
-    log(1)
     const meta = this.metaTransform(data, ctx)
-    log(2)
     const notifications = this.notificationTranceform(data, ctx, {items, meta})
-log(3)
+
     return {
       items,
       ...flatObj(meta),
