@@ -376,7 +376,7 @@ const updateBlock = [
   betweenHelper(
     { show: "{{ui_showForecast}}",
       h: [
-//         textHelper("{{strageType}} mode", "smallText")
+        textHelper("{{footer_storageType}}", "smallText")
       ]
     },
     {
@@ -649,18 +649,14 @@ module.exports = {
         intervalHours: { type: "number", label: "Interval Hours", section: "API", default: 2 },
         displayCount: { type: "number", label: "Display Count", section: "API", default: 4 },
 
-        useNotification: { type: "bool", label: "Use Notification Data", section: "Notification", default: true },
-
+        useNotification: { type: "bool", label: "Use Notification Data", section: "Menu", default: true },
+        closeOnPreview: { type: "bool", label: "Close On Preview", section: "Menu", default: false },
         useCurrentLocation: { type: "bool", label: "現在地を使用", section: "Location", default: true },
         lat: { type: "number", label: "緯度（固定地点）", section: "Location", default: 35.6812, show: "{{!useCurrentLocation}}" },
         lon: { type: "number", label: "経度（固定地点）", section: "Location", default: 139.7671, show: "{{!useCurrentLocation}}" },
         name: { type: "text", label: "地名（固定地点）", section: "Location", default: "東京駅", show: "{{!name}}" },
 
-        layoutId: {
-          type: "select",
-          label: "Layout",
-          section: "Layout",
-          default: "default",
+        layoutId: { type: "select", label: "Layout", section: "Layout", default: "default",
           options: ["default", "testData"],
           readonly: false,
           hidden: false
@@ -676,6 +672,8 @@ module.exports = {
     baseURL: "https://api.weatherapi.com/v1",
     endpoint: "forecast.json",
     useLocation: true,
+    useLocationQuery: true,
+    locationQueryKey: "q",
 
     cache: {
       key: "forecast",
@@ -971,6 +969,7 @@ module.exports = {
     const env = ctx?.env ?? {}
     const runtime = ctx?.runtime ?? {}
     const appId = env?.appId ?? "WidgetFramework"
+    const storageType = env?.storageType ?? "****"
 
     // current
     const current = this.currentDataTransform(data, ctx)
@@ -998,13 +997,13 @@ module.exports = {
     }
 
     // location
-    const l = runtime?.location ?? null
+    const location = runtime?.location ?? null
     const location = {
-        lat: l?.lat ?? null,
-        lon: l?.lon ?? null,
-        latStr: l?.lat != null ? l.lat.toFixed(4) : "",
-        lonStr: l?.lon != null ? l.lon.toFixed(4) : "",
-        name: l?.full != null ? l.full.split(" ").slice(1).join("") : ""
+        lat: location?.lat ?? null,
+        lon: location?.lon ?? null,
+        latStr: location?.lat != null ? location.lat.toFixed(4) : "",
+        lonStr: location?.lon != null ? location.lon.toFixed(4) : "",
+        name: location?.full != null ? location.full.split(" ").slice(1).join("") : ""
       }
 
     // ui
@@ -1035,6 +1034,7 @@ module.exports = {
         
       },
       footer: {
+        storageType: storageType,
         updateStr: updateStr
       },
 
@@ -1238,7 +1238,7 @@ module.exports = {
 
 //     items.map((h, i) => {
 //       notifications.push({ 
-//         id: `forecast_${i}_${h.timeEpoch}`,
+//         id: `forecast_${i}`,
 //         delay: 10000,
 //         scheduleAt: new Date(h.timeEpoch * 1000),
 //         title: `${h.hourStr}の予報`,
