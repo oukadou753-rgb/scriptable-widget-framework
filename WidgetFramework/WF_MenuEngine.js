@@ -7,15 +7,18 @@
  **/
 module.exports = class WF_MenuEngine {
 
+  // =========================
+  // constructor
+  // =========================
   constructor() {
 
     this.menus = {}
-
     this.stack = []
+
   }
 
   // =========================
-  // メニュー登録
+  // register
   // =========================
   register(name, items, options = {}, ctx = {}) {
 
@@ -44,7 +47,7 @@ module.exports = class WF_MenuEngine {
   }
 
   // =========================
-  // 開始
+  // start
   // =========================
   async start(name, overrideOptions = {}) {
 
@@ -74,9 +77,10 @@ module.exports = class WF_MenuEngine {
   }
 
   // =========================
-  // 評価関数
+  // _eval
   // =========================
   _eval(val, ctx, def = true) {
+
     if (typeof val === "function") {
       try {
         return val(ctx)
@@ -85,12 +89,13 @@ module.exports = class WF_MenuEngine {
         return def
       }
     }
+
     if (val === undefined) return def
     return val
   }
 
   // =========================
-  // 表示（Alert版）
+  // present
   // =========================
   async present(name, overrideOptions = {}) {
 
