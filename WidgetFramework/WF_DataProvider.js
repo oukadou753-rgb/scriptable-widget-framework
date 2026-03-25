@@ -142,7 +142,7 @@ module.exports = class WF_DataProvider {
       const url = this.buildApiUrl(apiConfig, location)
       console.log("API URL: " + url)
 
-      const data = await this.fetch(url, cache, apiConfig, location)
+      const data = await this.fetch(url, cache)
 
       // =========================
       // APIエラー判定
