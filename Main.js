@@ -37,17 +37,18 @@ module.exports = {
 
     const modules = {
       WF_StorageEngine: { type: "both", path: WF_MODULE_DIR },
-      WF_WidgetRenderer: { type: "both", path: WF_MODULE_DIR },
-      WF_ProfileEngine: { type: "both", path: WF_MODULE_DIR },
       WF_DataProvider: { type: "both", path: WF_MODULE_DIR },
+      WF_ProfileEngine: { type: "both", path: WF_MODULE_DIR },
+      WF_WidgetRenderer: { type: "both", path: WF_MODULE_DIR },
       WF_NotificationManager: { type: "both", path: WF_MODULE_DIR },
       WF_CoreBase: { type: "both", path: WF_MODULE_DIR },
     
       WF_MenuEngine: { type: "app", path: WF_MODULE_DIR },
-      WF_ConfigUI: { type: "app", path: WF_MODULE_DIR },
       WF_NotificationHandlers: { type: "app", path: WF_MODULE_DIR },
-      WF_NotificationUI: { type: "app", path: WF_MODULE_DIR },
+
       WF_TableUI: { type: "app", path: WF_MODULE_DIR },
+      WF_ConfigUI: { type: "app", path: WF_MODULE_DIR },
+      WF_NotificationUI: { type: "app", path: WF_MODULE_DIR },
     
       WF_AppCore: { type: "app", path: WF_MODULE_DIR },
       WF_WidgetCore: { type: "widget", path: WF_MODULE_DIR },
