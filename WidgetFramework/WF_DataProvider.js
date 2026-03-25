@@ -130,7 +130,7 @@ module.exports = class WF_DataProvider {
     ) {
       return {
         data: cache.data || {},
-        location: apiConfig.useLocation ? location : null
+        location: location ?? null
       }
     }
 
@@ -142,7 +142,7 @@ module.exports = class WF_DataProvider {
       const url = this.buildApiUrl(apiConfig, location)
       console.log("API URL: " + url)
 
-      const data = await this.fetch(url)
+      const data = await this.fetch(url, cache, apiConfig, location)
 
       // =========================
       // APIエラー判定
@@ -159,7 +159,7 @@ module.exports = class WF_DataProvider {
           console.warn("Using cached data")
           return {
             data: cache.data || {},
-            location: apiConfig.useLocation ? location : null
+            location: location ?? null
           }
         }
 
@@ -176,7 +176,7 @@ module.exports = class WF_DataProvider {
 
       return {
         data: data || {},
-        location: apiConfig.useLocation ? location : null
+        location: location ?? null
       }
 
     } catch (e) {
@@ -185,7 +185,7 @@ module.exports = class WF_DataProvider {
       if (cache && cache.data) {
         return {
           data: cache.data || {},
-          location: apiConfig.useLocation ? location : null
+          location: location ?? null
         }
       }
 
@@ -203,11 +203,12 @@ module.exports = class WF_DataProvider {
     const params = { ...(apiConfig.params || {}) }
 
     if (
-      apiConfig.useLocation &&
+      apiConfig.useLocationQuery &&
       location?.lat != null &&
       location?.lon != null
     ) {
-      params.q = `${location.lat},${location.lon}`
+      const key = apiConfig.locationQueryKey || "q"
+      params[key] = `${location.lat},${location.lon}`
     }
 
     // ■ 動的パラメータ（位置情報以外）
@@ -391,7 +392,7 @@ module.exports = class WF_DataProvider {
   // =========================
   // ■ fetch
   // =========================
-  async fetch(url) {
+  async fetch(url, cache) {
 
     const req = new Request(url)
     req.method = "GET"
@@ -403,20 +404,11 @@ module.exports = class WF_DataProvider {
     catch(e) {
       console.warn("API timeout")
 
-      // =========================
-      // stale cache fallback
-      // =========================
       if (cache && cache.data) {
-
         console.warn("Using stale cache")
-
-        return {
-          data: cache.data || {},
-          location: apiConfig.useLocation ? location : null
-        }
+        return cache.data
       }
 
-      // キャッシュも無い場合のみエラー
       throw e
     }
   }
