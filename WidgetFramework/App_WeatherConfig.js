@@ -840,9 +840,11 @@ module.exports = {
     if (useTestData) return this.testDataTransform(data, ctx)
 
     const items = this.dataTransform(data, ctx)
+    log(1)
     const meta = this.metaTransform(data, ctx)
+    log(2)
     const notifications = this.notificationTranceform(data, ctx, {items, meta})
-
+log(3)
     return {
       items,
       ...flatObj(meta),
@@ -997,14 +999,20 @@ module.exports = {
       opacity: isOnline ? 1.0 : 0.7
     }
 
-     const l = runtime?.location ?? null
+    // location
     const location = {
-        lat: l?.lat ?? null,
-        lon: l?.lon ?? null,
-        latStr: l?.lat != null ? l.lat.toFixed(4) : "",
-        lonStr: l?.lon != null ? l.lon.toFixed(4) : "",
-        name: l?.full != null ? l.full.split(" ").slice(1).join("") : ""
-      }
+      lat: runtime?.location?.lat ?? null,
+      lon: runtime?.location?.lon ?? null,
+      latStr: runtime?.location?.lat != null
+        ? runtime.location.lat.toFixed(4)
+        : "",
+      lonStr: runtime?.location?.lon != null
+        ? runtime.location.lon.toFixed(4)
+        : "",
+      name: runtime?.location?.full
+        ? runtime.location.full.split(" ").slice(1).join("")
+        : ""
+    }
 
     // ui
     const levelMap = {
@@ -1294,14 +1302,20 @@ module.exports = {
     const limit = Number(v.limit) || 0
 
     // location
-    const l = runtime?.location ?? null
     const location = {
-        lat: l?.lat ?? null,
-        lon: l?.lon ?? null,
-        latStr: l?.lat != null ? l.lat.toFixed(4) : "",
-        lonStr: l?.lon != null ? l.lon.toFixed(4) : "",
-        name: l?.full != null ? l.full.split(" ").slice(1).join("") : ""
-      }
+      lat: runtime?.location?.lat ?? null,
+      lon: runtime?.location?.lon ?? null,
+      latStr: runtime?.location?.lat != null
+        ? runtime.location.lat.toFixed(4)
+        : "",
+      lonStr: runtime?.location?.lon != null
+        ? runtime.location.lon.toFixed(4)
+        : "",
+      name: runtime?.location?.full
+        ? runtime.location.full.split(" ").slice(1).join("")
+        : ""
+    }
+
     // 元データ正規化
     const rawList = Array.isArray(data?.news)
       ? data.news
