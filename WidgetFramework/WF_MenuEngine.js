@@ -17,16 +17,6 @@ module.exports = class WF_MenuEngine {
   // =========================
   // メニュー登録
   // =========================
-  _register(name, items = [], options = {}) {
-
-    if (!Array.isArray(items)) items = []
-
-    this.menus[name] = {
-      items,
-      options
-    }
-  }
-
   register(name, items, options = {}, ctx = {}) {
 
     const processed = items
