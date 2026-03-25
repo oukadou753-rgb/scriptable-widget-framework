@@ -651,6 +651,7 @@ module.exports = {
 
         useNotification: { type: "bool", label: "Use Notification Data", section: "Menu", default: true },
         closeOnPreview: { type: "bool", label: "Close On Preview", section: "Menu", default: false },
+
         useCurrentLocation: { type: "bool", label: "現在地を使用", section: "Location", default: true },
         lat: { type: "number", label: "緯度（固定地点）", section: "Location", default: 35.6812, show: "{{!useCurrentLocation}}" },
         lon: { type: "number", label: "経度（固定地点）", section: "Location", default: 139.7671, show: "{{!useCurrentLocation}}" },
