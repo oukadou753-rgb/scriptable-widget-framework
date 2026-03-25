@@ -1551,7 +1551,7 @@ function isTimeInRangeAcrossDay(checkTime, startTime, endTime) {
 }
 
 // ======================
-// Module Test
+// getMoonphaseImage
 // ======================
 function getMoonphaseImage( dt, isMoonUp = true ) {
   Date.prototype.getMoonphase=function(){let t=0,e=0,$=0,o=0,n=this.getFullYear(),h=this.getMonth()+1,r=this.getDate();return h<3&&(n--,h+=12),++h,$=(t=365.25*n)+(e=30.6*h)+r-694039.09,$/=29.5305882,o=parseInt($),$-=o,(o=Math.round(8*$))>=8&&(o=0),o}
