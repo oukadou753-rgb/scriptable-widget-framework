@@ -18,6 +18,7 @@ module.exports = {
   async present(core, options = {}) {
 
     this.core = core
+    this.result = "back"
     this.tableUI = core.tableUI
 
     const profileEngine = core.profile
@@ -32,6 +33,7 @@ module.exports = {
 
     await this.createTable(table, activeCfg, profileEngine, activeProfile)
     await table.present(true)
+    return this.result
   },
 
   // =========================
@@ -292,7 +294,10 @@ module.exports = {
     // フッター
     // -------------------------
     table.addRow(this.tableUI.createButtonRow([
-      { label: "Cancel", dismiss: true },
+      { 
+        label: "Cancel", 
+        dismiss: true 
+      },
       {
         label: "Save & Close",
         dismiss: true,
@@ -300,6 +305,7 @@ module.exports = {
           const cfg = profileEngine.getConfig()
           cfg.values = JSON.parse(JSON.stringify(values))
           profileEngine.saveConfig(activeProfile, cfg)
+          this.result = "reload"
         }
       }
     ]).row)
