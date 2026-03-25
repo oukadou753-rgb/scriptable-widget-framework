@@ -163,7 +163,7 @@ module.exports = class WF_DataProvider {
           }
         }
 
-        throw new warn("API returned error JSON")
+        throw new Error("API returned error JSON")
       }
 
       // =========================
