@@ -997,14 +997,13 @@ module.exports = {
       opacity: isOnline ? 1.0 : 0.7
     }
 
-    // location
-    const location = runtime?.location ?? null
+     const l = runtime?.location ?? null
     const location = {
-        lat: location?.lat ?? null,
-        lon: location?.lon ?? null,
-        latStr: location?.lat != null ? location.lat.toFixed(4) : "",
-        lonStr: location?.lon != null ? location.lon.toFixed(4) : "",
-        name: location?.full != null ? location.full.split(" ").slice(1).join("") : ""
+        lat: l?.lat ?? null,
+        lon: l?.lon ?? null,
+        latStr: l?.lat != null ? l.lat.toFixed(4) : "",
+        lonStr: l?.lon != null ? l.lon.toFixed(4) : "",
+        name: l?.full != null ? l.full.split(" ").slice(1).join("") : ""
       }
 
     // ui
