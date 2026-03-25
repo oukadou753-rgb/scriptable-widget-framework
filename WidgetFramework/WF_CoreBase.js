@@ -92,7 +92,8 @@ module.exports = class WF_CoreBase {
 
       env: {
         appId: this.appId,
-        size: finalSize
+        size: finalSize,
+        storageType: this.storageType
       },
 
       config: {
