@@ -7,6 +7,9 @@
  **/
 module.exports = class WF_AppCore {
 
+  // =========================
+  // constructor
+  // =========================
   constructor(appInfo, appConfig, moduleCache) {
 
     const appId = appInfo.id
@@ -53,6 +56,9 @@ module.exports = class WF_AppCore {
     WF_CoreBase.mixinCore(this, core)
   }
 
+  // =========================
+  // start
+  // =========================
   async start() {
 /*
     // Framework update check
@@ -79,6 +85,9 @@ module.exports = class WF_AppCore {
 
   }
 
+  // =========================
+  // setupMenus
+  // =========================
   setupMenus() {
 
     const ctx = {
@@ -134,45 +143,38 @@ module.exports = class WF_AppCore {
     )
   }
 
+  // =========================
+  // openNotifications
+  // =========================
   async openNotifications() {
-    try {
+    return await this.safeAction(async () => {
       await this.notificationUI.present(this)
-
       return true
-
-    } catch (e) {
-      log(e.message)
-
-      const table = new UITable()
-      const row = new UITableRow()
-
-      row.addText("Error (tap to view)")
-      row.onSelect = () => {
-        const a = new Alert()
-        a.title = "Error"
-        a.message = String(e)
-        a.addAction("OK")
-        a.present()
-      }
-
-      table.addRow(row)
-      await table.present()
-
-      return true
-    }
+    })
   }
 
+  // =========================
+  // editConfig
+  // =========================
   async editConfig() {
-    try {
-      const active = this.profile.getActive()
+    return await this.safeAction(async () => {
+
       const cfg = this.profile.getConfig()
 
-      const newValues = await this.configUI.present(this, {
-        config: {...cfg}
+      const result = await this.configUI.present(this, {
+        config: { ...cfg }
       })
 
-      return newValues
+      return result
+    })
+  }
 
+  // =========================
+  // safeAction
+  // =========================
+  async safeAction(fn) {
+    try {
+      return await fn()
     } catch (e) {
       log(e.message)
 
@@ -196,7 +198,7 @@ module.exports = class WF_AppCore {
   }
 
   // =========================
-  // Snapshot系（layout除外完全版）
+  // Snapshot系
   // =========================
   async saveSnapshotUI() {
     const active = this.profile.getActive()
@@ -228,6 +230,9 @@ module.exports = class WF_AppCore {
     })
   }
 
+  // =========================
+  // loadSnapshotUI
+  // =========================
   async loadSnapshotUI() {
     const list = this.storage.listSnapshots()
     if (list.length === 0) return
@@ -251,6 +256,9 @@ module.exports = class WF_AppCore {
     this.profile.saveConfig(data.profile, merged)
   }
 
+  // =========================
+  // previewSnapshotDiffUI
+  // =========================
   async previewSnapshotDiffUI() {
     const list = this.storage.listSnapshots()
     if (list.length === 0) return
@@ -270,6 +278,9 @@ module.exports = class WF_AppCore {
     await this.previewSnapshotDiff(current, snapshot)
   }
 
+  // =========================
+  // previewSnapshotDiff
+  // =========================
   async previewSnapshotDiff(current, snapshot) {
     if (!snapshot || !snapshot.diff || !current) return
 
@@ -314,6 +325,9 @@ module.exports = class WF_AppCore {
     await a.present()
   }
 
+  // =========================
+  // deleteSnapshotUI
+  // =========================
   async deleteSnapshotUI() {
     const list = this.storage.listSnapshots()
     if (list.length === 0) return true
@@ -336,6 +350,9 @@ module.exports = class WF_AppCore {
     return true
   }
 
+  // =========================
+  // previewSnapshotDiff
+  // =========================
   async previewSnapshotDiff(current, snapshot) {
 
     if (!snapshot || !snapshot.diff || !current) return
@@ -376,6 +393,9 @@ module.exports = class WF_AppCore {
     await a.present()
   }
 
+  // =========================
+  // createDiff
+  // =========================
   createDiff(base, current, path = "") {
     let diff = {}
 
@@ -401,6 +421,9 @@ module.exports = class WF_AppCore {
     return diff
   }
 
+  // =========================
+  // applyDiff
+  // =========================
   applyDiff(target, diff) {
     Object.keys(diff).forEach(path => {
       const keys = path.split(".")
@@ -419,14 +442,23 @@ module.exports = class WF_AppCore {
     return target
   }
 
+  // =========================
+  // isObject
+  // =========================
   isObject(v) {
     return v && typeof v === "object" && !Array.isArray(v)
   }
 
+  // =========================
+  // getByPath
+  // =========================
   getByPath(obj, path) {
     return path.split(".").reduce((o, k) => o?.[k], obj)
   }
 
+  // =========================
+  // deepClone
+  // =========================
   deepClone(obj) {
     if (obj === undefined) {
       throw new warn("deepClone: undefined detected")
@@ -434,6 +466,9 @@ module.exports = class WF_AppCore {
     return JSON.parse(JSON.stringify(obj))
   }
 
+  // =========================
+  // manageProfiles
+  // =========================
   async manageProfiles() {
     const a = new Alert()
     a.title = "Manage Profiles"
@@ -454,6 +489,9 @@ module.exports = class WF_AppCore {
     return true
   }
 
+  // =========================
+  // createProfile
+  // =========================
   async createProfile() {
     const a = new Alert()
     a.title = "Create Profile"
@@ -469,6 +507,9 @@ module.exports = class WF_AppCore {
     return true
   }
 
+  // =========================
+  // duplicateProfile
+  // =========================
   async duplicateProfile() {
     const src = this.profile.getActive()
 
@@ -486,6 +527,9 @@ module.exports = class WF_AppCore {
     return true
   }
 
+  // =========================
+  // renameProfile
+  // =========================
   async renameProfile() {
     const list = this.profile.list()
 
@@ -511,6 +555,9 @@ module.exports = class WF_AppCore {
     return true
   }
 
+  // =========================
+  // deleteProfile
+  // =========================
   async deleteProfile() {
     const list = this.profile.list()
 
@@ -525,6 +572,9 @@ module.exports = class WF_AppCore {
     return true
   }
 
+  // =========================
+  // resetConfig
+  // =========================
   async resetConfig() {
     const profile = this.profile.getActive()
 
@@ -542,6 +592,9 @@ module.exports = class WF_AppCore {
     return true
   }
 
+  // =========================
+  // showAbout
+  // =========================
   async showAbout() {
     const a = new Alert()
     a.title = "Framework v" + this.version
