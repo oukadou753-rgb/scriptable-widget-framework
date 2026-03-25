@@ -697,8 +697,9 @@ module.exports = {
       },
       days: (ctx) => {
         const now = Date.now()
-        const span = (ctx.values.intervalHours * ctx.values.displayCount) * 3600000
-      
+        const interval = ctx.values.intervalHours ?? 2
+        const count = (ctx.values.displayCount ?? 4) + 1
+        const span = (interval * count) * 3600000
         return new Date(now).getDate() === new Date(now + span).getDate() ? 1 : 2
       }
     }
@@ -1235,17 +1236,17 @@ module.exports = {
 
     const notifications = []
 
-    items.map((h, i) => {
-      notifications.push({ 
-        id: `forecast_${i}_${h.timeEpoch}`,
-        delay: 10000,
-        scheduleAt: new Date(h.timeEpoch * 1000),
-        title: `${h.hourStr}の予報`,
-        body: `［気圧］${h.pressureStr}hPa　［気温］${h.tempStr}°　［降水確率］${h.popStr}%`,
-        sound: "default",
-        cooldown: 25000
-      })
-    })
+//     items.map((h, i) => {
+//       notifications.push({ 
+//         id: `forecast_${i}_${h.timeEpoch}`,
+//         delay: 10000,
+//         scheduleAt: new Date(h.timeEpoch * 1000),
+//         title: `${h.hourStr}の予報`,
+//         body: `［気圧］${h.pressureStr}hPa　［気温］${h.tempStr}°　［降水確率］${h.popStr}%`,
+//         sound: "default",
+//         cooldown: 25000
+//       })
+//     })
 
     return notifications
   },
