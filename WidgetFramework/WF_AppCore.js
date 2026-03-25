@@ -36,14 +36,14 @@ module.exports = class WF_AppCore {
     this.storage = new WF_StorageEngine(this.appId, this.storageType)
     this.renderer = new WF_WidgetRenderer(this.appId, this.storageType)
     this.menu = new WF_MenuEngine()
+    this.configUI = WF_ConfigUI
+    this.tableUI = WF_TableUI
 
     this.appConfig = appConfig
     this.defaultConfig = appConfig.getDefaultConfig()
     this.profile = new WF_ProfileEngine(this.storage, this.defaultConfig)
 
     this.notification = new WF_NotificationManager(this.appId, this.storage)
-    this.configUI = WF_ConfigUI
-    this.tableUI = WF_TableUI
     this.notificationUI = WF_NotificationUI
     this.notification.syncStatus()
 
@@ -70,31 +70,27 @@ module.exports = class WF_AppCore {
 */
     if (await this.handleNotificationTap()) return
 
-    this.setupMenus()
-
     while (true) {
-      const exit = await this.menu.start("Main")
-      if (exit) break
+      this.setupMenus()
+      const result = await this.menu.start("Main")
+      if (result === "reload") continue
+      if (result === "exit") break
     }
 
-  }
-
-  async _start() {
-    this.setupMenus()
-
-    while (true) {
-      const exit = await this.menu.start("Main")
-      if (exit) break
-    }
   }
 
   setupMenus() {
 
+    const ctx = {
+      config: this.profile.getConfig()
+    }
+    const v = ctx.config.values
+
     this.menu.register(
       "Main",
       [
-        { label: "Preview", next: "Preview" },
-        { label: "Notif Manage", action: () => this.openNotifications() },
+        { label: "Preview", next: "Preview", close: true },
+        { label: "Notif Manage", action: () => this.openNotifications(), show: v.useNotification },
         { label: "Config Manage", next: "Config" },
         { label: "Snapshot Manage", next: "Snapshot" },
         { label: "Profile Manage", action: () => this.manageProfiles() },
@@ -106,7 +102,10 @@ module.exports = class WF_AppCore {
     this.menu.register(
       "Config",
       [
-        { label: "Edit", action: () => this.editConfig() },
+        { label: "Edit", action: async () => {
+          const result = await this.editConfig()
+          return result }
+        },
         { label: "Reset", action: () => this.resetConfig() },
       ],
       { title: "Config" }
@@ -120,7 +119,7 @@ module.exports = class WF_AppCore {
         { label: "Large", action: () => this.preview("large") },
         { label: "ExtraLarge", action: () => this.preview("extraLarge") }
       ],
-      { title: "Preview", closeOnSelect: true }
+      { title: "Preview", closeOnSelect: v.closeOnPreview }
     )
 
     this.menu.register(
@@ -168,17 +167,11 @@ module.exports = class WF_AppCore {
       const active = this.profile.getActive()
       const cfg = this.profile.getConfig()
 
-//       const newValues = await this.configUI.present(
-//         {...cfg},
-//         this.profile,
-//         active
-//       )
-
       const newValues = await this.configUI.present(this, {
         config: {...cfg}
       })
 
-      return true
+      return newValues
 
     } catch (e) {
       log(e.message)
