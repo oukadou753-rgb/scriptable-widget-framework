@@ -52,6 +52,7 @@ module.exports = class WF_DataProvider {
         location = {
           lat: Number(values.lat ?? this.appConfig.location?.default?.lat),
           lon: Number(values.lon ?? this.appConfig.location?.default?.lon),
+          alt: Number(values.alt ?? this.appConfig.location?.default?.alt),
           name: values.name ?? this.appConfig.location?.default?.name ?? "",
           full: values.full ?? this.appConfig.location?.default?.full ?? ""
         }
@@ -81,6 +82,7 @@ module.exports = class WF_DataProvider {
             location = {
               lat: Number(newLoc.lat),
               lon: Number(newLoc.lon),
+              alt: Number(newLoc.alt),
               name: geo?.name || "",
               full: geo?.full || ""
             }
@@ -109,6 +111,7 @@ module.exports = class WF_DataProvider {
               location = {
                 lat: Number(def.lat),
                 lon: Number(def.lon),
+                alt: Number(def.alt),
                 name: def.name || "",
                 full: def.full || ""
               }
@@ -287,7 +290,8 @@ module.exports = class WF_DataProvider {
 
       return {
         lat: loc.latitude,
-        lon: loc.longitude
+        lon: loc.longitude,
+        alt: loc.altitude
       }
   
     } catch (e) {
@@ -301,6 +305,7 @@ module.exports = class WF_DataProvider {
       this.storage.writeJSON("location", {
         lat: location.lat,
         lon: location.lon,
+        alt: location.alt,
         name: location.name || "",
         full: location.full || "",
         timestamp: Date.now()
@@ -319,6 +324,7 @@ module.exports = class WF_DataProvider {
     return {
       lat: cache.lat,
       lon: cache.lon,
+      alt: cache.alt,
       name: cache.name || "",
       full: cache.full || ""
     }
@@ -364,7 +370,7 @@ module.exports = class WF_DataProvider {
       if (!res || res.length === 0) return null
 
       const place = res[0]
-
+log(place)
       return {
         name: place.locality || place.subLocality || "",
         country: place.country || "",
