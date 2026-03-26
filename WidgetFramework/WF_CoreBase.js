@@ -104,6 +104,11 @@ module.exports = class WF_CoreBase {
       runtime: {
         isOnline,
         location
+      },
+
+      services: {
+        notification: this.notification,
+        storage: this.storage
       }
 
     }
