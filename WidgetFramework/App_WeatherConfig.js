@@ -431,7 +431,7 @@ const currentDataBlockSmall = [
 
 // CurrentData Details Block 1
 const currentDataBlock1 = [
-  { size: new Size(135, 0), padding: pos(0, 0, 0, -5), justify: "center",
+  { size: new Size(140, 0), padding: pos(0, 0, 0, 0), justify: "center",
     h: [
       textHelper("{{current_pressure}}", { base: "dataText", fontSize: 45, color: "{{current_pressureColor}}" })
     ]
@@ -1242,17 +1242,17 @@ module.exports = {
 
     const notifications = []
 
-//     items.map((h, i) => {
-//       notifications.push({ 
-//         id: `forecast_${i}`,
-//         delay: 10000,
-//         scheduleAt: new Date(h.timeEpoch * 1000),
-//         title: `${h.hourStr}の予報`,
-//         body: `［気圧］${h.pressureStr}hPa　［気温］${h.tempStr}°　［降水確率］${h.popStr}%`,
-//         sound: "default",
-//         cooldown: 25000
-//       })
-//     })
+    items.map((h, i) => {
+      notifications.push({ 
+        id: `forecast_${i}`,
+        delay: 10000,
+        scheduleAt: new Date(h.timeEpoch * 1000),
+        title: `${h.hourStr}の予報`,
+        body: `［気圧］${h.pressureStr}hPa　［気温］${h.tempStr}°　［降水確率］${h.popStr}%`,
+        sound: "default",
+        cooldown: 25000
+      })
+    })
 
     return notifications
   },
