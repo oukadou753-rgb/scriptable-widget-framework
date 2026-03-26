@@ -370,7 +370,7 @@ module.exports = class WF_DataProvider {
       if (!res || res.length === 0) return null
 
       const place = res[0]
-log(place)
+
       return {
         name: place.locality || place.subLocality || "",
         country: place.country || "",
