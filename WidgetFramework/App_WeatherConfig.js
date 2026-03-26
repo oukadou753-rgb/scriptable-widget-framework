@@ -13,7 +13,7 @@ const APP_MAIN = "Main"
 const APP_ID = "Weather"
 const DEFAULT_STRAGE_TYPE = "local" // "icloud", "local", "bookmark"
 
-// ======================
+/// ======================
 // Color
 // ======================
 const PALETTE = Object.freeze({
@@ -649,13 +649,17 @@ module.exports = {
         intervalHours: { type: "number", label: "Interval Hours", section: "API", default: 2 },
         displayCount: { type: "number", label: "Display Count", section: "API", default: 4 },
 
-        useNotification: { type: "bool", label: "Use Notification Data", section: "Menu", default: true },
         closeOnPreview: { type: "bool", label: "Close On Preview", section: "Menu", default: false },
+
+        useNotification: { type: "bool", label: "Use Notification Data", section: "Notification", default: true },
+        notifyCooldown: { type: "number", label: "Notification Cooldown", section: "Notification", default: 300000 },
 
         useCurrentLocation: { type: "bool", label: "現在地を使用", section: "Location", default: true },
         lat: { type: "number", label: "緯度（固定地点）", section: "Location", default: 35.6812, show: "{{!useCurrentLocation}}" },
         lon: { type: "number", label: "経度（固定地点）", section: "Location", default: 139.7671, show: "{{!useCurrentLocation}}" },
-        name: { type: "text", label: "地名（固定地点）", section: "Location", default: "東京駅", show: "{{!name}}" },
+        alt: { type: "number", label: "標高（固定地点）", section: "Location", default: 3.5, show: "{{!useCurrentLocation}}" },
+        full: { type: "text", label: "地名（固定地点）", section: "Location", default: "東京都 千代田区 千代田", show: "{{!full}}" },
+
 
         layoutId: { type: "select", label: "Layout", section: "Layout", default: "default",
           options: ["default", "testData"],
@@ -714,7 +718,7 @@ module.exports = {
       return {
         lat: this.config?.values?.lat ?? 35.6812,
         lon: this.config?.values?.lon ?? 139.7671,
-        name: "東京都",
+        alt: this.config?.values?.alt ?? 3.5,
         full: "東京都 千代田区 千代田"
       }
     },
@@ -998,19 +1002,7 @@ module.exports = {
     }
 
     // location
-    const location = {
-      lat: runtime?.location?.lat ?? null,
-      lon: runtime?.location?.lon ?? null,
-      latStr: runtime?.location?.lat != null
-        ? runtime.location.lat.toFixed(4)
-        : "",
-      lonStr: runtime?.location?.lon != null
-        ? runtime.location.lon.toFixed(4)
-        : "",
-      name: runtime?.location?.full
-        ? runtime.location.full.split(" ").slice(1).join("")
-        : ""
-    }
+    const location = locationTransform(ctx)
 
     // ui
     const levelMap = {
@@ -1280,7 +1272,7 @@ module.exports = {
       location: {
         lat: 35.6812,
         lon: 139.7671,
-        name: "東京都",
+        alt: 3.5,
         full: "東京都 千代田区 千代田"
       }
     }
@@ -1300,19 +1292,7 @@ module.exports = {
     const limit = Number(v.limit) || 0
 
     // location
-    const location = {
-      lat: runtime?.location?.lat ?? null,
-      lon: runtime?.location?.lon ?? null,
-      latStr: runtime?.location?.lat != null
-        ? runtime.location.lat.toFixed(4)
-        : "",
-      lonStr: runtime?.location?.lon != null
-        ? runtime.location.lon.toFixed(4)
-        : "",
-      name: runtime?.location?.full
-        ? runtime.location.full.split(" ").slice(1).join("")
-        : ""
-    }
+    const location = locationTransform(ctx)
 
     // 元データ正規化
     const rawList = Array.isArray(data?.news)
@@ -1569,6 +1549,32 @@ function getMoonphaseImage( dt, isMoonUp = true ) {
   const sunIcon = '\ud83d\udfe0';
   const moonIcons = [ '\ud83c\udf11', '\ud83c\udf12', '\ud83c\udf13', '\ud83c\udf14', '\ud83c\udf15', '\ud83c\udf16', '\ud83c\udf17', '\ud83c\udf18' ];
   return isMoonUp ? moonIcons[ dt.getMoonphase() ] : sunIcon;
+}
+
+// ======================
+// locationTransform
+// ======================
+function locationTransform(ctx) {
+  const v = ctx?.config?.values ?? {}
+  const runtime = ctx?.runtime ?? {}
+
+  return {
+    lat: runtime?.location?.lat ?? null,
+    lon: runtime?.location?.lon ?? null,
+    alt: runtime?.location?.alt ?? null,
+    latStr: runtime?.location?.lat != null
+      ? runtime.location.lat.toFixed(4)
+      : "",
+    lonStr: runtime?.location?.lon != null
+      ? runtime.location.lon.toFixed(4)
+      : "",
+    altStr: runtime?.location?.alt != null
+      ? runtime.location.alt.toFixed(1) + "m"
+      : "",
+    name: runtime?.location?.full
+        ? runtime.location.full.split(" ").slice(1).join("")
+      : ""
+  }
 }
 
 // ======================
