@@ -29,8 +29,6 @@ module.exports = class WF_CoreBase {
 
     const context = await this.buildContext({ size })
 
-    await this.handleNotifications(context)
-
     return await this.renderer.render(context)
   }
 
@@ -224,13 +222,9 @@ module.exports = class WF_CoreBase {
         // =========================
         // ③ 条件通知（notifyOnce）
         // =========================
-        if (n.when) {
+        if (n.when === true) {
 
-          await this.notification.notifyOnce(
-            n.id,
-            n,
-            n.cooldown
-          )
+          await this.notification.notifyOnce(n)
 
           continue
         }
