@@ -5,15 +5,20 @@
  * WF_WidgetRenderer
  * UTF-8 日本語コメント
  **/
+
 const ALIAS = {
   backgroundColor: ["bgColor", "bg"],
   fontSize: ["fs"],
   textColor: ["color", "fgColor"]
 }
 
+// ======================
+// Export
+// ======================
 module.exports = class WF_WidgetRenderer {
 
   constructor(appId, storageType) {
+
     this.appId = appId
     this.storageType = storageType
 
@@ -21,6 +26,7 @@ module.exports = class WF_WidgetRenderer {
     this.styleCache = {}
 
     this.initStorage()
+
   }
 
   // =========================
@@ -46,47 +52,44 @@ module.exports = class WF_WidgetRenderer {
 
     }
 
-    this.root = this.fm.joinPath(this.baseDir, "WF_Data")
+    // Main Root
+    this.root = this._ensureDirs(this.baseDir, "WF_Data")
 
-    this.appRoot = this.fm.joinPath(this.root, this.appId)
-    this.imageDir = this.fm.joinPath(this.appRoot, "img")
+    // App Root
+    this.appRoot = this._ensureDirs(this.root, this.appId)
 
-    this._ensureDirs()
+    // Sub Dir
+    this.imageRoot = this._ensureDirs(this.appRoot, "images")
+
   }
 
   // =========================
-  // 初期ディレクトリ生成（完全修正版）
+  // _ensureDirs
   // =========================
-  _ensureDirs() {
+  _ensureDirs(root, dir) {
 
-    // WF_Data
-    if (!this.fm.fileExists(this.root)) {
-      this.fm.createDirectory(this.root)
+    const path = this.fm.joinPath(root, dir)
+
+    if (!this.fm.fileExists(path)) {
+      this.fm.createDirectory(path)
     }
 
-    // appRoot
-    if (!this.fm.fileExists(this.appRoot)) {
-      this.fm.createDirectory(this.appRoot)
-    }
+    return path
 
-    // imageDir
-    if (!this.fm.fileExists(this.imageDir)) {
-      this.fm.createDirectory(this.imageDir)
-    }
   }
 
   // =========================
-  // エントリ
+  // render
   // =========================
   async render(context) {
 
     context = context || {}
 
-    const widget = new ListWidget()
-
     const cfg = context.config || {}
     const values = cfg.values || {}
     const layout = cfg.layout || {}
+
+    const widget = new ListWidget()
 
     // layout padding
     if (layout.padding) {
@@ -94,7 +97,7 @@ module.exports = class WF_WidgetRenderer {
       widget.setPadding(p.top, p.left, p.bottom, p.right)
     }
 
-    // 背景
+    // backgroundColor / backgroundGradient
     if (values.useBgGradient && values.bgColorTop && values.bgColorBottom) {
       widget.backgroundGradient = await this.setGradientBackground(values.bgColorTop, values.bgColorBottom)
     }
@@ -106,7 +109,7 @@ module.exports = class WF_WidgetRenderer {
       }
     }
 
-    //Header
+    // Header
     if (Array.isArray(layout.header) && layout.header.length) {
       await this.renderBlock(widget, layout.header, context)
       // widget.addSpacer()
@@ -119,31 +122,34 @@ module.exports = class WF_WidgetRenderer {
 
     // Footer
     if (Array.isArray(layout.footer) && layout.footer.length) {
-      widget.addSpacer()
+      // widget.addSpacer()
       await this.renderBlock(widget, layout.footer, context)
     }
 
     return widget
+
   }
 
   // =========================
-  // ブロック描画
+  // renderBlock
   // =========================
   async renderBlock(container, blocks, context) {
+
     if (!Array.isArray(blocks)) return
 
     for (const block of blocks) {
       if (!block || typeof block !== "object") continue
 
-      // show判定
+      // show
       if (block.show !== undefined && !this.evaluate(block.show, context)) continue
 
-      // hidden判定
+      // hidden
       if (block.hidden !== undefined && this.evaluate(block.hidden, context)) continue
 
       // =========================
-      // repeat対応
+      // repeat
       // =========================
+
       if (block.type === "repeat") {
 
         let items = this.resolveData(block.items, context)
@@ -179,11 +185,13 @@ module.exports = class WF_WidgetRenderer {
           continue
         }
 
-        // repeat用Stack
+        // repeat Stack
         const repeatStack = container.addStack()
-        if (block.direction === "vertical") repeatStack.layoutVertically()
-        else repeatStack.layoutHorizontally()  // default horizontal
 
+        if (block.direction === "vertical") repeatStack.layoutVertically()
+        else repeatStack.layoutHorizontally()
+
+        // spacing
         repeatStack.spacing = block.spacing ?? 6
 
         // alignContent
@@ -193,7 +201,7 @@ module.exports = class WF_WidgetRenderer {
         else if (align === "bottom") repeatStack.bottomAlignContent()
         else repeatStack.centerAlignContent()
 
-        // template描画（再帰）
+        // template / renderBlock
         for (let i = 0; i < items.length; i++) {
           const item = items[i]
           const newCtx = { ...context, item, index: i + 1 }
@@ -204,24 +212,27 @@ module.exports = class WF_WidgetRenderer {
       }
 
       // =========================
-      // 通常描画
+      // renderElement
       // =========================
+
       await this.renderElement(container, block, context)
+
     }
+
   }
 
   // =========================
-  // 要素描画
+  // renderElement
   // =========================
   async renderElement(container, el, context) {
 
     if (!el) return
 
-    // -------------------------
+    // =========================
     // shorthand
-    // -------------------------
+    // =========================
 
-    // "text"
+    // text shorthand
     if (typeof el === "string") {
       el = { type: "text", text: el }
     }
@@ -268,7 +279,10 @@ module.exports = class WF_WidgetRenderer {
     // hidden
     if (el.hidden !== undefined && this.evaluate(el.hidden, context)) return
 
-    // children 内 repeat でも描画される
+    // =========================
+    // children repeat
+    // =========================
+
     if (el.type === "repeat") {
       let items = this.resolveData(el.items, context)
       if (!Array.isArray(items)) items = []
@@ -278,7 +292,7 @@ module.exports = class WF_WidgetRenderer {
         return
       }
 
-      // repeatStack を作る（横/縦選択）
+      // repeat Stack
       const repeatStack = container.addStack()
       if (el.direction === "vertical") repeatStack.layoutVertically()
       else repeatStack.layoutHorizontally()
@@ -292,19 +306,23 @@ module.exports = class WF_WidgetRenderer {
       else if (align === "bottom") repeatStack.bottomAlignContent()
       else repeatStack.centerAlignContent()
 
-      // template を repeatStack に再帰描画
+      // template repeatStack / renderBlock
       for (let i = 0; i < items.length; i++) {
         const item = items[i]
         const newCtx = { ...context, item, index: i + 1 }
         if (el.template) {
-          // ←ここで再帰呼び出し
           await this.renderBlock(repeatStack, [el.template], newCtx)
         }
       }
+
       return
+
     }
 
-    // 通常描画
+  // =========================
+  // renderText / renderStack / renderSpacer / renderImage
+  // =========================
+
     switch (el.type) {
       case "text": return this.renderText(container, el, context)
       case "hstack": return this.renderStack(container, el, context, true)
@@ -312,10 +330,11 @@ module.exports = class WF_WidgetRenderer {
       case "spacer": return this.renderSpacer(container, el)
       case "image": return await this.renderImage(container, el, context)
     }
+
   }
 
   // =========================
-  // Text
+  // renderText
   // =========================
   renderText(container, el, context) {
 
@@ -325,12 +344,14 @@ module.exports = class WF_WidgetRenderer {
     this.applyStyle(txt, el.style, context)
 
     return txt
+
   }
 
   // =========================
-  // Stack
+  // renderStack
   // =========================
   async renderStack(container, el, context, horizontal) {
+
     const stack = container.addStack()
 
     // background color
@@ -341,7 +362,7 @@ module.exports = class WF_WidgetRenderer {
       stack.backgroundColor = this.toColor(color)
     }
 
-    // サイズ
+    // size
     if (el.size) stack.size = new Size(el.size.width, el.size.height)
 
     // Padding
@@ -353,7 +374,7 @@ module.exports = class WF_WidgetRenderer {
     // Spacing
     if (el.spacing != null) stack.spacing = Number(el.spacing)
 
-    // 配置方向
+    // horizontal / vertical
     if (horizontal) stack.layoutHorizontally()
     else stack.layoutVertically()
 
@@ -385,6 +406,7 @@ module.exports = class WF_WidgetRenderer {
     }
 
     return stack
+
   }
 
   // =========================
@@ -403,7 +425,8 @@ module.exports = class WF_WidgetRenderer {
   // Image
   // =========================
   async renderImage(container, el, context){
-    const rawSrc = this.resolveData(el.src, context)   // ★追加
+
+    const rawSrc = this.resolveData(el.src, context)
 
     const size = el.size || 16
     const tint = this.bind(el.tint, context)
@@ -411,11 +434,9 @@ module.exports = class WF_WidgetRenderer {
 
     let image
 
-    // ★ DrawContext Image
+    // DrawContext Image
     if (rawSrc && rawSrc.size) {
-
       image = rawSrc
-
     }
 
     // URL
@@ -495,12 +516,12 @@ module.exports = class WF_WidgetRenderer {
         style = { ...(styles[styleInput] || styles.defaultText || {}) }
       }
       else if (typeof styleInput === "object") {
-        // base スタイル取得
+        // base style
         if (styleInput.base) {
           style = { ...(styles[styleInput.base] || {}) }
         }
 
-        // 空文字は上書きしない
+        // Do not overwrite empty characters
         for (const k in styleInput) {
           if (k === "base") continue
           const v = styleInput[k]
@@ -534,6 +555,7 @@ module.exports = class WF_WidgetRenderer {
       }
 
     }
+
     else if (colorValue) {
 
       const resolvedColor = this.resolveColor(colorValue, context)
@@ -578,10 +600,11 @@ module.exports = class WF_WidgetRenderer {
     if (opacity !== "" && !isNaN(opacity)) {
       textItem.textOpacity = Number(opacity)
     }
+
   }
 
   // =========================
-  // bind（統一）
+  // bind
   // =========================
   bind(text, context) {
 
@@ -590,7 +613,7 @@ module.exports = class WF_WidgetRenderer {
 
     const str = String(text)
 
-    // 完全変数
+    // Complete variable
     const m = str.match(/^{{\s*([^}]+?)\s*}}$/)
 
     if (m) {
@@ -599,7 +622,7 @@ module.exports = class WF_WidgetRenderer {
       return val ?? ""
     }
 
-    // テンプレート
+    // template
     return str.replace(/{{\s*([^}]+?)\s*}}/g, (_, key) => {
       const val = this.resolve(key.trim(), context)
       return val ?? ""
@@ -608,7 +631,7 @@ module.exports = class WF_WidgetRenderer {
   }
 
   // =========================
-  // evaluate（完全安定版）
+  // evaluate
   // =========================
   evaluate(expr, context) {
 
@@ -666,6 +689,7 @@ module.exports = class WF_WidgetRenderer {
   // context buildEval
   // =========================
   buildEvalContext(context) {
+
     return {
       ...(context.config?.values || {}),
       ...(context.data || {}),
@@ -675,12 +699,14 @@ module.exports = class WF_WidgetRenderer {
       version: context.version,
       update: context.update
     }
+
   }
 
   // =========================
   // resolve
   // =========================
   resolve(key, context) {
+
     if (!key) return undefined
 
     // ネストパスも対応（将来用）
@@ -700,22 +726,27 @@ module.exports = class WF_WidgetRenderer {
     if (key === "version") return context.version
 
     return undefined
+
   }
 
   // =========================
   // getByPath
   // =========================
   getByPath(obj, path) {
+
     if (!obj || !path) return undefined
+
     return path.replace(/\[(\d+)\]/g, '.$1')
               .split('.')
               .reduce((o, k) => (o ? o[k] : undefined), obj)
+
   }
 
   // =========================
   // resolveData
   // =========================
   resolveData(expr, context) {
+
     if (expr === null || expr === undefined) return expr
     if (typeof expr !== "string") return expr
 
@@ -734,6 +765,7 @@ module.exports = class WF_WidgetRenderer {
       if (typeof val === "object") return ""  // 配列やオブジェクトは文字列化せず空文字に
       return String(val)
     })
+
   }
 
   // =========================
@@ -781,26 +813,32 @@ module.exports = class WF_WidgetRenderer {
   // getDefaultTextColor
   // =========================
   getDefaultTextColor() {
+
     return Device.isUsingDarkAppearance()
       ? Color.white()
       : Color.black()
+
   }
 
   // =========================
   // resolveColor
   // =========================
   resolveColor(color, context) {
+
     if (!color) return null
     if (typeof color === "string" && color.includes("{{")) {
       return this.bind(color, context)
     }
+
     return color
+
   }
 
   // =========================
   // resolveProp
   // =========================
   resolveProp(el, key) {
+
     if (el[key] !== undefined) return el[key]
 
     const aliases = ALIAS[key]
@@ -809,86 +847,131 @@ module.exports = class WF_WidgetRenderer {
     for (const a of aliases) {
       if (el[a] !== undefined) return el[a]
     }
+
   }
 
   // =========================
   // resolveStyleProp
   // =========================
   resolveStyleProp(el, style, key) {
+
     if (style && style[key] !== undefined) return style[key]
     return this.resolveProp(el, key)
+
   }
 
   // =========================
-  // ■ toColor
+  // toColor
   // =========================
   toColor(value) {
+
     if (value === "" || value === null || value === undefined)
       return null
+
     if (value instanceof Color)
+
       return value
+
     try {
+
       return new Color(String(value))
+
     } catch (e) {
+
       return null
+
     }
+
   }
 
   // =========================
-  // ■ setGradientBackground
+  // setGradientBackground
   // =========================
   async setGradientBackground(colorTop, colorBottom) {
 
     const bgColor = new LinearGradient();
     bgColor.colors = [new Color(colorTop), new Color(colorBottom)]
-    bgColor.locations = [0, 1]           // 上端0 → 下端1
-    return bgColor 
+    bgColor.locations = [0, 1]
+
+    return bgColor
+
   }
 
   // =========================
-  // ■ fetchImage
+  // fetchImage
   // =========================
   async fetchImage(url) {
+
     if (!url) return null
 
     const fileName = this.hash(url) + ".png"
-    const filePath = this.fm.joinPath(this.imageDir, fileName)
+    const filePath = this.fm.joinPath(this.imageRoot, fileName)
 
     // キャッシュが存在する場合は読み込む
     if (this.fm.fileExists(filePath)) {
+
       try {
+
         const img = this.fm.readImage(filePath)
+
         if (img) return img
+
         console.warn("Cached image exists but failed to read: " + filePath)
-      } catch (e) {
-        console.warn("Error reading cached image: " + e)
+
       }
+
+      catch (e) {
+
+        console.warn("Error reading cached image: " + e)
+
+      }
+
     }
 
     // ネットワーク取得
     try {
+
       const req = new Request(url)
       const img = await req.loadImage()
+
       if (img) {
+
         try {
+
           this.fm.writeImage(filePath, img)
-        } catch (e) {
-          console.warn("Failed to write image cache: " + e)
+
         }
+
+        catch (e) {
+
+          console.warn("Failed to write image cache: " + e)
+
+        }
+
         return img
+
       }
+
       console.warn("Fetched image is null: " + url)
-    } catch (e) {
+
+    }
+
+    catch (e) {
+
       console.warn("Failed to fetch image from URL: " + url + "\n" + e)
+
     }
 
     return null
   }
 
   // =========================
-  // ■ fetch
+  // hash
   // =========================
   hash(str){
+
     return str.replace(/[^\w]/g,"_")
+
   }
+
 }
