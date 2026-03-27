@@ -655,7 +655,9 @@ module.exports = class WF_WidgetRenderer {
       }
 
       node.url = this.buildActionUrl(resolvedMeta)
+  
       return
+
     }
 
     // =========================
