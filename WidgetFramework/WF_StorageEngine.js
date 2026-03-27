@@ -44,31 +44,31 @@ module.exports = class WF_StorageEngine {
     }
 
     // Main Root
-    this.root = this._ensureDirs(this.baseDir, "WF_Data")
+    this.root = this._ensureDirs(this.baseDir, "WF_Data", true)
 
     // App Root
-    this.appRoot = this._ensureDirs(this.root, this.appId)
+    this.appRoot = this._ensureDirs(this.root, this.appId, true)
 
     // Sub Dir
-    this.cacheRoot = this._ensureDirs(this.appRoot, "caches")
-    this.profileRoot = this._ensureDirs(this.appRoot, "profiles")
-    this.snapshotRoot = this._ensureDirs(this.appRoot, "snapshots")
+    this.cacheRoot = this._ensureDirs(this.appRoot, "caches", true)
+    this.profileRoot = this._ensureDirs(this.appRoot, "profiles", true)
+    this.snapshotRoot = this._ensureDirs(this.appRoot, "snapshots", true)
 
     // System File
-    this.activeFile = this._ensureDirs(this.appRoot, "active.txt")
-    this.profilesFile = this._ensureDirs(this.appRoot, "profiles.json")
+    this.activeFile = this._ensureDirs(this.appRoot, "active.txt", true)
+    this.profilesFile = this._ensureDirs(this.appRoot, "profiles.json", true)
 
   }
 
   // =========================
   // _ensureDirs
   // =========================
-  _ensureDirs(root, dir) {
+  _ensureDirs(root, dir, isDir) {
 
     const path = this.fm.joinPath(root, dir)
 
     if (!this.fm.fileExists(path)) {
-      this.fm.createDirectory(path)
+      if (isDir) this.fm.createDirectory(path)
     }
 
     return path
