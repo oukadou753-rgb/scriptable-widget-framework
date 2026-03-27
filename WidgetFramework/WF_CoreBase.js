@@ -5,9 +5,14 @@
  * WF_CoreBase
  * UTF-8 日本語コメント
  **/
+
+// ======================
+// Export
+// ======================
 module.exports = class WF_CoreBase {
 
   constructor(appInfo, appConfig, moduleCache) {
+
     const appId = appInfo.id
     const appVersion = appInfo.version
 
@@ -23,15 +28,23 @@ module.exports = class WF_CoreBase {
     this.frameworkRepo = appInfo.frameworkRepo
 
     this.WF_DataProvider = WF_DataProvider
+
   }
 
+  // ======================
+  // run
+  // ======================
   async run({ size = null } = {}) {
 
     const context = await this.buildContext({ size })
 
     return await this.renderer.render(context)
+
   }
 
+  // ======================
+  // preview
+  // ======================
   async preview(size) {
 
     const widget = await this.run({ size })
@@ -45,8 +58,12 @@ module.exports = class WF_CoreBase {
     }
 
     return true
+
   }
 
+  // ======================
+  // buildContext
+  // ======================
   async buildContext({ size = null, cfg = null } = {}) {
 
     const configData = cfg ?? this.profile.getConfig()
@@ -135,25 +152,44 @@ module.exports = class WF_CoreBase {
       data: finalData,
       location
     }
+
   }
 
+  // ======================
+  // checkOnline
+  // ======================
   async checkOnline() {
 
     try {
+  
       const req = new Request("https://www.apple.com")
       req.timeoutInterval = 2
       await req.load()
+  
       return true
-    } catch(e) {
-      return false
+  
     }
+
+    catch(e) {
+
+      return false
+
+    }
+
   }
 
+  // ======================
+  // getVersionURL
+  // ======================
   getVersionURL() {
 
     return `https://raw.githubusercontent.com/${this.frameworkRepo}/main/version.json?t=${Date.now()}`
+
   }
 
+  // ======================
+  // checkFrameworkUpdate
+  // ======================
   async checkFrameworkUpdate() {
 
     try {
@@ -173,13 +209,21 @@ module.exports = class WF_CoreBase {
 
       }
 
-    } catch(e) {
+    }
+  
+    catch(e) {
+  
       console.log("Version check failed")
+  
     }
 
     return null
+
   }
 
+  // ======================
+  // handleNotifications
+  // ======================
   async handleNotifications(data) {
 
     if (!this.notification) return
@@ -229,12 +273,22 @@ module.exports = class WF_CoreBase {
           continue
         }
 
-      } catch (e) {
-        console.log("Notification error: " + e)
       }
+
+
+      catch (e) {
+
+        console.log("Notification error: " + e)
+
+      }
+
     }
+
   }
 
+  // ======================
+  // handleNotificationTap
+  // ======================
   async handleNotificationTap() {
 
     const notif = args.notification
@@ -269,6 +323,9 @@ module.exports = class WF_CoreBase {
 
 }
 
+// ======================
+// mixinCore
+// ======================
 function mixinCore(target, core) {
 
   const proto = Object.getPrototypeOf(core)
