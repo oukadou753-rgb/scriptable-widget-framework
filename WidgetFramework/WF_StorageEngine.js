@@ -55,8 +55,8 @@ module.exports = class WF_StorageEngine {
     this.snapshotRoot = this._ensureDirs(this.appRoot, "snapshots", true)
 
     // System File
-    this.activeFile = this._ensureDirs(this.appRoot, "active.txt", true)
-    this.profilesFile = this._ensureDirs(this.appRoot, "profiles.json", true)
+    this.activeFile = this._ensureDirs(this.appRoot, "active.txt", false)
+    this.profilesFile = this._ensureDirs(this.appRoot, "profiles.json", false)
 
   }
 
