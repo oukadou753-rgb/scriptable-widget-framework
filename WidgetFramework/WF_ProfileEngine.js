@@ -5,6 +5,10 @@
  * WF_ProfileEngine
  * UTF-8 日本語コメント
  **/
+
+// ======================
+// Export
+// ======================
 module.exports = class WF_ProfileEngine {
 
   constructor(storage, defaultConfig) {
@@ -12,12 +16,12 @@ module.exports = class WF_ProfileEngine {
     this.storage = storage
     this.defaultConfig = defaultConfig
 
-    // 初期セットアップ
     this.ensureSystem()
+
   }
 
   // =========================
-  // システム初期化
+  // ensureSystem
   // =========================
   ensureSystem() {
 
@@ -36,10 +40,11 @@ module.exports = class WF_ProfileEngine {
 
     // defaultプロファイルのconfig生成
     this.ensureConfig("default")
+
   }
 
   // =========================
-  // config存在保証
+  // ensureConfig
   // =========================
   ensureConfig(profile) {
 
@@ -47,12 +52,20 @@ module.exports = class WF_ProfileEngine {
     const raw = this.storage.read(path)
 
     if (raw) {
+
       try {
+
         JSON.parse(raw)
         return
-      } catch {
-        log("Config corrupted → recreating")
+
+      } 
+
+      catch {
+
+        console.log("Config corrupted → recreating")
+
       }
+
     }
 
     const cfg = this.deepClone(this.defaultConfig)
@@ -79,33 +92,44 @@ module.exports = class WF_ProfileEngine {
     })
 
     this.storage.write(path, JSON.stringify(cfg))
+
   }
 
   // =========================
-  // プロファイル一覧
+  // Profiles
+  // =========================
+
+  // =========================
+  // list
   // =========================
   list() {
+  
     return JSON.parse(
       this.storage.read(this.storage.getProfilesPath())
     )
+
   }
 
   // =========================
-  // アクティブ取得
+  // getActive
   // =========================
   getActive() {
+
     return this.storage.read(this.storage.getActivePath())
+
   }
 
   // =========================
-  // アクティブ変更
+  // setActive
   // =========================
   setActive(name) {
+
     this.storage.write(this.storage.getActivePath(), name)
+
   }
 
   // =========================
-  // MigrateValues（自動補完）
+  // migrateValues
   // =========================
   migrateValues(values, schema) {
 
@@ -123,6 +147,7 @@ module.exports = class WF_ProfileEngine {
 
       const sec = def.section || "General"
       sectionSet.add(sec)
+
     }
 
     // section
@@ -143,8 +168,10 @@ module.exports = class WF_ProfileEngine {
 
       // 通常キー削除
       if (!key.startsWith("section_") && !(key in schema)) {
+  
         delete newValues[key]
         return
+
       }
 
       // sectionキー削除
@@ -153,7 +180,9 @@ module.exports = class WF_ProfileEngine {
         const sec = key.replace("section_", "")
 
         if (!sectionSet.has(sec)) {
+
           delete newValues[key]
+
         }
 
       }
@@ -161,10 +190,11 @@ module.exports = class WF_ProfileEngine {
     })
 
     return newValues
+
   }
 
   // =========================
-  // Config取得（正規化込み）
+  // getConfig
   // =========================
   getConfig() {
 
@@ -182,7 +212,7 @@ module.exports = class WF_ProfileEngine {
     // 壊れてた場合は再生成
     if (!cfg || typeof cfg !== "object") {
 
-      log("Config broken → rebuilding")
+      console.log("Config broken → rebuilding")
 
       const fresh = this.deepClone(this.defaultConfig)
 
@@ -193,44 +223,47 @@ module.exports = class WF_ProfileEngine {
 
       this.saveConfig(profile, fresh)
       return fresh
+
     }
 
-    // schema更新
+    // schema
     cfg.schema = this.defaultConfig.schema
 
-    // layout補完
+    // layout
     if (!cfg.layout) {
       cfg.layout = this.deepClone(this.defaultConfig.layout || {})
     }
 
-    // api補完
+    // api
     if (!cfg.api) {
       cfg.api = this.deepClone(this.defaultConfig.api || {})
     }
 
-    // styles補完
+    // styles
     if (!cfg.styles) {
       cfg.styles = this.deepClone(this.defaultConfig.styles || {})
     }
 
-    // migrate（超重要）
+    // migrate
     cfg.values = this.migrateValues(
       cfg.values || {},
       cfg.schema
     )
 
-    // values正規化
+    // values
     cfg = this.normalizeConfig(cfg)
 
     this.saveConfig(profile, cfg)
 
     return cfg
+
   }
 
   // =========================
-  // 保存
+  // saveConfig
   // =========================
   saveConfig(profile, cfg) {
+
     const sanitized = {
       version: this.defaultConfig.version,
       values: cfg.values,
@@ -241,11 +274,12 @@ module.exports = class WF_ProfileEngine {
     this.storage.write(
       this.storage.getProfileConfigPath(profile),
       JSON.stringify(sanitized)
-    );
+    )
+
   }
 
   // =========================
-  // 完全リセット
+  // reset
   // =========================
   reset(profile) {
 
@@ -260,10 +294,11 @@ module.exports = class WF_ProfileEngine {
     })
 
     this.saveConfig(profile, cfg)
+
   }
 
   // =========================
-  // 作成
+  // create
   // =========================
   create(name) {
 
@@ -281,10 +316,11 @@ module.exports = class WF_ProfileEngine {
     )
 
     this.ensureConfig(name)
+
   }
 
   // =========================
-  // 削除
+  // delete
   // =========================
   delete(name) {
 
@@ -306,10 +342,11 @@ module.exports = class WF_ProfileEngine {
     if (this.getActive() === name) {
       this.setActive("default")
     }
+
   }
 
   // =========================
-  // 複製
+  // duplicate
   // =========================
   duplicate(from, to) {
 
@@ -332,10 +369,11 @@ module.exports = class WF_ProfileEngine {
       this.storage.getProfilesPath(),
       JSON.stringify(list)
     )
+
   }
 
   // =========================
-  // ディレクトリコピー
+  // copyDir
   // =========================
   copyDir(src, dst) {
 
@@ -357,11 +395,13 @@ module.exports = class WF_ProfileEngine {
       } else {
         fm.writeString(d, fm.readString(s))
       }
+
     }
+
   }
 
   // =========================
-  // リネーム
+  // rename
   // =========================
   rename(oldName, newName) {
 
@@ -388,10 +428,11 @@ module.exports = class WF_ProfileEngine {
     if (this.getActive() === oldName) {
       this.setActive(newName)
     }
+
   }
 
   // =========================
-  // values正規化
+  // normalizeConfig
   // =========================
   normalizeConfig(cfg) {
 
@@ -429,18 +470,21 @@ module.exports = class WF_ProfileEngine {
         default:
           val = String(val ?? def.default ?? "")
           break
+
       }
 
       newValues[key] = val
+
     })
 
     cfg.values = newValues
 
     return cfg
+
   }
 
   // =========================
-  // Deep Clone（完全安全版）
+  // deepClone
   // =========================
   deepClone(obj) {
 
@@ -467,18 +511,22 @@ module.exports = class WF_ProfileEngine {
       // -------------------------
       return JSON.parse(JSON.stringify(safe))
 
-    } catch (e) {
+    }
+
+    catch (e) {
 
       log("deepClone error")
       log(e)
       log(obj)
 
       return {}
+
     }
+
   }
 
   // =========================
-  // JSON安全化
+  // toSafeJSON
   // =========================
   toSafeJSON(obj, seen = new WeakSet()) {
 
@@ -494,6 +542,7 @@ module.exports = class WF_ProfileEngine {
       if (typeof obj === "function") return null
 
       return obj
+
     }
 
     // -------------------------
@@ -527,20 +576,33 @@ module.exports = class WF_ProfileEngine {
       if (typeof value === "function") continue
 
       result[key] = this.toSafeJSON(value, seen)
+
     }
 
     return result
+
   }
 
+  // =========================
+  // safeParse
+  // =========================
   safeParse(txt, fallback = {}) {
 
     if (!txt) return fallback
 
     try {
+
       return JSON.parse(txt)
-    } catch (e) {
-      log("JSON parse failed, fallback used")
-      return fallback
+
     }
+
+    catch (e) {
+
+      console.log("JSON parse failed, fallback used")
+      return fallback
+
+    }
+
   }
+
 }
