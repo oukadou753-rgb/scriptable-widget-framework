@@ -5,11 +5,12 @@
  * WF_MenuEngine
  * UTF-8 日本語コメント
  **/
+
+// =========================
+// Export
+// =========================
 module.exports = class WF_MenuEngine {
 
-  // =========================
-  // constructor
-  // =========================
   constructor() {
 
     this.menus = {}
@@ -44,6 +45,7 @@ module.exports = class WF_MenuEngine {
       items: processed,
       options
     }
+
   }
 
   // =========================
@@ -60,17 +62,26 @@ module.exports = class WF_MenuEngine {
       const result = await this.present(current, overrideOptions)
 
       if (result === "reload" || result === "exit") {
+
         this.stack = []
         return result
+
       }
 
       if (result === "back") {
+
         if (this.stack.length > 1) {
+
           this.stack.pop()
+
         } else {
+
           return "exit"
+
         }
+
       }
+
     }
 
     return "exit"
@@ -82,12 +93,20 @@ module.exports = class WF_MenuEngine {
   _eval(val, ctx, def = true) {
 
     if (typeof val === "function") {
+
       try {
+
         return val(ctx)
-      } catch (e) {
+
+      }
+
+      catch (e) {
+
         console.warn("Menu eval error:", e)
         return def
+
       }
+
     }
 
     if (val === undefined) return def
@@ -118,7 +137,7 @@ module.exports = class WF_MenuEngine {
     }
 
     // =========================
-    // メニュー項目
+    // Menu Items
     // =========================
     items.forEach(item => {
 
@@ -133,25 +152,30 @@ module.exports = class WF_MenuEngine {
     const index = await a.present()
 
     // =========================
-    // 戻る / 閉じる
+    // Back / Close
     // =========================
     if (index === -1) {
+
       return "back"
+
     }
 
     const item = items[index]
+
     if (!item) return null
 
     // =========================
-    // サブメニュー
+    // Sub Menu
     // =========================
     if (item.next) {
+
       this.stack.push(item.next)
       return null
+
     }
 
     // =========================
-    // アクション
+    // Action
     // =========================
     if (item.action) {
 
@@ -166,18 +190,25 @@ module.exports = class WF_MenuEngine {
         if (item.close == true) return "exit"
         if (options.closeOnSelect == true) return "exit"
 
-      } catch (e) {
+      }
+
+      catch (e) {
 
         const err = new Alert()
+
         err.title = "Action Error"
         err.message = String(e)
         err.addAction("OK")
+
         await err.present()
+
       }
 
       return null
     }
 
     return null
+
   }
+
 }
