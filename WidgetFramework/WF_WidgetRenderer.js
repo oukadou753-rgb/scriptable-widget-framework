@@ -91,15 +91,27 @@ module.exports = class WF_WidgetRenderer {
 
     const widget = new ListWidget()
 
+    // =========================
+    // ★ widgetタップ（全体）
+    // =========================
+    this.applyTapAction(widget, layout, context)
+
+    // =========================
     // layout padding
+    // =========================
     if (layout.padding) {
       const p = layout.padding
       widget.setPadding(p.top, p.left, p.bottom, p.right)
     }
 
-    // backgroundColor / backgroundGradient
+    // =========================
+    // background
+    // =========================
     if (values.useBgGradient && values.bgColorTop && values.bgColorBottom) {
-      widget.backgroundGradient = await this.setGradientBackground(values.bgColorTop, values.bgColorBottom)
+      widget.backgroundGradient = await this.setGradientBackground(
+        values.bgColorTop,
+        values.bgColorBottom
+      )
     }
     else if (values.bgColor) {
       try {
@@ -109,25 +121,34 @@ module.exports = class WF_WidgetRenderer {
       }
     }
 
-    // Header
-    if (Array.isArray(layout.header) && layout.header.length) {
-      await this.renderBlock(widget, layout.header, context)
-      // widget.addSpacer()
-    }
+    // =========================
+    // ★ blocks（新方式）
+    // =========================
+    if (Array.isArray(layout.blocks) && layout.blocks.length) {
 
-    // Body
-    if (Array.isArray(layout.body) && layout.body.length) {
-      await this.renderBlock(widget, layout.body, context)
-    }
+      await this.renderBlock(widget, layout.blocks, context)
 
-    // Footer
-    if (Array.isArray(layout.footer) && layout.footer.length) {
-      // widget.addSpacer()
-      await this.renderBlock(widget, layout.footer, context)
+    } else {
+
+      // =========================
+      // 従来方式（互換）
+      // =========================
+
+      if (Array.isArray(layout.header) && layout.header.length) {
+        await this.renderBlock(widget, layout.header, context)
+      }
+
+      if (Array.isArray(layout.body) && layout.body.length) {
+        await this.renderBlock(widget, layout.body, context)
+      }
+
+      if (Array.isArray(layout.footer) && layout.footer.length) {
+        await this.renderBlock(widget, layout.footer, context)
+      }
+
     }
 
     return widget
-
   }
 
   // =========================
@@ -207,6 +228,9 @@ module.exports = class WF_WidgetRenderer {
           const newCtx = { ...context, item, index: i + 1 }
           if (block.template) await this.renderBlock(repeatStack, [block.template], newCtx)
         }
+
+        URL
+        this.applyTapAction(repeatStack, block, context)
 
         continue
       }
@@ -343,6 +367,9 @@ module.exports = class WF_WidgetRenderer {
 
     this.applyStyle(txt, el.style, context)
 
+    // URL
+    this.applyTapAction(txt, el, context)
+
     return txt
 
   }
@@ -404,6 +431,9 @@ module.exports = class WF_WidgetRenderer {
         if (i < children.length - 1) stack.addSpacer()
       }
     }
+
+    // URL
+    this.applyTapAction(stack, el, context)
 
     return stack
 
@@ -495,6 +525,9 @@ module.exports = class WF_WidgetRenderer {
   
     if (opacity)
       node.imageOpacity = Number(opacity)
+
+    // URL
+    this.applyTapAction(node, el, context)
 
   }
 
@@ -600,6 +633,63 @@ module.exports = class WF_WidgetRenderer {
     if (opacity !== "" && !isNaN(opacity)) {
       textItem.textOpacity = Number(opacity)
     }
+
+  }
+
+  // =========================
+  // applyTapAction
+  // =========================
+  applyTapAction(node, el, context) {
+
+    if (!node || !el) return
+
+    // =========================
+    // meta（最優先）
+    // =========================
+    if (el.meta) {
+
+      const resolvedMeta = {}
+
+      for (const k in el.meta) {
+        resolvedMeta[k] = this.bind(el.meta[k], context)
+      }
+
+      node.url = this.buildActionUrl(resolvedMeta)
+      return
+    }
+
+    // =========================
+    // URL
+    // =========================
+    const rawUrl = el.url || el.onTap
+    if (!rawUrl) return
+
+    try {
+      const url = this.bind(rawUrl, context)
+      if (url) node.url = url
+    } catch (e) {
+      console.warn("Invalid tap url")
+    }
+
+  }
+
+
+  // =========================
+  // buildActionUrl
+  // =========================
+  buildActionUrl(meta) {
+
+    if (!meta) return null
+
+    const base = "scriptable:///run"
+
+    const query = Object.entries(meta)
+      .map(([k, v]) =>
+        encodeURIComponent(k) + "=" + encodeURIComponent(v)
+      )
+      .join("&")
+
+    return `${base}?scriptName=${encodeURIComponent(Script.name())}&${query}`
 
   }
 
