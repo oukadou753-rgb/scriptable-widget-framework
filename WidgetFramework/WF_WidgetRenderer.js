@@ -53,25 +53,25 @@ module.exports = class WF_WidgetRenderer {
     }
 
     // Main Root
-    this.root = this._ensureDirs(this.baseDir, "WF_Data")
+    this.root = this._ensureDirs(this.baseDir, "WF_Data", true)
 
     // App Root
-    this.appRoot = this._ensureDirs(this.root, this.appId)
+    this.appRoot = this._ensureDirs(this.root, this.appId, true)
 
     // Sub Dir
-    this.imageRoot = this._ensureDirs(this.appRoot, "images")
+    this.imageRoot = this._ensureDirs(this.appRoot, "images", true)
 
   }
 
   // =========================
   // _ensureDirs
   // =========================
-  _ensureDirs(root, dir) {
+  _ensureDirs(root, dir, isDir = false) {
 
     const path = this.fm.joinPath(root, dir)
 
     if (!this.fm.fileExists(path)) {
-      this.fm.createDirectory(path)
+      if (isDir) this.fm.createDirectory(path)
     }
 
     return path
