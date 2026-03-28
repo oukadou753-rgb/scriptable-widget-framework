@@ -5,6 +5,10 @@
  * WF_ConfigUI
  * UTF-8 日本語コメント
  **/
+
+// =========================
+// Export
+// ========================
 module.exports = {
 
   // =========================
@@ -34,22 +38,27 @@ module.exports = {
     await this.createTable(table, activeCfg, profileEngine, activeProfile)
     await table.present(true)
     return this.result
+
   },
 
   // =========================
   // createTable
   // =========================
   async createTable(table, activeCfg, profileEngine, activeProfile) {
+
     table.removeAllRows()
     await this.renderContent(table, activeCfg, profileEngine, activeProfile)
     table.reload()
+
   },
 
   // =========================
   // 共通UI部品
   // =========================
   applyColor(row, left, right, value) {
+
     try {
+
       const color = new Color(value)
 
       row.backgroundColor = color
@@ -67,7 +76,10 @@ module.exports = {
       left.titleColor = textColor
       right.titleColor = textColor
 
-    } catch {}
+    }
+
+    catch {}
+
   },
 
   // =========================
@@ -84,10 +96,12 @@ module.exports = {
     // -------------------------
     const sections = {}
     for (const key in schemaObj) {
+
       const item = schemaObj[key]
       const sec = item.section || "General"
       if (!sections[sec]) sections[sec] = []
       sections[sec].push({ key, ...item })
+
     }
 
     // -------------------------
@@ -95,7 +109,9 @@ module.exports = {
     // -------------------------
     let sectionState = {}
     for (const sec in sections) {
+
       sectionState[sec] = values[`section_${sec}`] === true
+
     }
 
     // -------------------------
@@ -124,13 +140,16 @@ module.exports = {
       const r = await a.present()
 
       if (r !== -1) {
+
         const selected = list[r]
 
         profileEngine.setActive(selected)
         const cfg = profileEngine.getConfig()
 
         await this.createTable(this.table, {...cfg}, profileEngine, selected)
+
       }
+
     }
 
     table.addRow(row)
@@ -144,23 +163,34 @@ module.exports = {
       {
         label: allOpen ? "▶ Close All" : "▼ Open All",
         onTap: async () => {
+
           for (const sec in sections) {
+
             const state = !allOpen
             sectionState[sec] = state
             values[`section_${sec}`] = state
+
           }
+
           await this.reload(activeCfg, profileEngine, activeProfile)
+
         }
+
       },
       {
         label: "↺ Default",
         onTap: async () => {
+
           for (const sec in sections) {
+
             const isOpen = defaultOpenSections.includes(sec)
             sectionState[sec] = isOpen
             values[`section_${sec}`] = isOpen
+
           }
+
           await this.reload(activeCfg, profileEngine, activeProfile)
+
         }
       }
     ]).row)
@@ -174,8 +204,10 @@ module.exports = {
 
       const { row: headerRow } = this.tableUI.createSectionHeader(sectionName, isOpen)
       headerRow.onSelect = async () => {
+
         values[`section_${sectionName}`] = !isOpen
         await this.reload(activeCfg, profileEngine, activeProfile)
+
       }
 
       table.addRow(headerRow)
@@ -205,30 +237,39 @@ module.exports = {
 
         // COLOR
         if (item.type === "color") {
+
           this.applyColor(row, left, right, current)
+
         }
 
         // BOOL色分け
         if (item.type === "bool" || item.type === "boolean") {
+
           right.titleColor = current ? Color.green() : Color.red()
+
         }
 
         // SELECT
         if (item.type === "select") {
+
           right.titleColor = Color.blue()
+
         }
 
         row.onSelect = async () => {
 
           // BOOL
           if (item.type === "bool" || item.type === "boolean") {
+
             values[item.key] = !Boolean(current)
             await this.reload(activeCfg, profileEngine, activeProfile)
             return
+
           }
 
           // SELECT
           if (item.type === "select") {
+
             const opts = item.options || []
 
             const a = new Alert()
@@ -246,10 +287,12 @@ module.exports = {
 
             await this.reload(activeCfg, profileEngine, activeProfile)
             return
+
           }
 
           // COLOR
           if (item.type === "color") {
+
             const presets = item.presets || [
               "#ffffff", "#000000", "#ff3b30",
               "#34c759", "#007aff", "#ffcc00"
@@ -266,26 +309,36 @@ module.exports = {
             if (r === -1) return
 
             if (r < presets.length) {
+
               values[item.key] = presets[r]
+
             } else {
+
               const input = await this.prompt("HEX Color", current)
               if (input !== null) values[item.key] = input
+
             }
 
             await this.reload(activeCfg, profileEngine, activeProfile)
             return
+
           }
 
           // DEFAULT
           const input = await this.prompt(item.label, current)
           if (input !== null) {
+
             values[item.key] = this.castSafe(input, item.type, current)
             await this.reload(activeCfg, profileEngine, activeProfile)
+
           }
+
         }
 
         table.addRow(row)
+
       }
+
     }
 
     table.addRow(this.tableUI.createSpacer(16))
@@ -302,10 +355,12 @@ module.exports = {
         label: "Save & Close",
         dismiss: true,
         onTap: async () => {
+
           const cfg = profileEngine.getConfig()
           cfg.values = JSON.parse(JSON.stringify(values))
           profileEngine.saveConfig(activeProfile, cfg)
           this.result = "reload"
+
         }
       }
     ]).row)
@@ -315,15 +370,19 @@ module.exports = {
   // reload
   // =========================
   async reload(activeCfg, profileEngine, activeProfile) {
+
     await this.createTable(this.table, {...activeCfg}, profileEngine, activeProfile)
+
   },
 
   // =========================
   // prompt
   // =========================
   async prompt(title, def) {
+
     const a = new Alert()
     a.title = title
+
     a.addTextField("", String(def ?? ""))
     a.addAction("OK")
     a.addCancelAction("Cancel")
@@ -332,22 +391,29 @@ module.exports = {
     if (r === -1) return null
 
     return a.textFieldValue(0)
+
   },
 
   // =========================
   // cast
   // =========================
   castSafe(val, type, fallback) {
+
     if (type === "number") {
+
       const n = Number(val)
       return isNaN(n) ? Number(fallback || 0) : n
+
     }
 
     if (type === "bool" || type === "boolean") {
+
       return val === "true" || val === true
+
     }
 
     return val
+
   }
 
 }
