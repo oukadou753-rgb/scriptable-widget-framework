@@ -5,13 +5,20 @@
  * WF_NotificationManager
  * UTF-8 日本語コメント
  **/
+
+// =========================
+// Export
+// ========================
 module.exports = class WF_NotificationManager {
+
   constructor(appId, storage) {
+
     this.appId = appId
     this.storage = storage
 
     this.key = "wf_notifications"
     this.history = this._load()
+
   }
 
   // =========================
@@ -23,6 +30,7 @@ module.exports = class WF_NotificationManager {
   // payload: { id, title, subtitle?, body, delay?, cooldown?, meta? }
   // =========================
   async notifyOnce(payload) {
+
     if (!payload?.id) throw new Error("notifyOnce: payload.id is required")
 
     const uid = `${payload.id}_${Date.now()}`
@@ -35,10 +43,16 @@ module.exports = class WF_NotificationManager {
     if (last && Date.now() - last < cooldown) return false
 
     if (payload.delay) {
+  
       const fireDate = new Date(Date.now() + payload.delay)
       await this.schedule(payload.id, fireDate, payload)
-    } else {
+
+    }
+
+    else {
+
       await this._send(payload)
+
       this.history[uid] = {
         groupId: payload.id,
         lastSent: Date.now(),
@@ -47,29 +61,40 @@ module.exports = class WF_NotificationManager {
         subtitle: payload.subtitle,
         body: payload.body
       }
+
       this._save()
+
     }
 
     return true
+
   }
 
   // =========================
   // 即時通知（delay があれば予約として扱う）
   // =========================
   async notify(payload) {
+
     if (payload.delay) {
+
       const fireDate = new Date(Date.now() + payload.delay)
       await this.schedule(payload.id || `temp_${Date.now()}`, fireDate, payload)
+
     } else {
+
       await this._send(payload)
+
     }
+
     return true
+
   }
 
   // =========================
   // 予約通知
   // =========================
   async schedule(id, date, payload) {
+
     if (!id) throw new Error("schedule: id is required")
 
     const cooldown = payload.cooldown ?? 0
@@ -82,10 +107,15 @@ module.exports = class WF_NotificationManager {
 
     // ★ pending削除（JSON）
     for (const key in this.history) {
+
       const item = this.history[key]
+
       if (item.groupId === id && item.status === "pending") {
+
         delete this.history[key]
+
       }
+
     }
 
     // ★ iOS削除
@@ -95,9 +125,15 @@ module.exports = class WF_NotificationManager {
     n.identifier = id
 
     if (typeof n.setTriggerDate === "function") {
+
       n.setTriggerDate(date)
-    } else {
+
+    }
+
+    else {
+
       n.triggerDate = date
+
     }
 
     await n.schedule()
@@ -116,50 +152,64 @@ module.exports = class WF_NotificationManager {
     this._save()
 
     return true
+
   }
 
   // =========================
   // 削除（予約含む）
   // =========================
   async remove(id) {
+
     if (!id) return false
 
     try {
+
       await Notification.removePending([id])
       await Notification.removeDelivered([id])
-    } catch (e) {}
+
+    }
+
+    catch (e) {}
 
     // ★ groupIdで全削除
     let changed = false
 
     for (const key in this.history) {
+  
       if (this.history[key].groupId === id) {
+  
         delete this.history[key]
         changed = true
+  
       }
+  
     }
 
     if (changed) this._save()
 
     return true
+
   }
 
   // =========================
   // 全削除
   // =========================
   async clearAll() {
+
     const ids = Object.keys(this.history)
     await Notification.removePending(ids)
     await Notification.removeDelivered(ids)
 
     this.history = {}
     this._save()
+
   }
 
   // =========================
   // UI 用一覧取得
   // =========================
   list() {
+
     if (!this.history || typeof this.history !== "object") return []
 
     return Object.entries(this.history).map(([id, v]) => ({
@@ -173,12 +223,14 @@ module.exports = class WF_NotificationManager {
       lastSent: v?.lastSent ?? null,
       meta: v?.meta ?? {}
     }))
+
   }
 
   // =========================
   // getUIList
   // =========================
   getUIList(type = "all") {
+
     this.syncStatus()
 
     let list = this.list().map(item => {
@@ -199,113 +251,147 @@ module.exports = class WF_NotificationManager {
     })
 
     if (type === "scheduled") {
+
       list = list.filter(v => v.isPending)
       list.sort((a, b) => (a.date || 0) - (b.date || 0))
+
     }
 
     if (type === "history") {
+
       list = list.filter(v => v.isSent)
       list.sort((a, b) => (b.date || 0) - (a.date || 0))
+
     }
 
     return list
+
   }
 
   // =========================
   // getScheduled
   // =========================
   getScheduled() {
+
     return this.list().filter(v => v.status === "pending")
+
   }
 
   // =========================
   // getHistory
   // =========================
   getHistory() {
+
     return this.list().filter(v => v.status === "sent")
+
   }
 
   // =========================
   // refresh
   // =========================
   refresh() {
+
     this.history = this._load()
     this.syncStatus()
+
   }
 
   // =========================
   // removeAndRefresh
   // =========================
   async removeAndRefresh(id) {
+
     await this.remove(id)
     this.refresh()
+
   }
 
   // =========================
   // syncStatus
   // =========================
   syncStatus() {
+
     const now = Date.now()
     let changed = false
 
     for (const id in this.history) {
+
       const item = this.history[id]
 
       if (item.status === "pending" && item.fireAt && item.fireAt <= now) {
+
         item.status = "sent"
         item.lastSent = item.fireAt
         changed = true
+
       }
+    
     }
 
     if (changed) this._save()
+
   }
 
   // =========================
   // getStateMap
   // =========================
   getStateMap() {
+
     const map = {}
 
     for (const v of Object.values(this.history)) {
+
       const gid = v.groupId
+
       if (!gid) continue
 
       if (!map[gid]) {
+
         map[gid] = {
           hasPending: false,
           hasSent: false,
           pendingAt: null,
           lastSentAt: null
         }
+
       }
 
       // pending
       if (v.status === "pending") {
+
         map[gid].hasPending = true
 
         if (
           !map[gid].pendingAt ||
           v.fireAt > map[gid].pendingAt
         ) {
+
           map[gid].pendingAt = v.fireAt
+
         }
+
       }
 
       // sent
       if (v.status === "sent") {
+
         map[gid].hasSent = true
 
         if (
           !map[gid].lastSentAt ||
           v.lastSent > map[gid].lastSentAt
         ) {
+
           map[gid].lastSentAt = v.lastSent
+
         }
+
       }
+
     }
 
     return map
+
   }
 
   // =========================
@@ -316,10 +402,13 @@ module.exports = class WF_NotificationManager {
   // _send
   // =========================
   async _send(payload) {
+
     const n = this._createNotification(payload)
 
     if (payload.id) {
+
       n.identifier = payload.id
+
     }
 
     await n.schedule()
@@ -327,6 +416,7 @@ module.exports = class WF_NotificationManager {
     const uid = `${payload.id}_${Date.now()}`
 
     if (payload?.id) {
+
       this.history[uid] = {
         groupId: payload.id, // ★修正
         lastSent: Date.now(),
@@ -338,13 +428,16 @@ module.exports = class WF_NotificationManager {
       }
 
       this._save()
+
     }
+
   }
 
   // =========================
   // _createNotification
   // =========================
   _createNotification(payload) {
+
     const n = new Notification()
 
     n.title = payload.title || ""
@@ -354,6 +447,7 @@ module.exports = class WF_NotificationManager {
 
     // Scriptable 起動 URL（payload.id を必須に）
     if (payload.id) {
+
       const toQuery = (obj) =>
         Object.entries(obj)
           .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
@@ -362,30 +456,42 @@ module.exports = class WF_NotificationManager {
       n.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
         Script.name()
       )}&${toQuery({ id: payload.id })}`
+
     }
 
     // userInfo に payload.meta を格納
     n.userInfo = { id: payload.id, ...payload.meta }
 
     return n
+
   }
 
   // =========================
   // _load
   // =========================
   _load() {
+
     try {
+
       const data = this.storage.readJSON(this.key)
       return data && typeof data === "object" ? data : {}
-    } catch {
-      return {}
     }
+
+    catch {
+
+      return {}
+
+    }
+
   }
 
   // =========================
   // _save
   // =========================
   _save() {
+
     this.storage.writeJSON(this.key, this.history)
+
   }
+
 }
