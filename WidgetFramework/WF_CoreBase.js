@@ -27,6 +27,8 @@ module.exports = class WF_CoreBase {
     this.storageType = appInfo.storageType
     this.frameworkRepo = appInfo.frameworkRepo
 
+    this.appConfig = appConfig
+
     this.WF_DataProvider = WF_DataProvider
 
     this.pinText = ""
