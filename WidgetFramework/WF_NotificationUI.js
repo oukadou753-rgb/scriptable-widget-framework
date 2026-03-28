@@ -5,6 +5,10 @@
  * WF_NotificationUI
  * UTF-8 日本語コメント
  **/
+
+// =========================
+// Export
+// ========================
 module.exports = {
 
   // =========================
@@ -33,46 +37,59 @@ module.exports = {
     this.currentItem = null
 
     if (options.mode) {
+
       this.mode = options.mode
+
     }
 
     if (options.openId) {
+
       const item = core.notification
         .getUIList("all")
         .find(v => v.id === options.openId)
 
       if (item) {
+
         this.view = "detail"
         this.currentItem = item
+
       }
+
     }
 
     await this.createTable(table, core)
     await table.present(true)
+
   },
 
   // =========================
   // createTable
   // =========================
   async createTable(table, core) {
+
     table.removeAllRows()
 
     core.notification.refresh()
 
     if (this.view === "list") {
+
       const list = this.getList(core)
 
       this.renderTabs(table, core)
       this.renderCount(table, list)
       this.renderList(table, list, core)
       this.renderFooter(table, core)
+
     }
 
     if (this.view === "detail") {
+
       this.renderDetail(table, core)
+
     }
 
     table.reload()
+
   },
 
   // =========================
@@ -83,38 +100,54 @@ module.exports = {
   // データ取得
   // =========================
   getList(core) {
+
     if (this.mode === "history") {
+
       return core.notification.getUIList("history")
+
     }
+
     return core.notification.getUIList("scheduled")
+
   },
 
   // =========================
   // タブ
   // =========================
   renderTabs(table, core) {
+
     table.addRow(this.tableUI.createButtonRow([
       {
         label: this.mode === "scheduled" ? "●予定" : "予定",
         onTap: async () => {
+
           this.mode = "scheduled"
           await this.reload(core)
+
         }
+
       },
       {
         label: this.mode === "history" ? "●履歴" : "履歴",
         onTap: async () => {
+
           this.mode = "history"
           await this.reload(core)
+
         }
+
       },
       {
         label: "↺",
         onTap: async () => {
+
           await this.reload(core)
+
         }
+
       }
     ]).row)
+
   },
 
   // =========================
@@ -122,6 +155,7 @@ module.exports = {
   // =========================
   renderCount(table, list) {
     table.addRow(this.tableUI.createKeyValueRow("件数", list.length).row)
+
   },
 
   // =========================
@@ -130,8 +164,10 @@ module.exports = {
   renderList(table, list, core) {
 
     if (!Array.isArray(list) || list.length === 0) {
+
       table.addRow(this.tableUI.createKeyValueRow("状態", "通知はありません").row)
       return
+
     }
 
     for (const item of list) {
@@ -144,7 +180,9 @@ module.exports = {
       })
 
       if (item.isExpired) {
+  
         left.titleColor = Color.gray()
+  
       }
 
       row.onSelect = async () => {
@@ -154,6 +192,7 @@ module.exports = {
       }
 
       table.addRow(row)
+
     }
 
   },
@@ -162,6 +201,7 @@ module.exports = {
   // 詳細
   // =========================
   renderDetail(table, core) {
+  
     const item = this.currentItem
     if (!item) return
 
@@ -170,10 +210,13 @@ module.exports = {
       {
         label: "← 一覧",
         onTap: async () => {
+
           this.view = "list"
           this.currentItem = null
           await this.reload(core)
+
         }
+
       }
     ]).row)
 
@@ -181,7 +224,9 @@ module.exports = {
     table.addRow(this.tableUI.createKeyValueRow("Title", item.title).row)
 
     if (item.body) {
+  
       table.addRow(this.tableUI.createKeyValueRow("Body", item.body).row)
+
     }
 
     table.addRow(this.tableUI.createKeyValueRow(
@@ -201,42 +246,58 @@ module.exports = {
       {
         label: "削除",
         onTap: async () => {
+
           await core.notification.remove(item.id)
           this.view = "list"
           await this.reload(core)
+
         }
+
       }
     ]).row)
 
     // スヌーズ
     if (item.isPending) {
+  
       table.addRow(this.tableUI.createButtonRow([
         {
           label: "+5分",
           onTap: async () => {
+    
             await this.snooze(item, core, 5 * 60 * 1000)
+
           }
+
         },
         {
           label: "+1時間",
           onTap: async () => {
+
             await this.snooze(item, core, 60 * 60 * 1000)
+
           }
+
         },
         {
           label: "カスタム",
           onTap: async () => {
+
             await this.snoozeCustom(item, core)
+
           }
+
         }
       ]).row)
+
     }
+
   },
 
   // =========================
   // フッター
   // =========================
   renderFooter(table, core) {
+
     table.addRow(this.tableUI.createSpacer(16))
 
     table.addRow(
@@ -244,6 +305,7 @@ module.exports = {
         {
           label: "全削除",
           onTap: async () => {
+
             const a = new Alert()
             a.title = "全削除しますか？"
             a.addDestructiveAction("削除")
@@ -254,25 +316,29 @@ module.exports = {
 
             await core.notification.clearAll()
             await this.reload(core)
+
           }
+
         },
         { label: "Close", dismiss: true }
-      ]).row
-    )
+      ]).row)
   },
 
   // =========================
   // reload
   // =========================
   async reload(core) {
+
     await this.createTable(this.table, core)
     this.table.reload()
+
   },
 
   // =========================
   // snooze
   // =========================
   async snooze(item, core, diffMs) {
+
     const base = item.date || Date.now()
     const newTime = base + diffMs
 
@@ -284,11 +350,14 @@ module.exports = {
 
     this.view = "list"
     await this.reload(core)
+
   },
 
   async snoozeCustom(item, core) {
+
     const a = new Alert()
     a.title = "スヌーズ（分）"
+
     a.addTextField("例: 10", "5")
     a.addAction("OK")
     a.addCancelAction("キャンセル")
@@ -300,18 +369,23 @@ module.exports = {
     if (!minutes || minutes <= 0) return
 
     await this.snooze(item, core, minutes * 60 * 1000)
+
   },
 
   // =========================
   // 時刻
   // =========================
   formatDate(ts) {
+
     if (!ts) return ""
+
     const d = new Date(ts)
     return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`
+
   },
 
   formatTimeAgo(ts) {
+
     if (!ts) return ""
 
     const diff = Date.now() - ts
@@ -323,16 +397,19 @@ module.exports = {
     const day = Math.floor(hour / 24)
 
     if (diff < 0) {
+
       if (sec < 60) return `${sec}秒後`
       if (min < 60) return `${min}分後`
       if (hour < 24) return `${hour}時間後`
       return `${day}日後`
+
     }
 
     if (sec < 60) return `${sec}秒前`
     if (min < 60) return `${min}分前`
     if (hour < 24) return `${hour}時間前`
     return `${day}日前`
+
   }
 
 }
