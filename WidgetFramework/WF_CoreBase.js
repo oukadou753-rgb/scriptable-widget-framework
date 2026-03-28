@@ -29,6 +29,7 @@ module.exports = class WF_CoreBase {
 
     this.WF_DataProvider = WF_DataProvider
 
+    this.pinText = ""
   }
 
   // ======================
@@ -52,10 +53,10 @@ module.exports = class WF_CoreBase {
     if (size === "small") await widget.presentSmall()
     else if (size === "medium") await widget.presentMedium()
     else if (size === "large") await widget.presentLarge()
-    else {
+    else if (size === "extraLarge") {
       if (Device.isPad()) await widget.presentExtraLarge()
       else await widget.presentLarge()
-    }
+    } else return false
 
     return true
 
@@ -73,7 +74,6 @@ module.exports = class WF_CoreBase {
     // =========================
     const isOnline = await this.checkOnline()
     const layout = this.appConfig.getLayout(configData.values.layoutId)
-
     configData.values.isOnline = isOnline
     configData.layout = layout
 
@@ -108,7 +108,11 @@ module.exports = class WF_CoreBase {
       env: {
         appId: this.appId,
         size: finalSize,
-        storageType: this.storageType
+        storageType: this.storageType,
+        runs: {
+          inApp: config.runsInApp,
+          inWidget: config.runsInWidget
+        }
       },
 
       config: {
@@ -123,7 +127,8 @@ module.exports = class WF_CoreBase {
 
       services: {
         notification: this.notification,
-        storage: this.storage
+        storage: this.storage,
+        core: this
       }
 
     }
@@ -138,6 +143,7 @@ module.exports = class WF_CoreBase {
     // =========================
     // 通知
     // =========================
+
     await this.handleNotifications(finalData)
 
     // =========================
@@ -161,13 +167,12 @@ module.exports = class WF_CoreBase {
   async checkOnline() {
 
     try {
-  
+
       const req = new Request("https://www.apple.com")
       req.timeoutInterval = 2
       await req.load()
-  
       return true
-  
+
     }
 
     catch(e) {
@@ -319,6 +324,25 @@ module.exports = class WF_CoreBase {
     }
 
     return false
+  }
+
+  // ======================
+  // textCopy
+  // ======================
+  async textCopy(text, useNotif = false) {
+    if (!text) return false
+
+    Pasteboard.copyString(text)
+
+    if (useNotif) {
+      const n = new Notification()
+      n.title = "コピーしました ✅"
+      n.body = text
+      await n.schedule()
+    }
+
+    return true
+
   }
 
 }
