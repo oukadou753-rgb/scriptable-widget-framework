@@ -4,9 +4,10 @@
 /**
  * DevWidget
  * UTF-8 日本語コメント
- * 2026/03/23 11:50
+ * 2026/03/28 21:00
  */
-const DEFAULT_APP_ID = "Weather"
+
+const DEFAULT_APP_ID = "Earthquake"
 const DEFAULT_STRAGE_TYPE = "local"
 
 const APP_DEV_MODE = true
@@ -26,6 +27,9 @@ const APP_INFO = {
   frameworkRepo: WF_REPO,
 }
 
+// =========================
+// Export
+// =========================
 module.exports = {
   
   // =========================
@@ -165,7 +169,7 @@ function errorWidget(e) {
   addText(w, e.message, Font.boldSystemFont(16), color[1], "center")
   if (e.stack) {
     w.addSpacer(6)
-    addText(w, e.stack.slice(0, 120), Font.systemFont(10), color[1], "left")
+    addText(w, e.stack.slice(0, 120), Font.systemFont(10), color[0], "left")
   }
   w.addSpacer()
   addText(w, APP_INFO.storageType + " " + new Date().toLocaleTimeString(), Font.semiboldSystemFont(11), color[1], "right")
