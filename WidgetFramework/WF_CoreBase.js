@@ -328,7 +328,7 @@ module.exports = class WF_CoreBase {
   // ======================
   // textCopy
   // ======================
-  async textCopy(text, useNotif = false) {
+  async textCopy(text, useNotif = true) {
     if (!text) return false
 
     Pasteboard.copyString(text)
