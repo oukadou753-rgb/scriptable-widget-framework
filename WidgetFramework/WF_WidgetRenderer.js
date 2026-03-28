@@ -260,6 +260,12 @@ module.exports = class WF_WidgetRenderer {
 
     if (!el) return
 
+    // show
+    if (el.show !== undefined && !this.evaluate(el.show, context)) return
+
+    // hidden
+    if (el.hidden !== undefined && this.evaluate(el.hidden, context)) return
+
     // =========================
     // shorthand
     // =========================
@@ -304,12 +310,6 @@ module.exports = class WF_WidgetRenderer {
     if (el.s && !el.style) el.style = el.s
 
     if (!el.type) return
-
-    // show
-    if (el.show !== undefined && !this.evaluate(el.show, context)) return
-
-    // hidden
-    if (el.hidden !== undefined && this.evaluate(el.hidden, context)) return
 
     // =========================
     // children repeat
@@ -456,7 +456,7 @@ module.exports = class WF_WidgetRenderer {
       container.addSpacer(el.size)
     else
       container.addSpacer()
-  
+
   }
 
   // =========================
