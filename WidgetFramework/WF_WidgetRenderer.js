@@ -237,7 +237,7 @@ module.exports = class WF_WidgetRenderer {
           if (block.template) await this.renderBlock(repeatStack, [block.template], newCtx)
         }
 
-        URL
+        // URL
         this.applyTapAction(repeatStack, block, context)
 
         continue
