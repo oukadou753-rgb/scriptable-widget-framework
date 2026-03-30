@@ -193,7 +193,11 @@ function betweenHelper(left, right) {
 }
 
 function textHelper(text, style) {
-  return { text, style }
+  return {
+    type: "text",
+    text,
+    style
+  }
 }
 
 function imageHelper(image, size = 14, tint = "", opacity = 1) {
@@ -251,7 +255,7 @@ function rowHelper(text, trend, color) {
 const headerBlock = [
   betweenHelper(
     {
-      size: new Size(0, 24),
+      size: new Size(0, 25),
       spacing: 3,
 
       h: [
@@ -276,18 +280,7 @@ const headerBlock = [
 // ======================
 
 // [small, medium, large]
-const locationBlock = [
-  {
-    show: "{{ui_isMediumUp}}",
-
-    h: [
-      textHelper("{{location_name}}", { base: "largeText", color: "{{highlightTextColor}}" }),
-    ]
-  }
-]
-
-// [small, medium, large]
-const updateBlock = [
+const footerBlock = [
   betweenHelper(
     {
       justify: "start",
@@ -311,17 +304,17 @@ const updateBlock = [
 // ======================
 
 // [small]
-const pindedDataBlockSmall = [
+const bodyBlock_1 = [
   {
     show: "{{ui_isSmall}}",
 
     v: [
       {
-        padding: pos(0, 0, 10, 0),
+        padding: pos(0, 0, 5, 0),
         justify: "center",
 
         h: [
-          textHelper("{{pinned_maxShindo}}", { base: "dataText", fontSize: 50, color: "{{pinned_maxColor}}" })
+          textHelper("{{pinned_maxShindo}}", { base: "dataText", fontSize: 55, color: "{{pinned_maxColor}}" })
         ]
       },
       textHelper("{{pinned_place}}", "dataText")
@@ -330,11 +323,13 @@ const pindedDataBlockSmall = [
 ]
 
 // [medium, large]
-const pindedDataBlock1 = [
+const bodyBlock_2 = [
   {
     size: new Size(130, 0),
-    padding: pos(0, 0, 0, 0),
     justify: "center",
+    meta: {
+      action: "copyText"
+    },
 
     h: [
       textHelper("{{pinned_maxShindo}}", { base: "dataText", fontSize: 60, color: "{{pinned_maxColor}}" })
@@ -343,7 +338,7 @@ const pindedDataBlock1 = [
 ]
 
 // [medium, large]
-const pindedDataBlock2 = [
+const bodyBlock_3 = [
   {
     size: new Size(135, 0),
 
@@ -351,13 +346,15 @@ const pindedDataBlock2 = [
       {
         h: [
           textHelper("規模：", "columnText"),
-          textHelper("{{pinned_magnitudeStr}}", "dataText"),
+          textHelper("M", "dataText"),
+          textHelper("{{pinned_magnitudeStr}}", "dataText")
         ]
       },
       {
         h: [
           textHelper("深さ：", "columnText"),
-          textHelper("{{pinned_depthStr}}", "dataText")
+          textHelper("{{pinned_depthStr}}", "dataText"),
+          textHelper("km", "dataText")
         ]
       },
       {
@@ -373,62 +370,63 @@ const pindedDataBlock2 = [
       {
         h: [
           textHelper("現在の標高：", "columnText"),
-          textHelper("{{location_altStr}}", "dataText")
+          textHelper("{{location_altStr}}", "dataText"),
+          textHelper("m", "dataText")
         ]
       }
     ]
   }
 ]
 
-// [medium, large]
-const pindedDataBlockMediumUp = [
+// [small, medium, large]
+const bodyBlock_4 = [
   {
-    padding: pos(0, 0, 0, 0),
-    justify: "space-between",
     show: "{{ui_isMediumUp}}",
-    meta: {
-      action: "copyText"
-    },
 
     h: [
-      ...pindedDataBlock1,
-      ...pindedDataBlock2
+      textHelper("{{pinned_place}}", "dataLargeText"),
+      textHelper(" ({{pinned_distanceStr}}km)", "dataSmallText")
     ]
   }
 ]
 
 // [small, medium, large]
-const placeDataBlock = [
+const bodyBlock_5 = [
   {
-    sise: new Size(0, 0),
-    padding: pos(0, 0, 0, 0),
     show: "{{ui_isMediumUp}}",
 
     h: [
-      textHelper("{{pinned_place}}", "dataLargeText"),
-      textHelper(" ({{pinned_distanceStr}})", "dataSmallText")
+      textHelper("{{location_name}}", { base: "largeText", color: "{{highlightTextColor}}" }),
     ]
   }
 ]
 
 // [large]
-const historyDataBlock = [
+const repeatBlock = [
   {
-    padding: pos(5, 0, 5, 0),
+    padding: pos(5, 0, 0, 0),
+    spacing: 2,
     show: "{{ui_isLargeUp}}",
     url: 'https://www.data.jma.go.jp/multi/quake/index.html?lang=jp',
 
     v: [
       {
-        padding: pos(0, 0, 3, 0),
-        spacing: 2,
+        spacing: 1,
 
         h: [
           textHelper("震源地", "columnText"),
           textHelper("（距離）", "columnText"),
           { spacer: 0 },
           textHelper("震度", "columnText"),
-          { spacer: 30 },
+          {
+            show: "ui_isExtraLarge",
+
+            h: [
+              { spacer: 10 },
+              textHelper("体感", "columnText")
+            ]
+          },
+          { spacer: 35 },
           textHelper("発生日時", "columnText")
         ]
       },
@@ -442,16 +440,65 @@ const historyDataBlock = [
 
         template: {
           size: new Size(0, 0),
+
           h: [
             textHelper("{{badge}}{{place}}", {base: "dataText", color: "{{maxColor}}"}),
-            textHelper(" ({{distanceStr}})", {base: "dataSmallText", color: "{{maxColor}}"}),
+            textHelper(" ({{distanceStr}}km)", {base: "dataSmallText", color: "{{maxColor}}"}),
             { spacer: 0 },
             textHelper("{{maxShindo}}", {base: "dataText", color: "{{maxColor}}"}),
+            {
+              size: new Size(35, 0),
+              show: "ui_isExtraLarge",
+
+              h: [
+                { spacer: true },
+                textHelper("{{localShindo}}", {base: "dataText", color: "{{localColor}}"})
+              ]
+            },
             { spacer: 15 },
             textHelper("{{timeStr}}", {base: "dataText", color: "{{maxColor}}"}),
           ]
         }
       }
+    ]
+  }
+]
+
+// [small]
+const bodyBlock_small = [
+  {
+    show: "{{ui_isSmall}}",
+
+    v: [
+      ...bodyBlock_1,
+    ]
+  }
+]
+
+// [medium, large]
+const bodyBlock_mediumUp = [
+  {
+    align: "top",
+    show: "ui_isMediumUp",
+
+    v: [
+      {
+        size: new Size(280, 0),
+        justify: "space-between",
+
+        h: [
+          ...bodyBlock_2,
+          ...bodyBlock_3
+        ]
+      },
+      ...bodyBlock_4,
+    ]
+  },
+  {
+  show: "{{ui_isLargeUp}}",
+
+    v: [
+      ...repeatBlock
     ]
   }
 ]
@@ -523,6 +570,7 @@ module.exports = {
         useTestData: { type: "bool", label: "Use Test Data", section: "Debug", default: true },
         showStorageType: { type: "bool", label: "Show Storage Type", section: "Debug", default: true },
         showTableFullscreen: { type: "bool", label: "Show Table Fullscreen", section: "Debug", default: true },
+        refreshInterval: { type: "select", label: "Refresh Interval", section: "Debug", default: "15", options: ["15", "30", "45", "60"] },
         sort: { type: "select", label: "Sort", section: "Debug", default: "asc", options: ["asc", "desc"] },
         limit: { type: "number", label: "Limit", section: "Debug", default: 5 },
         minScore: { type: "number", label: "Min Score", section: "Debug", default: 80 },
@@ -606,18 +654,31 @@ module.exports = {
 
     const layouts = {
 
-      // Default Layout
       default: {
         padding: pos(16, 13, 16, 13),
-//         widgetUrl: "",
+        url: "",
 
         blocks: [
           ...headerBlock,
-          ...pindedDataBlockSmall,
-          ...pindedDataBlockMediumUp,
-          ...placeDataBlock,
-          ...historyDataBlock,
-          ...updateBlock
+          ...bodyBlock_small,
+          ...bodyBlock_mediumUp,
+          ...footerBlock
+        ],
+
+        spacing: {
+          headerBottom: "flex",
+          bodyBottom: "flex"
+        }
+      },
+
+      weather: {
+        padding: pos(16, 13, 16, 13),
+
+        blocks: [
+          ...headerBlock,
+          ...bodyBlock_small,
+          ...bodyBlock_mediumUp,
+          ...footerBlock
         ],
 
         // Spacing
@@ -705,6 +766,7 @@ module.exports = {
         const text = info.text || core.pinText || ""
         if (text) {
           await core.textCopy(text, isNotif)
+          App.close()
           return true
         }
       }
@@ -813,11 +875,11 @@ module.exports = {
       const distance = (lat && lon && runtime?.location?.lat)
         ? calcDistanceKm(runtime?.location?.lat, runtime?.location?.lon, lat, lon)
         : null
-      const distanceStr = distance ? `${distance}km` : "--"
+      const distanceStr = distance ? `${distance}` : "--"
       const depth = eq.earthquake?.hypocenter?.depth ?? null
-      const depthStr = depth ? `${depth}km` : "--"
+      const depthStr = depth ? `${depth}` : "--"
       const magnitude = eq.earthquake?.hypocenter?.magnitude ?? null
-      const magnitudeStr = magnitude ? `M${magnitude}` : "--"
+      const magnitudeStr = magnitude ? `${magnitude}` : "--"
 
       const [maxColor, maxShindo] = maxScale != null
         ? colorByThreshold(
@@ -825,7 +887,7 @@ module.exports = {
           SCALE_THRESHOLDS.shindo,
           SCALE_THRESHOLDS.def
         )
-        : ["#999999", "不明"]
+        : [Color.darkGray().hex, "0"]
 
       const [localColor, localShindo] = localScale != null
         ? colorByThreshold(
@@ -833,7 +895,7 @@ module.exports = {
           SCALE_THRESHOLDS.shindo,
           SCALE_THRESHOLDS.def
         )
-        : [null, null]
+        : [Color.darkGray().hex, "0"]
 
       const tsunami = eq.earthquake?.domesticTsunami ?? ""
       const tsunamiStr = domesticTsunamiStr(tsunami)
@@ -945,6 +1007,7 @@ module.exports = {
       isSmall: level === 1,
       isMediumUp: level >= 2,
       isLargeUp: level >= 3,
+      isExtraLarge: level === 4,
 
       showForecast: level >= 2 && v.showStorageType,
       showDetail: level >= 3
@@ -1381,7 +1444,7 @@ function locationTransform(ctx) {
       ? runtime.location.lon.toFixed(4)
       : "",
     altStr: runtime?.location?.alt != null
-      ? runtime.location.alt.toFixed(1) + "m"
+      ? runtime.location.alt.toFixed(1)
       : "",
     name: runtime?.location?.full
       ? runtime.location.full.split(" ").slice(0, 2).join("")
