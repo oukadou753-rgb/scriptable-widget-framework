@@ -773,6 +773,7 @@ module.exports = {
 
     }
 
+  
     const handler = core.notificationHandlers[info.action]
     if (handler) {
       await handler(info)
@@ -910,6 +911,7 @@ module.exports = {
         isPinned: isPinned,
 
         badge: badge,
+        tsunamiStr: tsunamiStr,
         tsunamiBadge: tsunamiBadge,
         tsunamiBgColor: tsunamiBgColor,
         tsunamiColor: tsunamiColor,
@@ -1081,12 +1083,31 @@ module.exports = {
       return {
         id: `eq_alert_${eq.id}`,
         delay: 5000,
-        title: `${eq.place}（${eq.distanceStr}）最大震度${eq.maxShindo}`,
+        title: `${eq.place}（${eq.distanceStr}km）最大震度${eq.maxShindo}`,
         body: `${eq.timeRaw}`,
         cooldown: v.notifyCooldown ?? 300000,
         meta: {
-          eqId: eq.id,
-          scale: eq.maxScale
+          action: "openPreview",
+//           type: "list",
+//           items: JSON.stringify([
+//             { title: `${eq.place}（${eq.distanceStr}km）最大震度${eq.maxShindo}`,
+//               subtitle: `${eq.timeRaw}`,
+//               rightTitle: `津波：${eq.tsunamiBadge}${eq.tsunamiStr}`,
+//             }
+//            
+//           ]),
+
+          lp_type: "list",
+          lp_items: [
+            {
+              text: `津波：${eq.tsunamiBadge}${eq.tsunamiStr}`,
+              fontSize: 16,
+              bold: true,
+              color: "#ffffff",
+              bgColor: eq.tsunamiLevel === "warning" ? "#b00020" : "#333333",
+              align: "center"
+            }
+          ]
         }
       }})
 
@@ -1263,6 +1284,22 @@ function flatObj(obj, prefix = "") {
   }
 
   return result
+}
+
+// ======================
+// normalizeInfo
+// ======================
+function normalizeInfo(info, isLongPress) {
+
+  if (isLongPress) {
+    return {
+      ...info,
+      type: info.lp_type || info.type,
+      items: info.lp_items || info.items
+    }
+  }
+
+  return info
 }
 
 // ======================
