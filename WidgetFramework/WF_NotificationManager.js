@@ -433,38 +433,63 @@ module.exports = class WF_NotificationManager {
 
   }
 
+// =========================
+// _createNotification
+// =========================
+_createNotification(payload) {
+
+  const n = new Notification()
+
+  n.title = payload.title || ""
+  n.subtitle = payload.subtitle || ""
+  n.body = payload.body || ""
+  if (payload.sound !== undefined) n.sound = payload.sound
+
+  const scriptName = Script.name()
+
   // =========================
-  // _createNotification
+  // ★ 長押しUI有効化（最重要）
   // =========================
-  _createNotification(payload) {
+  n.identifier = `_${scriptName}_${payload.id || ""}`
+  n.scriptName = scriptName
+  n.threadIdentifier = scriptName
 
-    const n = new Notification()
+  // =========================
+  // Scriptable 起動 URL（タップ用）
+  // =========================
+  if (payload.id) {
 
-    n.title = payload.title || ""
-    n.subtitle = payload.subtitle || ""
-    n.body = payload.body || ""
-    if (payload.sound !== undefined) n.sound = payload.sound
+    const toQuery = (obj) =>
+      Object.entries(obj)
+        .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
+        .join("&")
 
-    // Scriptable 起動 URL（payload.id を必須に）
-    if (payload.id) {
-
-      const toQuery = (obj) =>
-        Object.entries(obj)
-          .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
-          .join("&")
-
-      n.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
-        Script.name()
-      )}&${toQuery({ id: payload.id })}`
-
-    }
-
-    // userInfo に payload.meta を格納
-    n.userInfo = { id: payload.id, ...payload.meta }
-
-    return n
+    n.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
+      scriptName
+    )}&${toQuery({ id: payload.id })}`
 
   }
+
+  // =========================
+  // userInfo（meta）
+  // =========================
+  const meta = {}
+
+  for (const k in payload.meta || {}) {
+    const v = payload.meta[k]
+
+    // 配列・オブジェクトは文字列化
+    if (typeof v === "object") {
+      meta[k] = JSON.stringify(v)
+    } else {
+      meta[k] = v
+    }
+  }
+
+  n.userInfo = { id: payload.id, ...meta }
+
+  return n
+}
 
   // =========================
   // _load
