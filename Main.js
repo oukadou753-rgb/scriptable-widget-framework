@@ -27,15 +27,17 @@ const APP_INFO = {
   frameworkRepo: WF_REPO,
 }
 
-// =========================
-// Export
-// =========================
 module.exports = {
   
   // =========================
   // start
   // =========================
   async start(appInfo = APP_INFO) {
+
+    if (config.runsInNotification) {
+      await handleNotificationUI(args.notification.userInfo)
+      return
+    }
 
     appInfo.appConfig = `App_${appInfo.id}Config`
 
@@ -44,13 +46,13 @@ module.exports = {
       WF_DataProvider: { type: "both", path: WF_MODULE_DIR },
       WF_ProfileEngine: { type: "both", path: WF_MODULE_DIR },
       WF_WidgetRenderer: { type: "both", path: WF_MODULE_DIR },
-      WF_NotificationManager: { type: "both", path: WF_MODULE_DIR },
+      WF_NotificationManager: { type: "both", path: "" },
       WF_CoreBase: { type: "both", path: WF_MODULE_DIR },
     
       WF_MenuEngine: { type: "app", path: WF_MODULE_DIR },
-      WF_NotificationHandlers: { type: "app", path: WF_MODULE_DIR },
+      WF_NotificationHandlers: { type: "app", path: "" },
 
-      WF_TableUI: { type: "app", path: WF_MODULE_DIR },
+      WF_TableUI: { type: "app", path: "" },
       WF_ConfigUI: { type: "app", path: WF_MODULE_DIR },
       WF_NotificationUI: { type: "app", path: WF_MODULE_DIR },
     
@@ -81,30 +83,30 @@ module.exports = {
   // =========================
   async init(appInfo, modules) {
 
-      const ModuleLoader = importModule("ModuleLoader")
-      const moduleLoader = new ModuleLoader(appInfo.storageType)
+    const ModuleLoader = importModule("ModuleLoader")
+    const moduleLoader = new ModuleLoader(appInfo.storageType)
 
-      let obj = {}
+    let obj = {}
 
-      for (key in modules) {
+    for (key in modules) {
 
-        const value = modules[key]
-        const path = value.path + key
-        const type = value.type
+      const value = modules[key]
+      const path = value.path + key
+      const type = value.type
 
-        if (this.isImport(type)) {
-          obj[key] = moduleLoader.load(path)
-        }
-
+      if (this.isImport(type)) {
+        obj[key] = moduleLoader.load(path)
       }
 
-      if (config.runsInWidget) {
-        const core = new obj.WF_WidgetCore(appInfo, obj[appInfo.appConfig], obj)
-        await core.start()
-      } else {
-        const core = new obj.WF_AppCore(appInfo, obj[appInfo.appConfig], obj)
-        await core.start()
-      }
+    }
+
+    if (config.runsInWidget) {
+      const core = new obj.WF_WidgetCore(appInfo, obj[appInfo.appConfig], obj)
+      await core.start()
+    } else {
+      const core = new obj.WF_AppCore(appInfo, obj[appInfo.appConfig], obj)
+      await core.start()
+    }
 
   },
 
@@ -191,7 +193,59 @@ function addText(w, text, font, color, aling) {
   else if (aling == "center") t.centerAlignText()
 
 }
-  
+
+// =========================
+// handleNotificationUI
+// =========================
+async function handleNotificationUI(info) {
+
+  if (info.lp_type === "image") {
+
+    let img
+
+    if (info.src?.startsWith("http")) {
+      const req = new Request(info.src)
+      img = await req.loadImage()
+    } else {
+      img = Image.fromFile(info.src)
+    }
+
+    if (img) QuickLook.present(img)
+    return
+  }
+
+  if (info.lp_type === "list") {
+
+    const items = JSON.parse(info.lp_items || "[]")
+
+    const table = new UITable()
+
+    for (const v of items) {
+
+      const row = new UITableRow()
+      const text = row.addText(String(v.text || ""))
+
+      if (v.color)
+        text.titleColor = new Color(v.color)
+
+      if (v.bgColor)
+        row.backgroundColor = new Color(v.bgColor)
+
+      if (v.fontSize)
+        text.titleFont = Font.systemFont(Number(v.fontSize))
+
+      row.height = v.height || 44
+
+      table.addRow(row)
+    }
+
+    await table.present()
+    return
+
+  }
+
+}
+
 // =========================
 // Module Test
 // =========================
