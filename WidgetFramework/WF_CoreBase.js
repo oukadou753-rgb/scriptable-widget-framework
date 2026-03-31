@@ -26,6 +26,7 @@ module.exports = class WF_CoreBase {
     this.appId = appId
     this.storageType = appInfo.storageType
     this.frameworkRepo = appInfo.frameworkRepo
+    this.appConfig = appConfig
 
     this.WF_DataProvider = WF_DataProvider
 
@@ -328,17 +329,15 @@ module.exports = class WF_CoreBase {
   // ======================
   // textCopy
   // ======================
-  async textCopy(text, useNotif = true) {
+  async textCopy(text) {
     if (!text) return false
 
     Pasteboard.copyString(text)
 
-    if (useNotif) {
-      const n = new Notification()
-      n.title = "コピーしました ✅"
-      n.body = text
-      await n.schedule()
-    }
+    const n = new Notification()
+    n.title = "コピーしました ✅"
+    n.body = text
+    await n.schedule()
 
     return true
 
