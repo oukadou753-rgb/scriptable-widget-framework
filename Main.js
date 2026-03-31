@@ -4,7 +4,7 @@
 /**
  * DevWidget
  * UTF-8 日本語コメント
- * 2026/03/31 13:22
+ * 2026/03/28 21:00
  */
 
 const DEFAULT_APP_ID = "Earthquake"
@@ -46,13 +46,13 @@ module.exports = {
       WF_DataProvider: { type: "both", path: WF_MODULE_DIR },
       WF_ProfileEngine: { type: "both", path: WF_MODULE_DIR },
       WF_WidgetRenderer: { type: "both", path: WF_MODULE_DIR },
-      WF_NotificationManager: { type: "both", path: "" },
+      WF_NotificationManager: { type: "both", path: WF_MODULE_DIR },
       WF_CoreBase: { type: "both", path: WF_MODULE_DIR },
     
       WF_MenuEngine: { type: "app", path: WF_MODULE_DIR },
-      WF_NotificationHandlers: { type: "app", path: "" },
+      WF_NotificationHandlers: { type: "app", path: WF_MODULE_DIR },
 
-      WF_TableUI: { type: "app", path: "" },
+      WF_TableUI: { type: "app", path: WF_MODULE_DIR },
       WF_ConfigUI: { type: "app", path: WF_MODULE_DIR },
       WF_NotificationUI: { type: "app", path: WF_MODULE_DIR },
     
@@ -233,6 +233,9 @@ async function handleNotificationUI(info) {
 
       if (v.fontSize)
         text.titleFont = Font.systemFont(Number(v.fontSize))
+
+      if (v.align)
+        text.centerAligned()
 
       row.height = v.height || 44
 
