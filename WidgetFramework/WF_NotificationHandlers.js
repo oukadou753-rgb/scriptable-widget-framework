@@ -69,10 +69,17 @@ module.exports = (core) => ({
 
       const table = new UITable()
 
-      for (const item of info.items || []) {
+      const items = JSON.parse(info.items || "[]")
 
-        const row = new UITableRow()
-        row.addText(String(item))
+      for (const item of items) {
+
+        const { row } = core.tableUI.createListRow({
+          title: item.title,
+          subtitle: item.subtitle,
+          rightTitle: item.rightTitle,
+          rightSubtitle: item.rightSubtitle,
+          preset: "tap"
+        })
         table.addRow(row)
 
       }
