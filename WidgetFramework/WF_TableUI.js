@@ -2,10 +2,36 @@
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-gray; icon-glyph: magic;
 /**
- * App_TableUI
+ * WF_TableUI
  * UTF-8 日本語コメント
  */
+
+// =========================
+// Export
+// =======================
 module.exports = {
+
+  // =========================
+  // Presets
+  // =======================
+  TABLE_PRESETS: {
+
+    tap: {
+      rowHeight: 60,
+      cellSpacing: 10,
+
+      fontTitle: Font.semiboldSystemFont(16),
+      fontSubtitle: Font.systemFont(14),
+
+      fontRightTitle: Font.semiboldSystemFont(14),
+      fontRightSubtitle: Font.systemFont(12),
+
+      leftColor: null,
+      rightColor: null,
+      backgroundColor: null
+    }
+
+  },
 
   // =========================
   // 基本Row
@@ -13,8 +39,8 @@ module.exports = {
   createRow(height = 0) {
     const row = new UITableRow()
     row.dismissOnSelect = false
-    row.cellSpacing = 10
-    if (height > 0) row.height = height
+    row.cellSpacing = this.TABLE_PRESETS.tap.cellSpacing
+    if (height > 0) row.height = height || this.TABLE_PRESETS.tap.rowHeight
     return row
   },
 
@@ -47,17 +73,31 @@ module.exports = {
     subtitle,
     rightTitle,
     rightSubtitle,
-    height = 60
+    height = 0,
+    preset = "tap",
+    meta = {}
   }) {
-    const row = this.createRow(height)
+    const style = {
+      ...this.TABLE_PRESETS[preset],
+      ...meta
+    }
+
+    const row = this.createRow(height || style.rowHeight)
+    row.cellSpacing = style.cellSpacing
+
+    if (style.backgroundColor) {
+      row.backgroundColor = style.backgroundColor
+    }
 
     const left = row.addText(
       String(title || ""),
       String(subtitle || "")
     )
     left.widthWeight = 70
-    left.titleFont = Font.semiboldSystemFont(16)
-    left.subtitleFont = Font.systemFont(14)
+    left.titleFont = style.fontTitle
+    left.subtitleFont = style.fontSubtitle
+
+    if (style.leftColor) left.titleColor = style.leftColor
 
     const right = row.addText(
       String(rightTitle || ""),
@@ -65,8 +105,10 @@ module.exports = {
     )
     right.widthWeight = 30
     right.rightAligned()
-    right.titleFont = Font.semiboldSystemFont(14)
-    right.subtitleFont = Font.systemFont(12)
+    right.titleFont = style.fontRightTitle
+    right.subtitleFont = style.fontRightSubtitle
+
+    if (style.rightColor) right.titleColor = style.rightColor
 
     return { row, left, right }
   },
