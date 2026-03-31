@@ -328,15 +328,19 @@ module.exports = class WF_CoreBase {
   // ======================
   // textCopy
   // ======================
-  async textCopy(text) {
+  async textCopy(text, isNotif = true) {
     if (!text) return false
 
     Pasteboard.copyString(text)
 
-    const n = new Notification()
-    n.title = "コピーしました ✅"
-    n.body = text
-    await n.schedule()
+  if (isNotif) {
+
+      const n = new Notification()
+      n.title = "コピーしました ✅"
+      n.body = text
+      await n.schedule()
+
+    }
 
     return true
 
