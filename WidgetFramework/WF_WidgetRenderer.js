@@ -178,75 +178,14 @@ module.exports = class WF_WidgetRenderer {
       // =========================
       // repeat
       // =========================
-
       if (block.type === "repeat") {
-
-        let items = this.resolveData(block.items, context)
-        if (!Array.isArray(items)) items = []
-
-        // filter
-        if (block.filter) {
-          items = items.filter(item => this.evaluate(block.filter, { ...context, item }))
-        }
-
-        // sort
-        if (block.sortBy) {
-          const key = block.sortBy
-          const order = (block.order && this.bind(block.order, context) === "asc") ? 1 : -1
-          items = [...items].sort((a, b) => {
-            const av = a?.[key], bv = b?.[key]
-            if (av === bv) return 0
-            if (av === undefined) return 1
-            if (bv === undefined) return -1
-            return (typeof av === "string" ? av.localeCompare(bv) : Number(av) - Number(bv)) * order
-          })
-        }
-
-        // limit
-        if (block.limit) {
-          const limit = Number(this.bind(block.limit, context)) || 0
-          items = items.slice(0, limit)
-        }
-
-        // empty
-        if (items.length === 0 && block.empty) {
-          await this.renderElement(container, block.empty, context)
-          continue
-        }
-
-        // repeat Stack
-        const repeatStack = container.addStack()
-
-        if (block.direction === "vertical") repeatStack.layoutVertically()
-        else repeatStack.layoutHorizontally()
-
-        // spacing
-        repeatStack.spacing = block.spacing ?? 6
-
-        // alignContent
-        const align = block.align ?? "center"
-
-        if (align === "top") repeatStack.topAlignContent()
-        else if (align === "bottom") repeatStack.bottomAlignContent()
-        else repeatStack.centerAlignContent()
-
-        // template / renderBlock
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i]
-          const newCtx = { ...context, item, index: i + 1 }
-          if (block.template) await this.renderBlock(repeatStack, [block.template], newCtx)
-        }
-
-        // URL
-        this.applyTapAction(repeatStack, block, context)
-
+        await this.renderRepeat(container, block, context)
         continue
       }
 
       // =========================
       // renderElement
       // =========================
-
       await this.renderElement(container, block, context)
 
     }
@@ -314,47 +253,14 @@ module.exports = class WF_WidgetRenderer {
     // =========================
     // children repeat
     // =========================
-
     if (el.type === "repeat") {
-      let items = this.resolveData(el.items, context)
-      if (!Array.isArray(items)) items = []
-
-      if (items.length === 0 && el.empty) {
-        await this.renderElement(container, el.empty, context)
-        return
-      }
-
-      // repeat Stack
-      const repeatStack = container.addStack()
-      if (el.direction === "vertical") repeatStack.layoutVertically()
-      else repeatStack.layoutHorizontally()
-
-      repeatStack.spacing = el.spacing ?? 6
-
-      // alignContent
-      const align = el.align ?? "center"
-
-      if (align === "top") repeatStack.topAlignContent()
-      else if (align === "bottom") repeatStack.bottomAlignContent()
-      else repeatStack.centerAlignContent()
-
-      // template repeatStack / renderBlock
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i]
-        const newCtx = { ...context, item, index: i + 1 }
-        if (el.template) {
-          await this.renderBlock(repeatStack, [el.template], newCtx)
-        }
-      }
-
+      await this.renderRepeat(container, el, context)
       return
-
     }
 
   // =========================
   // renderText / renderStack / renderSpacer / renderImage
   // =========================
-
     switch (el.type) {
       case "text": return this.renderText(container, el, context)
       case "hstack": return this.renderStack(container, el, context, true)
@@ -362,6 +268,63 @@ module.exports = class WF_WidgetRenderer {
       case "spacer": return this.renderSpacer(container, el)
       case "image": return await this.renderImage(container, el, context)
     }
+
+  }
+
+  // =========================
+  // renderRepeat
+  // =========================
+  async renderRepeat(container, block, context) {
+
+    let items = this.resolveData(block.items, context)
+    if (!Array.isArray(items)) items = []
+
+    const repeatStack = container.addStack()
+
+    if (block.direction === "vertical") repeatStack.layoutVertically()
+    else repeatStack.layoutHorizontally()
+
+    repeatStack.spacing = block.spacing ?? 6
+
+    const align = block.align ?? "center"
+    if (align === "top") repeatStack.topAlignContent()
+    else if (align === "bottom") repeatStack.bottomAlignContent()
+    else repeatStack.centerAlignContent()
+
+    // 描画
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
+      const newCtx = { ...context, item, index: i + 1 }
+      if (block.template) {
+        await this.renderBlock(repeatStack, [block.template], newCtx)
+      }
+    }
+
+    // minRows
+    if (block.minRows) {
+
+      const min = Number(this.bind(block.minRows, context)) || 0
+      const missing = min - items.length
+
+      for (let i = 0; i < missing; i++) {
+
+        const emptyStack = repeatStack.addStack()
+
+        if (block.direction === "vertical") {
+          emptyStack.layoutHorizontally()
+        } else {
+          emptyStack.layoutVertically()
+        }
+
+        if (block.rowHeight) {
+          emptyStack.size = new Size(0, Number(block.rowHeight))
+        }
+
+        emptyStack.addSpacer()
+      }
+    }
+
+    this.applyTapAction(repeatStack, block, context)
 
   }
 
