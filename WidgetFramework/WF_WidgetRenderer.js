@@ -253,15 +253,16 @@ module.exports = class WF_WidgetRenderer {
     // =========================
     // children repeat
     // =========================
-    if (el.type === "repeat") {
-      await this.renderRepeat(container, el, context)
-      return
-    }
+//     if (el.type === "repeat") {
+//       await this.renderRepeat(container, el, context)
+//       return
+//     }
 
-  // =========================
-  // renderText / renderStack / renderSpacer / renderImage
-  // =========================
+    // =========================
+    // renderText / renderStack / renderSpacer / renderImage
+    // =========================
     switch (el.type) {
+      case "repeat": return await this.renderRepeat(container, el, context)
       case "text": return this.renderText(container, el, context)
       case "hstack": return this.renderStack(container, el, context, true)
       case "vstack": return this.renderStack(container, el, context, false)
