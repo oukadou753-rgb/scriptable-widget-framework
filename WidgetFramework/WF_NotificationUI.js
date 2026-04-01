@@ -170,6 +170,14 @@ module.exports = {
 
     }
 
+    list.sort((a, b) => {
+
+      if (a.meta?.isPinned && !b.meta?.isPinned) return -1
+      if (!a.meta?.isPinned && b.meta?.isPinned) return 1
+      return (b.date || 0) - (a.date || 0)
+
+    })
+
     for (const item of list) {
 
       const { row, left, right } = this.tableUI.createListRow({
@@ -179,10 +187,12 @@ module.exports = {
         rightSubtitle: this.formatDate(item.date)
       })
 
+      if (item.meta?.isPinned) {
+        left.titleColor = Color.orange()
+      }
+
       if (item.isExpired) {
-  
         left.titleColor = Color.gray()
-  
       }
 
       row.onSelect = async () => {
@@ -235,14 +245,27 @@ module.exports = {
     ).row)
 
     table.addRow(this.tableUI.createKeyValueRow(
+      "Pinned",
+      item.meta?.isPinned ? "ON" : "OFF"
+    ).row)
+
+    table.addRow(this.tableUI.createKeyValueRow(
       "時刻",
       this.formatDate(item.date)
     ).row)
 
     table.addRow(this.tableUI.createSpacer(16))
 
-    // 削除
+    // Pin / Unpin / 削除
     table.addRow(this.tableUI.createButtonRow([
+      {
+        label: item.meta?.isPinned ? "Unpin" : "Pin",
+        onTap: async () => {
+
+          await this.togglePin(item, core)
+
+        }
+      },
       {
         label: "削除",
         onTap: async () => {
@@ -409,6 +432,34 @@ module.exports = {
     if (min < 60) return `${min}分前`
     if (hour < 24) return `${hour}時間前`
     return `${day}日前`
+
+  },
+
+  // =========================
+  // togglePin
+  // =========================
+  async togglePin(item, core) {
+
+    // 最新状態取得
+    const history = core.notification.history
+
+    const target = history[item.id]
+    if (!target) return
+
+    if (!target.meta) target.meta = {}
+
+    // トグル
+    target.meta.isPinned = !target.meta.isPinned
+
+    core.notification._save()
+
+    // UI更新
+    this.currentItem = {
+      ...item,
+      meta: target.meta
+    }
+
+    await this.reload(core)
 
   }
 
