@@ -65,32 +65,3 @@ module.exports = class WF_WidgetCore {
 
   }
 }
-    this.notification.syncStatus()
-
-    const core = new WF_CoreBase(appInfo, appConfig, moduleCache)
-    WF_CoreBase.mixinCore(this, core)
-  }
-
-  async start() {
-/*
-    // Framework update check
-    const update = await this.checkFrameworkUpdate()
-
-    if (update?.update) {
-
-      console.log(
-        "Framework Update Available\n" +
-        "Local: " + update.local + "\n" +
-        "Remote: " + update.remote
-      )
-
-    }
-*/
-
-    const widget = await this.run()
-    Script.setWidget(widget)
-    Script.complete()
-    return
-
-  }
-}
