@@ -218,6 +218,18 @@ module.exports = {
 
         if (item.hidden) continue
 
+        if (!this.evaluateExpr(item.show, values)) continue
+
+        const isDisabled = item.disabled
+          ? this.evaluateExpr(item.disabled, values)
+          : false
+
+        const isReadonly =
+          item.readonly ||
+          (item.readonlyExpr
+            ? this.evaluateExpr(item.readonlyExpr, values)
+            : false)
+
         const current =
           values[item.key] ??
           item.default ??
@@ -225,7 +237,10 @@ module.exports = {
 
         const indent = "    " // スペースでもOK
 
-        const icon = item.readonly ? "□" : "■"
+        const icon =
+          isReadonly ? "□" :
+          isDisabled ? "×" :
+          "■"
         const label = item.label || item.key
 
         const display =
@@ -237,26 +252,47 @@ module.exports = {
 
         // COLOR
         if (item.type === "color") {
-
           this.applyColor(row, left, right, current)
-
         }
 
         // BOOL色分け
         if (item.type === "bool" || item.type === "boolean") {
-
           right.titleColor = current ? Color.green() : Color.red()
-
         }
 
         // SELECT
         if (item.type === "select") {
-
           right.titleColor = Color.blue()
+        }
 
+        // Disabled
+        if (isDisabled) {
+          right.titleColor = Color.gray()
+        }
+
+        // Readonly
+        if (isReadonly) {
+          right.titleColor = Color.lightGray()
         }
 
         row.onSelect = async () => {
+
+          // ★ disabled 完全無効
+          if (isDisabled) return
+
+          // ★ readonly 編集禁止
+          if (isReadonly) {
+
+            const a = new Alert()
+
+            a.title = "閲覧専用"
+            a.message = "この項目は編集できません"
+            a.addAction("OK")
+            await a.present()
+
+            return
+
+          }
 
           // BOOL
           if (item.type === "bool" || item.type === "boolean") {
@@ -413,6 +449,35 @@ module.exports = {
     }
 
     return val
+
+  },
+
+  // =========================
+  // evaluateExpr（修正版）
+  // =========================
+  evaluateExpr(expr, values) {
+
+    if (!expr) return true
+
+    try {
+
+      // {{...}} の中身をそのまま式として扱う
+      const js = expr.replace(/{{(.*?)}}/g, (_, code) => {
+
+        // useCurrentLocation → values.useCurrentLocation
+        return code.replace(/\b([a-zA-Z_]\w*)\b/g, (k) => {
+          return `values["${k}"]`
+        })
+
+      })
+
+      return !!eval(js)
+
+    } catch (e) {
+
+      return true
+
+    }
 
   }
 
