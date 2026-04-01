@@ -47,7 +47,7 @@ module.exports = class WF_AppCore {
     this.defaultConfig = appConfig.getDefaultConfig()
     this.profile = new WF_ProfileEngine(this.storage, this.defaultConfig)
 
-    this.notification = new WF_NotificationManager(this.appId, this.storage)
+    this.notification = new WF_NotificationManager(this.appId, this.storage, this.profile)
     this.notificationUI = WF_NotificationUI
     this.notification.syncStatus()
 
