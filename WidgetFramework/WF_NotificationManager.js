@@ -11,10 +11,11 @@
 // ========================
 module.exports = class WF_NotificationManager {
 
-  constructor(appId, storage) {
+  constructor(appId, storage, profile) {
 
     this.appId = appId
     this.storage = storage
+    this.profile = profile
 
     this.key = "wf_notifications"
     this.history = this._load()
@@ -209,6 +210,8 @@ module.exports = class WF_NotificationManager {
   // UI 用一覧取得
   // =========================
   list() {
+
+    this.syncStatus()
 
     if (!this.history || typeof this.history !== "object") return []
 
@@ -515,8 +518,102 @@ _createNotification(payload) {
   // =========================
   _save() {
 
+    this._prune()
+
     this.storage.writeJSON(this.key, this.history)
 
+  }
+
+  // =========================
+  // _getCacheSettings
+  // =========================
+  _getCacheSettings() {
+
+    const v = this.profile?.getConfig().values || {}
+
+    return {
+      enabled: v.notifyCacheEnabled ?? true,
+      maxCount: v.notifyCacheMaxCount ?? 50,
+      maxAgeMs: (v.notifyCacheMaxHours ?? 24) * 60 * 60 * 1000
+    }
+
+  }
+
+  // =========================
+  // _prune
+  // =========================
+  _prune() {
+
+    const settings = this._getCacheSettings()
+    if (!settings.enabled) return
+
+    let list = Object.entries(this.history)
+    const now = Date.now()
+
+    // =========================
+    // 期間制限
+    // =========================
+    if (settings.maxAgeMs > 0) {
+
+      list = list.filter(([_, v]) => {
+
+        // ★ 予約は削除しない
+        if (v.status === "pending") return true
+
+        // ★ Pinnedは削除しない
+        if (v.meta?.isPinned) return true
+
+        const t = v.lastSent || v.fireAt
+        if (!t) return true
+
+        return (now - t) <= settings.maxAgeMs
+      })
+    }
+
+    // =========================
+    // 件数制限
+    // =========================
+    if (settings.maxCount > 0 && list.length > settings.maxCount) {
+
+      // 並び替え（新しい順）
+      list.sort((a, b) => {
+
+        const va = a[1]
+        const vb = b[1]
+
+        const ta = va.lastSent || va.fireAt || 0
+        const tb = vb.lastSent || vb.fireAt || 0
+
+        return tb - ta
+      })
+
+      const result = []
+
+      for (const [key, v] of list) {
+
+        // ★ pendingは必ず残す
+        if (v.status === "pending") {
+          result.push([key, v])
+          continue
+        }
+
+        // ★ pinnedは必ず残す
+        if (v.meta?.isPinned) {
+          result.push([key, v])
+          continue
+        }
+
+        // 通常枠
+        if (result.length < settings.maxCount) {
+          result.push([key, v])
+        }
+
+      }
+
+      list = result
+    }
+
+    this.history = Object.fromEntries(list)
   }
 
 }
