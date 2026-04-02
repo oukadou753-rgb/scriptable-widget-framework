@@ -553,7 +553,7 @@ const bodyBlock_5 = [
 const bodyBlock_6 = [
   {
     h: [
-      textHelper("{{location_name}}", "largeText"),
+      textHelper("{{location_city}}{{location_town}}", "largeText"),
     ]
   }
 ]
@@ -575,18 +575,16 @@ const bodyBlock_7 = [
 const repeatBlock = [
   {
     size: new Size(0, 75),
-    justify: "center",
+    justify: "space-between",
 
     h: [
       {
-        justify: "start",
-
         v: [
           textHelper("時間予報", "columnExtraSmallText"),
           columnHelper("気　圧", ""),
           columnHelper("風　速", ""),
           columnHelper("気　温", ""),
-          columnHelper("降　水", ""),
+          columnHelper("降水確率", ""),
         ]
       },
 
@@ -599,7 +597,7 @@ const repeatBlock = [
         limit: "{{limit}}",
 
         template: {
-          size: new Size(53, 0),
+          size: new Size(55, 0),
 
           v: [
             {
@@ -751,9 +749,9 @@ module.exports = {
         showStorageType: { type: "bool", label: "Show Storage Type", section: "Debug", default: true },
         showTableFullscreen: { type: "bool", label: "Show Table Fullscreen", section: "Debug", default: true },
         refreshInterval: { type: "select", label: "Refresh Interval", section: "Debug", default: "15", options: ["15", "30", "45", "60"] },
-        sort: { type: "select", label: "Sort", section: "Debug", default: "asc", options: ["asc", "desc"] },
-        limit: { type: "number", label: "Limit", section: "Debug", default: 5 },
-        minScore: { type: "number", label: "Min Score", section: "Debug", default: 80 },
+        sort: { type: "select", label: "Sort", section: "Debug", default: "asc", options: ["asc", "desc"], readonlyExpr: "{{!useTestData}}" },
+        limit: { type: "number", label: "Limit", section: "Debug", default: 5, readonlyExpr: "{{!useTestData}}" },
+        minScore: { type: "number", label: "Min Score", section: "Debug", default: 80, readonlyExpr: "{{!useTestData}}" },
 
         myApiKey: { type: "text", label: "API KEY", section: "API", default: "MY_APIKEY" },
         useCacheData: { type: "bool", label: "Use Cache Data", section: "API", default: true },
@@ -765,13 +763,18 @@ module.exports = {
         closeOnPreview: { type: "bool", label: "Close On Preview", section: "Menu", default: false },
 
         useNotification: { type: "bool", label: "Use Notification Data", section: "Notification", default: true },
-        notifyCooldown: { type: "number", label: "Notification Cooldown", section: "Notification", default: 300000 },
+        notifyCooldown: { type: "number", label: "Notification Cooldown", section: "Notification", default: 300000, readonlyExpr: "{{!useNotification}}"},
+
+        // Notification Cache
+        notifyCacheEnabled: { type: "bool", label: "Enable Cache Prune", section: "Notification", default: true, readonlyExpr: "{{!useNotification}}" },
+        notifyCacheMaxCount: { type: "number", label: "Cache Max Count", section: "Notification", default: 50, readonlyExpr: "{{!notifyCacheEnabled || !useNotification}}" },
+        notifyCacheMaxHours: { type: "number", label: "Cache Max Hours", section: "Notification", default: 24, readonlyExpr: "{{!notifyCacheEnabled || !useNotification}}" },
 
         useCurrentLocation: { type: "bool", label: "現在地を使用", section: "Location", default: true },
-        lat: { type: "number", label: "緯度（固定地点）", section: "Location", default: 35.6812, show: "{{!useCurrentLocation}}" },
-        lon: { type: "number", label: "経度（固定地点）", section: "Location", default: 139.7671, show: "{{!useCurrentLocation}}" },
-        alt: { type: "number", label: "標高（固定地点）", section: "Location", default: 3.5, show: "{{!useCurrentLocation}}" },
-        full: { type: "text", label: "地名（固定地点）", section: "Location", default: "東京都 千代田区 千代田", show: "{{!full}}" },
+        lat: { type: "number", label: "緯度（固定地点）", section: "Location", default: 35.6812, readonlyExpr: "{{useCurrentLocation}}" },
+        lon: { type: "number", label: "経度（固定地点）", section: "Location", default: 139.7671, readonlyExpr: "{{useCurrentLocation}}" },
+        alt: { type: "number", label: "標高（固定地点）", section: "Location", default: 3.5, readonlyExpr: "{{useCurrentLocation}}" },
+        full: { type: "text", label: "地名（固定地点）", section: "Location", default: "東京都 千代田区 千代田", readonlyExpr: "{{useCurrentLocation}}" },
 
 
         layoutId: { type: "select", label: "Layout", section: "Layout", default: "default",
@@ -904,10 +907,6 @@ module.exports = {
             spacing: 8,
             align: "start",
 
-//             filter: "{{value >= minScore}}",
-            sortBy: "value",
-            order: "{{sort}}",
-            limit: "{{limit}}",
             empty: { text: "No Data", style: "bodyText" },
             template: {
               h: [
@@ -1509,12 +1508,31 @@ function pos(a,b,c,d){
 }
 
 // ======================
-// DrawContext
+// locationTransform
 // ======================
-function getDegString(deg) { return Math.floor((deg + 11.25) / 22.5) * 22.5 + 180 }
-function drawCircle(t,e,a,r,i,n,s,o,l){let c,u,d,$,m,h,p,g,f,w,y,_;d=e.width/2,$=e.height/2,r=r||0,i=i||0,n=n||0,o=o||0,p=1,w=l&&l.strokeColor?l.strokeColor:"#000",y=l&&l.strokeWidth?l.strokeWidth:0,_=l&&l.fillColor?l.fillColor:"#000";let S=new Path,T=[];for(let k=0;k<360;k++)g=(a-y/2)*Math.cos(m=(h=-90+p*k+o)*(Math.PI/180)),f=(a-y/2)*Math.sin(m),c=d+g,u=$+f,T.push(new Point(c,u));S.addLines(T),S.closeSubpath(),"transparent"!==_&&(t.addPath(S),t.setFillColor(new Color(_)),t.fillPath(S)),"transparent"!==w&&y>0&&(t.addPath(S),t.setStrokeColor(new Color(w)),t.setLineWidth(y),t.strokePath())}
-function drawTriangle(t,e,a,r,i,n,s,o,l){let c,u,d,$,m,h,p,g,f,w,y,_;d=e.width/2,$=e.height/2,r=r||0,i=i||0,n=n||0,o=o||0,w=l&&l.strokeColor?l.strokeColor:"#000",y=l&&l.strokeWidth?l.strokeWidth:0,_=l&&l.fillColor?l.fillColor:"#000";let S=new Path,T=[],k=[];for(let F=0;F<4;F++)0==F?h=-90+o:1==F?h=-90+o+n:2==F?p=(h+(360-2*n)/2)*(Math.PI/180):3==F&&(h=-90+o+(360-n)),m=h*(Math.PI/180),2==F?(g=(a-i)*Math.cos(p),f=(a-i)*Math.sin(p)):(g=(a+r)*Math.cos(m),f=(a+r)*Math.sin(m)),c=d+g,u=$+f,T.push(new Point(c,u)),k.push([c,u]);S.addLines(T),S.closeSubpath(),"transparent"!==_&&(t.addPath(S),t.setFillColor(new Color(_)),t.fillPath(S)),"transparent"!==w&&y>0&&(t.addPath(S),t.setStrokeColor(new Color(w)),t.setLineWidth(y),t.strokePath())}
-function drawArrow(t,e,a){let r=new Size(32,32),i=new DrawContext;i.opaque=!1,i.respectScreenScale=!0,i.size=r;let n={triangle:{strokeColor:e,strokeWidth:0,fillColor:e},circle:{strokeColor:e,strokeWidth:2,fillColor:"transparent"}};return a&&drawCircle(i,r,15,0,0,0,360,t,n.circle),drawTriangle(i,r,12,0,9,140,0,t,n.triangle),i.getImage()}
+function locationTransform(ctx) {
+  const v = ctx?.config?.values ?? {}
+  const runtime = ctx?.runtime ?? {}
+
+  const lat = runtime?.location?.lat ?? null
+  const lon = runtime?.location?.lon ?? null
+  const alt = runtime?.location?.alt ?? null
+  const address = runtime?.location?.full
+    ? runtime.location.full.split(" ")
+    : ["", "", ""]
+
+  return {
+    lat: lat,
+    lon: lon,
+    alt: alt,
+    latStr: lat != null ? lat.toFixed(4) : "",
+    lonStr: lon != null ? lon.toFixed(4) : "",
+    altStr: alt != null ? alt.toFixed(1) : "",
+    pref: address[0],
+    city: address[1],
+    town: address[2],
+  }
+}
 
 // ======================
 // Object 平坦化
@@ -1673,30 +1691,12 @@ function getMoonphaseImage( dt, isMoonUp = true ) {
 }
 
 // ======================
-// locationTransform
+// DrawContext
 // ======================
-function locationTransform(ctx) {
-  const v = ctx?.config?.values ?? {}
-  const runtime = ctx?.runtime ?? {}
-
-  return {
-    lat: runtime?.location?.lat ?? null,
-    lon: runtime?.location?.lon ?? null,
-    alt: runtime?.location?.alt ?? null,
-    latStr: runtime?.location?.lat != null
-      ? runtime.location.lat.toFixed(4)
-      : "",
-    lonStr: runtime?.location?.lon != null
-      ? runtime.location.lon.toFixed(4)
-      : "",
-    altStr: runtime?.location?.alt != null
-      ? runtime.location.alt.toFixed(1)
-      : "",
-    name: runtime?.location?.full
-        ? runtime.location.full.split(" ").slice(1).join("")
-      : ""
-  }
-}
+function getDegString(deg) { return Math.floor((deg + 11.25) / 22.5) * 22.5 + 180 }
+function drawCircle(t,e,a,r,i,n,s,o,l){let c,u,d,$,m,h,p,g,f,w,y,_;d=e.width/2,$=e.height/2,r=r||0,i=i||0,n=n||0,o=o||0,p=1,w=l&&l.strokeColor?l.strokeColor:"#000",y=l&&l.strokeWidth?l.strokeWidth:0,_=l&&l.fillColor?l.fillColor:"#000";let S=new Path,T=[];for(let k=0;k<360;k++)g=(a-y/2)*Math.cos(m=(h=-90+p*k+o)*(Math.PI/180)),f=(a-y/2)*Math.sin(m),c=d+g,u=$+f,T.push(new Point(c,u));S.addLines(T),S.closeSubpath(),"transparent"!==_&&(t.addPath(S),t.setFillColor(new Color(_)),t.fillPath(S)),"transparent"!==w&&y>0&&(t.addPath(S),t.setStrokeColor(new Color(w)),t.setLineWidth(y),t.strokePath())}
+function drawTriangle(t,e,a,r,i,n,s,o,l){let c,u,d,$,m,h,p,g,f,w,y,_;d=e.width/2,$=e.height/2,r=r||0,i=i||0,n=n||0,o=o||0,w=l&&l.strokeColor?l.strokeColor:"#000",y=l&&l.strokeWidth?l.strokeWidth:0,_=l&&l.fillColor?l.fillColor:"#000";let S=new Path,T=[],k=[];for(let F=0;F<4;F++)0==F?h=-90+o:1==F?h=-90+o+n:2==F?p=(h+(360-2*n)/2)*(Math.PI/180):3==F&&(h=-90+o+(360-n)),m=h*(Math.PI/180),2==F?(g=(a-i)*Math.cos(p),f=(a-i)*Math.sin(p)):(g=(a+r)*Math.cos(m),f=(a+r)*Math.sin(m)),c=d+g,u=$+f,T.push(new Point(c,u)),k.push([c,u]);S.addLines(T),S.closeSubpath(),"transparent"!==_&&(t.addPath(S),t.setFillColor(new Color(_)),t.fillPath(S)),"transparent"!==w&&y>0&&(t.addPath(S),t.setStrokeColor(new Color(w)),t.setLineWidth(y),t.strokePath())}
+function drawArrow(t,e,a){let r=new Size(32,32),i=new DrawContext;i.opaque=!1,i.respectScreenScale=!0,i.size=r;let n={triangle:{strokeColor:e,strokeWidth:0,fillColor:e},circle:{strokeColor:e,strokeWidth:2,fillColor:"transparent"}};return a&&drawCircle(i,r,15,0,0,0,360,t,n.circle),drawTriangle(i,r,12,0,9,140,0,t,n.triangle),i.getImage()}
 
 // ======================
 // Module Test
