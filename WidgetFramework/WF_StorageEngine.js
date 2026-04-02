@@ -44,10 +44,10 @@ module.exports = class WF_StorageEngine {
     }
 
     // Main Root
-    this.root = this._ensureDirs(this.baseDir, "WF_Data", true)
+    this.root = this._ensureDirs(this.baseDir, "WF_Data")
 
     // App Root
-    this.appRoot = this._ensureDirs(this.root, this.appId, true)
+    this.appRoot = this._ensureDirs(this.root, this.appId)
 
     // Sub Dir
     this.cacheRoot = this._ensureDirs(this.appRoot, "caches", true)
@@ -63,7 +63,7 @@ module.exports = class WF_StorageEngine {
   // =========================
   // _ensureDirs
   // =========================
-  _ensureDirs(root, dir, isDir) {
+  _ensureDirs(root, dir, isDir = false) {
 
     const path = this.fm.joinPath(root, dir)
 
