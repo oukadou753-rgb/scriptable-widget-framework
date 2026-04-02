@@ -5,6 +5,10 @@
  * WF_DataProvider
  * UTF-8 日本語コメント
  **/
+
+// =========================
+// Export
+// ========================
 module.exports = class WF_DataProvider {
 
   constructor(appId, storage, appConfig) {
@@ -126,14 +130,25 @@ module.exports = class WF_DataProvider {
     // =========================
     // ■ ② キャッシュ判定（後にする）
     // =========================
+    const oncePerDay = apiConfig.oncePerDay === true
+    const hours = apiConfig.refreshHours || null
+
+    const useMultiRefresh =
+      Array.isArray(hours) &&
+      this.isAfterRefreshHours(cache, hours)
+
     if (
       useCache &&
       !forceRefresh &&
-      this.isCacheValid(cache, cacheMinutes)
+      (
+        useMultiRefresh ||
+        (!hours && oncePerDay && this.isTodayCache(cache)) ||
+        (!oncePerDay && this.isCacheValid(cache, cacheMinutes))
+      )
     ) {
       return {
         data: cache.data || {},
-        location: location ?? null
+        location
       }
     }
 
@@ -145,7 +160,7 @@ module.exports = class WF_DataProvider {
       const url = this.buildApiUrl(apiConfig, location)
       console.log("API URL: " + url)
 
-      const data = await this.fetch(url, cache)
+      const data = await this.fetch(url, cache, apiConfig)
 
       // =========================
       // APIエラー判定
@@ -174,7 +189,8 @@ module.exports = class WF_DataProvider {
       // =========================
       this.storage.writeJSON(cacheKey, {
         data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        dateKey: this.getDateKey()
       })
 
       return {
@@ -389,6 +405,14 @@ module.exports = class WF_DataProvider {
   }
 
   // =========================
+  // ■ getDateKey
+  // =========================
+  getDateKey() {
+    const d = new Date()
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`
+  }
+
+  // =========================
   // ■ hash
   // =========================
   hash(str){
@@ -398,17 +422,42 @@ module.exports = class WF_DataProvider {
   // =========================
   // ■ fetch
   // =========================
-  async fetch(url, cache) {
+  async fetch(url, cache, apiConfig = {}) {
 
     const req = new Request(url)
     req.method = "GET"
-    req.timeoutInterval = 5
+
+    // ★ timeout（秒指定）
+    const timeoutSec = Number(apiConfig.timeout) / 1000 || 5
+    req.timeoutInterval = timeoutSec
+
+    const type = apiConfig.responseType || "json"
 
     try {
-      return await req.loadJSON()
+
+      let result
+
+      if (type === "text") {
+
+        result = await req.loadString()
+
+      } else if (type === "image") {
+
+        result = await req.loadImage()
+
+      } else {
+
+        result = await req.loadJSON()
+
+      }
+
+      return result
+
     }
-    catch(e) {
-      console.warn("API timeout")
+
+    catch (e) {
+
+      console.warn(`API error (${type}): ` + e)
 
       if (cache && cache.data) {
         console.warn("Using stale cache")
@@ -429,4 +478,63 @@ module.exports = class WF_DataProvider {
     const diff = (Date.now() - cache.timestamp) / 1000 / 60
     return diff < cacheMinutes
   }
+
+  isTodayCache(cache) {
+    if (!cache || !cache.dateKey) return false
+    return cache.dateKey === this.getDateKey()
+  }
+
+  isAfterRefreshHour(cache, hour = 0) {
+
+    const now = new Date()
+    const last = new Date(cache?.timestamp || 0)
+
+    const todayRefresh = new Date()
+    todayRefresh.setHours(hour, 0, 0, 0)
+
+    // 今日の指定時刻をまだ迎えてない
+    if (now < todayRefresh) {
+      return this.isTodayCache(cache)
+    }
+
+    // 指定時刻後は再取得
+    return last >= todayRefresh
+  }
+
+  isAfterRefreshHours(cache, hours = []) {
+
+    if (!Array.isArray(hours) || hours.length === 0) {
+      return false
+    }
+
+    const now = new Date()
+    const last = new Date(cache?.timestamp || 0)
+
+    // 今日の各refresh時刻を生成
+    const todayPoints = hours
+      .map(h => {
+        const d = new Date()
+        d.setHours(h, 0, 0, 0)
+        return d
+      })
+      .sort((a, b) => a - b)
+
+    // 今がどの区間にいるか判定
+    let currentSlot = null
+
+    for (const t of todayPoints) {
+      if (now >= t) {
+        currentSlot = t
+      }
+    }
+
+    // まだ最初の時間前（例：0〜5時）
+    if (!currentSlot) {
+      return true // ★スルー（深夜は更新しない）
+    }
+
+    // その時間帯で既に取得済みならtrue（=キャッシュ使用）
+    return last >= currentSlot
+  }
+
 }
