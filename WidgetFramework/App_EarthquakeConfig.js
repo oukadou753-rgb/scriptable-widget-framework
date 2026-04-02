@@ -210,39 +210,13 @@ function imageHelper(image, size = 14, tint = "", opacity = 1) {
   }
 }
 
-function unitHelper(text, unit, options = {}) {
+function rowStackHelper(options = {size, justify, show}, data) {
   return {
-    justify: "end",
-    spacing: 2,
+    size: options?.size ?? new Size(0, 0),
+    justify: options?.justify ?? "start",
+    show: options?.show ?? true,
     h: [
-      textHelper(text, "dataText"),
-      textHelper(unit, "dataSmallText"),
-      ...(options.mark ? [
-        textHelper(TEXT_ICON.mark, {
-          base: "dataSmallText",
-          color: options.color
-        })
-      ] : [])
-    ]
-  }
-}
-
-
-function columnHelper(text, subText) {
-  return {
-    h: [
-      textHelper(text, "columnText"),
-      (subText != "") ? textHelper(subText, "columnSmallText") : ""
-    ]
-  }
-}
-
-function rowHelper(text, trend, color) {
-  return {
-    justify: "end",
-    h: [
-      textHelper(trend ? trend + " " : "", { base: "dataSmallText", color: color }),
-      textHelper(text, "dataText")
+      ...data
     ]
   }
 }
@@ -268,7 +242,7 @@ const headerBlock = [
       show: "{{ui_isMediumUp}}",
 
       h: [
-        textHelper("{{location_name}}", "largeText"),
+        textHelper("{{location_pref}}{{location_city}}", "largeText"),
         imageHelper("{{onlineIcon_name}}", SIZES.image.medium, "{{onlineIcon_color}}", "{{onlineIcon_opacity}}")
       ]
     }
@@ -404,7 +378,9 @@ const bodyBlock_5 = [
 // [large]
 const repeatBlock = [
   {
+    size: new Size(0, 160),
     padding: pos(5, 0, 0, 0),
+    align: "top",
     spacing: 2,
     show: "{{ui_isLargeUp}}",
     url: 'https://www.data.jma.go.jp/multi/quake/index.html?lang=jp',
@@ -414,49 +390,73 @@ const repeatBlock = [
         spacing: 1,
 
         h: [
-          textHelper("震源地", "columnText"),
-          textHelper("（距離）", "columnText"),
-          { spacer: 0 },
-          textHelper("震度", "columnText"),
-          {
-            show: "ui_isExtraLarge",
-
-            h: [
-              { spacer: 10 },
+          rowStackHelper(
+            {},
+            [
+              textHelper("震源地", "columnText"),
+              textHelper("（距離）", "columnText"),
+              { spacer: true }
+            ]
+          ),
+          rowStackHelper(
+            {size: new Size(80, 0), justify: "end"},
+            [
+              textHelper("震度", "columnText")
+            ]
+          ),
+          rowStackHelper(
+            {size: new Size(35, 0), justify: "end", show: "ui_isExtraLarge"},
+            [
               textHelper("体感", "columnText")
             ]
-          },
-          { spacer: 35 },
-          textHelper("発生日時", "columnText")
+          ),
+          rowStackHelper(
+            {size: new Size(80, 0), justify: "end"},
+            [
+              textHelper("発生日時", "columnText")
+            ]
+          )
         ]
       },
       {
         type: "repeat",
         items: "{{items}}",
         direction: "vertical",
-        spacing: 1,
-        align: "center",
-        limit: "{{limit}}",
+        align: "top",
+        spacing: 0,
+        minRows: 9,
+        rowHeight: 15,
 
         template: {
-          size: new Size(0, 0),
+          size: new Size(0, 15),
 
           h: [
-            textHelper("{{badge}}{{place}}", {base: "dataText", color: "{{maxColor}}"}),
-            textHelper(" ({{distanceStr}}km)", {base: "dataSmallText", color: "{{maxColor}}"}),
-            { spacer: 0 },
-            textHelper("{{maxShindo}}", {base: "dataText", color: "{{maxColor}}"}),
-            {
-              size: new Size(35, 0),
-              show: "ui_isExtraLarge",
-
-              h: [
-                { spacer: true },
+            rowStackHelper(
+              {},
+              [
+                textHelper("{{badge}}{{place}}", {base: "dataText", color: "{{maxColor}}"}),
+                textHelper(" ({{distanceStr}}km)", {base: "dataSmallText", color: "{{maxColor}}"}),
+                { spacer: true }
+              ]
+            ),
+            rowStackHelper(
+              {size: new Size(35, 0), justify: "end"},
+              [
+                textHelper("{{maxShindo}}", {base: "dataText", color: "{{maxColor}}"})
+              ]
+            ),
+            rowStackHelper(
+              {size: new Size(35, 0), justify: "end", show: "ui_isExtraLarge"},
+              [
                 textHelper("{{localShindo}}", {base: "dataText", color: "{{localColor}}"})
               ]
-            },
-            { spacer: 15 },
-            textHelper("{{timeStr}}", {base: "dataText", color: "{{maxColor}}"}),
+            ),
+            rowStackHelper(
+              {size: new Size(80, 0), justify: "end"},
+              [
+                textHelper("{{timeStr}}", {base: "dataText", color: "{{maxColor}}"})
+              ]
+            )
           ]
         }
       }
@@ -571,28 +571,34 @@ module.exports = {
         showStorageType: { type: "bool", label: "Show Storage Type", section: "Debug", default: true },
         showTableFullscreen: { type: "bool", label: "Show Table Fullscreen", section: "Debug", default: true },
         refreshInterval: { type: "select", label: "Refresh Interval", section: "Debug", default: "15", options: ["15", "30", "45", "60"] },
-        sort: { type: "select", label: "Sort", section: "Debug", default: "asc", options: ["asc", "desc"] },
-        limit: { type: "number", label: "Limit", section: "Debug", default: 5 },
-        minScore: { type: "number", label: "Min Score", section: "Debug", default: 80 },
+//         sort: { type: "select", label: "Sort", section: "Debug", default: "asc", options: ["asc", "desc"], readonlyExpr: "{{!useTestData}}" },
+//         limit: { type: "number", label: "Limit", section: "Debug", default: 5, readonlyExpr: "{{!useTestData}}" },
+//         minScore: { type: "number", label: "Min Score", section: "Debug", default: 80, readonlyExpr: "{{!useTestData}}" },
 
         useCacheData: { type: "bool", label: "Use Cache Data", section: "API", default: true },
         refreshMinutes: { type: "number", label: "Refresh Minutes", section: "API", default: 5 },
         forceRefresh: { type: "bool", label: "Force Refresh in App", section: "API", default: false },
+        limit: { type: "number", label: "Limit", section: "API", default: 15 },
         displayCount: { type: "number", label: "Display Count", section: "API", default: 9 },
 
         closeOnPreview: { type: "bool", label: "Close On Preview", section: "Menu", default: false },
 
         useNotification: { type: "bool", label: "Use Notification Data", section: "Notification", default: true },
         useCopyTextNotification: { type: "bool", label: "CopyText Notification", section: "Notification", default: true },
-        pinScale: { type: "select", label: "Pin Scale", section: "Notification", default: 30, options: PRESETS.scale},
-        pinHours: { type: "number", label: "Pin Hours ", section: "Notification", default: 6 },
-        notifyCooldown: { type: "number", label: "Notification Cooldown", section: "Notification", default: 300000 },
+        pinScale: { type: "select", label: "Pin Scale", section: "Notification", default: 30, options: PRESETS.scale, readonlyExpr: "{{!useNotification}}" },
+        pinHours: { type: "number", label: "Pin Hours ", section: "Notification", default: 6, readonlyExpr: "{{!useNotification}}" },
+        notifyCooldown: { type: "number", label: "Notification Cooldown", section: "Notification", default: 300000, readonlyExpr: "{{!useNotification}}" },
+
+        // Notification Cache
+        notifyCacheEnabled: { type: "bool", label: "Enable Cache Prune", section: "Notification", default: true, readonlyExpr: "{{!useNotification}}" },
+        notifyCacheMaxCount: { type: "number", label: "Cache Max Count", section: "Notification", default: 50, readonlyExpr: "{{!notifyCacheEnabled || !useNotification}}" },
+        notifyCacheMaxHours: { type: "number", label: "Cache Max Hours", section: "Notification", default: 24, readonlyExpr: "{{!notifyCacheEnabled || !useNotification}}" },
 
         useCurrentLocation: { type: "bool", label: "現在地を使用", section: "Location", default: true },
-        lat: { type: "number", label: "緯度（固定地点）", section: "Location", default: 35.6812, show: "{{!useCurrentLocation}}" },
-        lon: { type: "number", label: "経度（固定地点）", section: "Location", default: 139.7671, show: "{{!useCurrentLocation}}" },
-        alt: { type: "number", label: "標高（固定地点）", section: "Location", default: 3.5, show: "{{!useCurrentLocation}}" },
-        full: { type: "text", label: "地名（固定地点）", section: "Location", default: "東京都 千代田区 千代田", show: "{{!full}}" },
+        lat: { type: "number", label: "緯度（固定地点）", section: "Location", default: 35.6812, readonlyExpr: "{{useCurrentLocation}}" },
+        lon: { type: "number", label: "経度（固定地点）", section: "Location", default: 139.7671, readonlyExpr: "{{useCurrentLocation}}" },
+        alt: { type: "number", label: "標高（固定地点）", section: "Location", default: 3.5, readonlyExpr: "{{useCurrentLocation}}" },
+        full: { type: "text", label: "地名（固定地点）", section: "Location", default: "東京都 千代田区 千代田", readonlyExpr: "{{useCurrentLocation}}" },
 
         layoutId: { type: "select", label: "Layout", section: "Layout", default: "default",
           options: ["default", "testData"],
@@ -622,8 +628,7 @@ module.exports = {
 
     params: {
       codes: '551',
-//       quake_type: 'DetailScale',
-      limit: '15'
+      limit: "{{limit}}"
     },
   
     dynamicParams: {}
@@ -712,11 +717,8 @@ module.exports = {
             spacing: 8,
             align: "start",
 
-//             filter: "{{value >= minScore}}",
-            sortBy: "value",
-            order: "{{sort}}",
-            limit: "{{limit}}",
             empty: { text: "No Data", style: "bodyText" },
+
             template: {
               h: [
                 { text: "{{index}}. {{titleStr}}", style: "bodyText" },
@@ -818,23 +820,21 @@ module.exports = {
         d?.code === 551 &&
         d?.issue?.type === "DetailScale"
       )
-      .sort((a, b) =>
-        new Date(b.earthquake?.time) - new Date(a.earthquake?.time)
-      )
-      .slice(0, v.displayCount ?? 5)
 
     // 重複除去
     const deduped = dedupeLatest(list)
 
     // point絞り
-    const filtered = deduped.map(eq => pickPoint(eq, v))
+    const location = locationTransform(ctx)
+    const filtered = deduped.map(eq => pickPoint(eq, location))
 
-    // 並び替え
-    const sorted = filtered
-      .sort((a, b) => new Date(b.time) - new Date(a.time))
+    // 最終ソート
+    const sorted = filtered.sort((a, b) =>
+      new Date(b.time) - new Date(a.time)
+    )
 
-    // 件数制限
-    const sliced = sorted.slice(0, v.displayCount ?? 3)
+    // 最終件数制限（ここだけでOK）
+    const sliced = sorted.slice(0, v.displayCount ?? 9)
 
     // PIN止め用item
     const pinned =
@@ -1012,7 +1012,8 @@ module.exports = {
       isExtraLarge: level === 4,
 
       showForecast: level >= 2 && v.showStorageType,
-      showDetail: level >= 3
+      showDetail: level >= 3,
+      isSpacer: items.length < v.displayCount ?? 9
     }
 
     // location
@@ -1088,15 +1089,6 @@ module.exports = {
         cooldown: v.notifyCooldown ?? 300000,
         meta: {
           action: "openPreview",
-//           type: "list",
-//           items: JSON.stringify([
-//             { title: `${eq.place}（${eq.distanceStr}km）最大震度${eq.maxShindo}`,
-//               subtitle: `${eq.timeRaw}`,
-//               rightTitle: `津波：${eq.tsunamiBadge}${eq.tsunamiStr}`,
-//             }
-//            
-//           ]),
-
           lp_type: "list",
           lp_items: [
             {
@@ -1253,8 +1245,31 @@ function pos(a,b,c,d){
 }
 
 // ======================
-// DrawContext
+// locationTransform
 // ======================
+function locationTransform(ctx) {
+  const v = ctx?.config?.values ?? {}
+  const runtime = ctx?.runtime ?? {}
+
+  const lat = runtime?.location?.lat ?? null
+  const lon = runtime?.location?.lon ?? null
+  const alt = runtime?.location?.alt ?? null
+  const address = runtime?.location?.full
+    ? runtime.location.full.split(" ")
+    : ["", "", ""]
+
+  return {
+    lat: lat,
+    lon: lon,
+    alt: alt,
+    latStr: lat != null ? lat.toFixed(4) : "",
+    lonStr: lon != null ? lon.toFixed(4) : "",
+    altStr: alt != null ? alt.toFixed(1) : "",
+    pref: address[0],
+    city: address[1],
+    town: address[2],
+  }
+}
 
 // ======================
 // Object 平坦化
@@ -1326,16 +1341,41 @@ function colorByThreshold(v, table, defaultColor) {
 }
 
 // ======================
+// createEventKey 
+// ======================
+function createEventKey(eq) {
+
+  const e = eq.earthquake || {}
+
+  const t = (e.time || "").slice(0, 19)
+
+  const name = (e.hypocenter?.name || "").replace(/\s/g, "")
+
+  const lat = Number(e.hypocenter?.latitude?.toFixed(2) || 0)
+  const lon = Number(e.hypocenter?.longitude?.toFixed(2) || 0)
+
+  const depth = e.hypocenter?.depth ?? 0
+  const mag = Number((e.hypocenter?.magnitude || 0).toFixed(1))
+
+  return `${t}_${name}_${lat}_${lon}_${depth}_${mag}`
+}
+
+// ======================
 // pickPoint 
 // ======================
-function pickPoint(eq, v) {
+function pickPoint(eq, loc) {
 
   const points = eq?.points ?? []
 
-  let filtered = points.filter(p => p.addr === v.addr)
+  let filtered = points.filter(p => {
+    const addr = (p.addr || "").replace(/\s/g, "")
+    const city = (loc.city || "").replace(/\s/g, "")
+
+    return addr.startsWith(city)
+  })
 
   if (filtered.length === 0) {
-    filtered = points.filter(p => p.pref === v.pref)
+    filtered = points.filter(p => p.pref === loc.pref)
   }
 
   return {
@@ -1347,7 +1387,7 @@ function pickPoint(eq, v) {
 // ======================
 // dedupeLatest 
 // ======================
-function dedupeLatest(list) {
+function _dedupeLatest(list) {
   const map = new Map()
 
   for (const eq of list) {
@@ -1356,6 +1396,35 @@ function dedupeLatest(list) {
     if (!prev || new Date(eq.time) > new Date(prev.time)) {
       map.set(eq.id, eq)
     }
+  }
+
+  return Array.from(map.values())
+}
+function dedupeLatest(list) {
+
+  const map = new Map()
+
+  for (const eq of list) {
+
+    const key = createEventKey(eq)
+
+    const prev = map.get(key)
+
+    if (!prev) {
+
+      map.set(key, eq)
+
+    } else {
+
+      const prevTime = prev.timestamp?.register || ""
+      const currTime = eq.timestamp?.register || ""
+
+      if (currTime > prevTime) {
+        map.set(key, eq)
+      }
+
+    }
+
   }
 
   return Array.from(map.values())
@@ -1461,32 +1530,6 @@ function formatTimeAgo(ts) {
   if (min < 60) return `${min}分前`
   if (hour < 24) return `${hour}時間前`
   return `${day}日前`
-}
-
-// ======================
-// locationTransform
-// ======================
-function locationTransform(ctx) {
-  const v = ctx?.config?.values ?? {}
-  const runtime = ctx?.runtime ?? {}
-
-  return {
-    lat: runtime?.location?.lat ?? null,
-    lon: runtime?.location?.lon ?? null,
-    alt: runtime?.location?.alt ?? null,
-    latStr: runtime?.location?.lat != null
-      ? runtime.location.lat.toFixed(4)
-      : "",
-    lonStr: runtime?.location?.lon != null
-      ? runtime.location.lon.toFixed(4)
-      : "",
-    altStr: runtime?.location?.alt != null
-      ? runtime.location.alt.toFixed(1)
-      : "",
-    name: runtime?.location?.full
-      ? runtime.location.full.split(" ").slice(0, 2).join("")
-      : ""
-  }
 }
 
 // ======================
