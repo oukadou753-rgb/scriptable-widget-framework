@@ -44,10 +44,10 @@ module.exports = class WF_StorageEngine {
     }
 
     // Main Root
-    this.root = this._ensureDirs(this.baseDir, "WF_Data")
+    this.root = this._ensureDirs(this.baseDir, "WF_Data", true)
 
     // App Root
-    this.appRoot = this._ensureDirs(this.root, this.appId)
+    this.appRoot = this._ensureDirs(this.root, this.appId, true)
 
     // Sub Dir
     this.cacheRoot = this._ensureDirs(this.appRoot, "caches", true)
