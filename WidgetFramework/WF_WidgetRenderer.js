@@ -107,7 +107,7 @@ module.exports = class WF_WidgetRenderer {
     // =========================
     // refreshAfterDate
     // =========================
-    if (values.refreshInterval && values.refreshAfterDate >= 15) {
+    if (values.refreshInterval >= 15) {
       let refreshInterval = Number(values.refreshInterval) * 60 * 1000
       widget.refreshAfterDate = new Date(Date.now() + refreshInterval)
     }
