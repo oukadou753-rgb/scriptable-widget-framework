@@ -492,8 +492,21 @@ module.exports = class WF_WidgetRenderer {
     if (tint != "")
       node.tintColor = new Color(tint)
 
+    // size解決
+    let width = 16
+    let height = 16
+
+    if (typeof el.size === "number") {
+      width = el.size
+      height = el.size
+    }
+    else if (typeof el.size === "object") {
+      width = el.size.width ?? 16
+      height = el.size.height ?? width
+    }
+
     if (size)
-      node.imageSize = new Size(size, size)
+      node.imageSize = new Size(Number(width), Number(height))
   
     if (opacity)
       node.imageOpacity = Number(opacity)
