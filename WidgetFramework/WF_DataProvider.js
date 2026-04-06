@@ -133,19 +133,36 @@ module.exports = class WF_DataProvider {
     const oncePerDay = apiConfig.oncePerDay === true
     const hours = apiConfig.refreshHours || null
 
-    const useMultiRefresh =
+    const isMultiRefresh =
       Array.isArray(hours) &&
       this.isAfterRefreshHours(cache, hours)
 
-    if (
+    const isDailyCache =
+      oncePerDay &&
+      !hours &&
+      this.isTodayCache(cache)
+
+    const isNormalCache =
+      this.isCacheValid(cache, cacheMinutes)
+
+    const shouldUseCache =
       useCache &&
       !forceRefresh &&
       (
-        useMultiRefresh ||
-        (!hours && oncePerDay && this.isTodayCache(cache)) ||
-        (!oncePerDay && this.isCacheValid(cache, cacheMinutes))
+        isMultiRefresh ||
+        isDailyCache ||
+        isNormalCache
       )
-    ) {
+
+//     log("==== CACHE DEBUG ====")
+//     log("useCache: " + useCache)
+//     log("forceRefresh: " + forceRefresh)
+//     log("isMultiRefresh: " + isMultiRefresh)
+//     log("isDailyCache: " + isDailyCache)
+//     log("isNormalCache: " + isNormalCache)
+//     log("shouldUseCache: " + shouldUseCache)
+
+    if (shouldUseCache) {
       return {
         data: cache.data || {},
         location
