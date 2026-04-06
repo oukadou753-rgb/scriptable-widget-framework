@@ -39,33 +39,33 @@ module.exports = {
 
     try {
 
-    if (config.runsInNotification) {
-      await handleNotificationUI(args.notification.userInfo)
-      return
-    }
+      if (config.runsInNotification) {
+        await handleNotificationUI(args.notification.userInfo)
+        return
+      }
 
-    appInfo.appConfig = `App_${appInfo.id}Config`
+      appInfo.appConfig = `App_${appInfo.id}Config`
 
-    const modules = {
-      WF_StorageEngine: { type: "both", path: WF_MODULE_DIR },
-      WF_DataProvider: { type: "both", path: WF_MODULE_DIR },
-      WF_ProfileEngine: { type: "both", path: WF_MODULE_DIR },
-      WF_WidgetRenderer: { type: "both", path: WF_MODULE_DIR },
-      WF_NotificationManager: { type: "both", path: WF_MODULE_DIR },
-      WF_CoreBase: { type: "both", path: WF_MODULE_DIR },
-    
-      WF_MenuEngine: { type: "app", path: WF_MODULE_DIR },
-      WF_NotificationHandlers: { type: "app", path: "" },
+      const modules = {
+        WF_StorageEngine: { type: "both", path: WF_MODULE_DIR },
+        WF_DataProvider: { type: "both", path: WF_MODULE_DIR },
+        WF_ProfileEngine: { type: "both", path: WF_MODULE_DIR },
+        WF_WidgetRenderer: { type: "both", path: WF_MODULE_DIR },
+        WF_NotificationManager: { type: "both", path: WF_MODULE_DIR },
+        WF_CoreBase: { type: "both", path: WF_MODULE_DIR },
 
-      WF_TableUI: { type: "app", path: WF_MODULE_DIR },
-      WF_ConfigUI: { type: "app", path: WF_MODULE_DIR },
-      WF_NotificationUI: { type: "app", path: WF_MODULE_DIR },
-    
-      WF_AppCore: { type: "app", path: WF_MODULE_DIR },
-      WF_WidgetCore: { type: "widget", path: WF_MODULE_DIR },
-    
-      [appInfo.appConfig]: { type: "both", path: "" },
-    }
+        WF_MenuEngine: { type: "app", path: WF_MODULE_DIR },
+        WF_NotificationHandlers: { type: "app", path: "" },
+
+        WF_TableUI: { type: "app", path: WF_MODULE_DIR },
+        WF_ConfigUI: { type: "app", path: WF_MODULE_DIR },
+        WF_NotificationUI: { type: "app", path: WF_MODULE_DIR },
+
+        WF_AppCore: { type: "app", path: WF_MODULE_DIR },
+        WF_WidgetCore: { type: "widget", path: WF_MODULE_DIR },
+
+        [appInfo.appConfig]: { type: "both", path: "" },
+      }
 
       await this.init(appInfo, modules)
 
