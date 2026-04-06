@@ -24,9 +24,11 @@ module.exports = (core) => ({
   // =========================
   // openNotificationUI
   // ========================
-  openNotificationUI: async () => {
+  openNotificationUI: async (info) => {
 
-    await core.notificationUI.present(core)
+    await core.notificationUI.present(core, {
+      mode: info.mode
+    })
 
   },
 
