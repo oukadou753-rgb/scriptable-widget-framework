@@ -17,7 +17,7 @@ module.exports = {
   TABLE_PRESETS: {
 
     tap: {
-      rowHeight: 60,
+      rowHeight: 90,
       cellSpacing: 10,
 
       fontTitle: Font.semiboldSystemFont(16),
