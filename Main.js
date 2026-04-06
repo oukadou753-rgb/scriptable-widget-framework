@@ -2,7 +2,7 @@
 // These must be at the very top of the file. Do not edit.
 // icon-color: blue; icon-glyph: download;
 /**
- * DevWidget
+ * Main
  * UTF-8 日本語コメント
  * 2026/03/28 21:00
  */
@@ -11,7 +11,10 @@ const DEFAULT_APP_ID = "Earthquake"
 const DEFAULT_STRAGE_TYPE = "local"
 
 const APP_DEV_MODE = true
-const APP_ID = args.widgetParameter || DEFAULT_APP_ID
+const APP_ID =
+  args.queryParameters?.appId ||
+  args.widgetParameter ||
+  DEFAULT_APP_ID
 const APP_VERSION = "1.0.0"
 const APP_CONFIG = `App_${APP_ID}Config`
 
@@ -34,6 +37,8 @@ module.exports = {
   // =========================
   async start(appInfo = APP_INFO) {
 
+    try {
+
     if (config.runsInNotification) {
       await handleNotificationUI(args.notification.userInfo)
       return
@@ -50,7 +55,7 @@ module.exports = {
       WF_CoreBase: { type: "both", path: WF_MODULE_DIR },
     
       WF_MenuEngine: { type: "app", path: WF_MODULE_DIR },
-      WF_NotificationHandlers: { type: "app", path: WF_MODULE_DIR },
+      WF_NotificationHandlers: { type: "app", path: "" },
 
       WF_TableUI: { type: "app", path: WF_MODULE_DIR },
       WF_ConfigUI: { type: "app", path: WF_MODULE_DIR },
@@ -61,8 +66,6 @@ module.exports = {
     
       [appInfo.appConfig]: { type: "both", path: "" },
     }
-    
-    try {
 
       await this.init(appInfo, modules)
 
@@ -252,7 +255,7 @@ async function handleNotificationUI(info) {
 // =========================
 // Module Test
 // =========================
-const module_name = module.filename.match(/[^\/]+$/ )[ 0 ].replace('.js', '');
+const module_name = module.filename.match(/[^\/]+$/ )[ 0 ].replace('.js', '')
 if (module_name == Script.name()) {
   (async() => {
     await module.exports.start()
