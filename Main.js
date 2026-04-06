@@ -55,7 +55,7 @@ module.exports = {
         WF_CoreBase: { type: "both", path: WF_MODULE_DIR },
 
         WF_MenuEngine: { type: "app", path: WF_MODULE_DIR },
-        WF_NotificationHandlers: { type: "app", path: "" },
+        WF_NotificationHandlers: { type: "app", path: WF_MODULE_DIR },
 
         WF_TableUI: { type: "app", path: WF_MODULE_DIR },
         WF_ConfigUI: { type: "app", path: WF_MODULE_DIR },
