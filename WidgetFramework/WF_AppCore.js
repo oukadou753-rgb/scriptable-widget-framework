@@ -104,7 +104,7 @@ module.exports = class WF_AppCore {
       "Main",
       [
         { label: "Preview", next: "Preview", close: true },
-        { label: "Notif Manage", action: () => this.openNotifications(), show: v.useNotification },
+        { label: "Notif Manage", action: () => this.openNotifications(), show: v.notifyEnabled },
         { label: "Config Manage", next: "Config" },
         { label: "Snapshot Manage", next: "Snapshot" },
         { label: "Profile Manage", action: () => this.manageProfiles() },
