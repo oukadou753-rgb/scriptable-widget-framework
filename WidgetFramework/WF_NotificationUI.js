@@ -181,8 +181,8 @@ module.exports = {
     for (const item of list) {
 
       const { row, left, right } = this.tableUI.createListRow({
-        title: item.title,
-        subtitle: `${item.subtitle || ""} ${item.body || ""}`,
+        title: `${item.title || ""}${item.subtitle ? "\n" + item.subtitle : ""}`,
+        subtitle: `${item.body || ""}`,
         rightTitle: this.formatTimeAgo(item.date),
         rightSubtitle: this.formatDate(item.date)
       })
