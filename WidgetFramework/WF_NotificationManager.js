@@ -295,7 +295,15 @@ module.exports = class WF_NotificationManager {
   refresh() {
 
     this.history = this._load()
+
+    const before = JSON.stringify(this.history)
+
+    this._prune()
     this.syncStatus()
+
+    if (JSON.stringify(this.history) !== before) {
+      this._save()
+    }
 
   }
 
@@ -436,63 +444,63 @@ module.exports = class WF_NotificationManager {
 
   }
 
-// =========================
-// _createNotification
-// =========================
-_createNotification(payload) {
-
-  const n = new Notification()
-
-  n.title = payload.title || ""
-  n.subtitle = payload.subtitle || ""
-  n.body = payload.body || ""
-  if (payload.sound !== undefined) n.sound = payload.sound
-
-  const scriptName = Script.name()
-
   // =========================
-  // ★ 長押しUI有効化（最重要）
+  // _createNotification
   // =========================
-  n.identifier = `_${scriptName}_${payload.id || ""}`
-  n.scriptName = scriptName
-  n.threadIdentifier = scriptName
+  _createNotification(payload) {
 
-  // =========================
-  // Scriptable 起動 URL（タップ用）
-  // =========================
-  if (payload.id) {
+    const n = new Notification()
 
-    const toQuery = (obj) =>
-      Object.entries(obj)
-        .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
-        .join("&")
+    n.title = payload.title || ""
+    n.subtitle = payload.subtitle || ""
+    n.body = payload.body || ""
+    if (payload.sound !== undefined) n.sound = payload.sound
 
-    n.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
-      scriptName
-    )}&${toQuery({ id: payload.id })}`
+    const scriptName = Script.name()
 
-  }
+    // =========================
+    // ★ 長押しUI有効化（最重要）
+    // =========================
+    n.identifier = `_${scriptName}_${payload.id || ""}`
+    n.scriptName = scriptName
+    n.threadIdentifier = scriptName
 
-  // =========================
-  // userInfo（meta）
-  // =========================
-  const meta = {}
+    // =========================
+    // Scriptable 起動 URL（タップ用）
+    // =========================
+    if (payload.id) {
 
-  for (const k in payload.meta || {}) {
-    const v = payload.meta[k]
+      const toQuery = (obj) =>
+        Object.entries(obj)
+          .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
+          .join("&")
 
-    // 配列・オブジェクトは文字列化
-    if (typeof v === "object") {
-      meta[k] = JSON.stringify(v)
-    } else {
-      meta[k] = v
+      n.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
+        scriptName
+      )}&${toQuery({ id: payload.id })}`
+
     }
+
+    // =========================
+    // userInfo（meta）
+    // =========================
+    const meta = {}
+
+    for (const k in payload.meta || {}) {
+      const v = payload.meta[k]
+
+      // 配列・オブジェクトは文字列化
+      if (typeof v === "object") {
+        meta[k] = JSON.stringify(v)
+      } else {
+        meta[k] = v
+      }
+    }
+
+    n.userInfo = { id: payload.id, ...meta }
+
+    return n
   }
-
-  n.userInfo = { id: payload.id, ...meta }
-
-  return n
-}
 
   // =========================
   // _load
@@ -502,7 +510,13 @@ _createNotification(payload) {
     try {
 
       const data = this.storage.readJSON(this.key)
-      return data && typeof data === "object" ? data : {}
+      const history = data && typeof data === "object" ? data : {}
+
+      this.history = history
+      this._prune()
+
+      return this.history
+
     }
 
     catch {
@@ -519,7 +533,6 @@ _createNotification(payload) {
   _save() {
 
     this._prune()
-
     this.storage.writeJSON(this.key, this.history)
 
   }
