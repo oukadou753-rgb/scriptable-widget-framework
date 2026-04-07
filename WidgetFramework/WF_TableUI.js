@@ -82,8 +82,9 @@ module.exports = {
       ...meta
     }
 
-    const lineCount = ([title, subtitle].join("\n").match(new RegExp("\n", "g")) || []).length + 1
-    const lineHeight = (16 * 1.6) * lineCount
+    const titleLineCount = (title.match(new RegExp("\n", "g")) || []).length + 1
+    const subtitleLineCount = (subtitle.match(new RegExp("\n", "g")) || []).length + 1
+    const lineHeight = ((16 * 1.6) * titleLineCount) + ((14 * 1.6) * subtitleLineCount)
     height = Math.ceil(Math.max(style.rowHeight, lineHeight))
 
     const row = this.createRow(height || style.rowHeight)
