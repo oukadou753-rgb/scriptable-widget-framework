@@ -9,10 +9,10 @@
 // ======================
 // Constat
 // ======================
-const APP_VERSION = "2.0.0"
+const APP_VERSION = "20260407-2000"
 const APP_MAIN = "Main"
 const APP_ID = "Weather"
-const DEFAULT_STRAGE_TYPE = "local" // "icloud", "local", "bookmark"
+const DEFAULT_STRAGE_TYPE = "local"
 
 // ======================
 // Color
@@ -58,11 +58,11 @@ const COLORS = {
   theme: {
     textPrimary: "#d1cdda",    // メイン文字
     textSecondary: "#a8b2c7",  // サブ文字
-    divider: "#2c4a72",        // 仕切り
+    divider: "#87cefa",        // 仕切り
 
     accent: PALETTE.blue,      // 強調
     info: PALETTE.sky,         // 情報
-    highlight: PALETTE.purple  // 特殊
+    highlight: PALETTE.purple   // 特殊
   },
 
   background: {
@@ -279,6 +279,27 @@ const TEXT_ICON = {
 }
 
 // ======================
+// NOTIFICATION
+// ======================
+const SOUNDS = {
+  notify: {
+    default: "default",
+    accept: "accept",
+    alert: "alert",
+    complete: "complete",
+    event: "event",
+    failure: "failure",
+    piano_error: "piano_error",
+    piano_success: "piano_success",
+    popup: "popup"
+  }
+}
+
+const PRESETS_SOUNDS = {
+  notify: Object.values(SOUNDS.notify)
+}
+
+// ======================
 // Helper
 // ======================
 function betweenHelper(left, right) {
@@ -382,7 +403,7 @@ const footerBlock = [
     },
     {
       h: [
-        textHelper("Update: ", { base: "smallText", color: "{{highlightTextColor}}" }),
+        textHelper("Update: ", { base: "smallText", color: "{{dividerTextColor}}" }),
         textHelper("{{footer_updateStr}}", "smallText")
       ]
     }
@@ -523,7 +544,7 @@ const bodyBlock_4 = [
       textHelper("m/s", "dataText"),
       { spacer: 10 },
       textHelper("風向き：", "columnLargeText"),
-      imageHelper("{{current_windIcon}}", SIZES.image.large, "{{highlightTextColor}}"),
+      imageHelper("{{current_windIcon}}", SIZES.image.large, "{{dividerTextColor}}"),
       { spacer: 2 },
       textHelper("{{current_winDirStr}}", "dataLargeText"),
     ]
@@ -612,7 +633,7 @@ const repeatBlock = [
               justify: "end",
 
               h: [
-                imageHelper("{{windIcon}}", SIZES.image.medium, "{{highlightTextColor}}"),
+                imageHelper("{{windIcon}}", SIZES.image.medium, "{{dividerTextColor}}"),
                 { spacer: 3 },
                 textHelper("{{windTrend}} ", { base: "dataSmallText", color: "{{windSpeedColor}}" }),
                 textHelper("{{windStr}}", "dataText")
@@ -641,7 +662,6 @@ const bodyBlock_small = [
 // [medium, large]
 const bodyBlock_mediumUp = [
   {
-    align: "top",
     show: "ui_isMediumUp",
 
     h: [
@@ -686,6 +706,8 @@ const bodyBlock_mediumUp = [
 // ======================
 module.exports = {
 
+  version: APP_VERSION,
+
   // ======================
   // getDefaultConfig
   // ======================
@@ -693,28 +715,26 @@ module.exports = {
 
     return {
 
-      version: APP_VERSION,
-
       colors: COLORS,
 
       styles: {
         defaultText: { fontSize: SIZES.text.default, bold: false, color: "{{defaultTextColor}}" },
-        HighlightText: { fontSize: SIZES.text.default, bold: false, color: "{{highlightTextColor}}" },
+        HighlightText: { fontSize: SIZES.text.default, bold: false, color: "{{dividerTextColor}}" },
 
         headerText: { fontSize: SIZES.text.header, bold: true, color: "{{headerTextColor}}" },
         bodyText: { fontSize: SIZES.text.body, bold: false, color: "{{bodyTextColor}}" },
         footerText: { fontSize: SIZES.text.footer, bold: false, color: "{{footerTextColor}}" },
 
-        titleText: { fontSize: SIZES.text.header, bold: true, color: "{{highlightTextColor}}" },
+        titleText: { fontSize: SIZES.text.header, bold: true, color: "{{dividerTextColor}}" },
         versionText: { fontSize: SIZES.text.footer, bold: false, color: "{{defaultTextColor}}" },
-        updateText: { fontSize: SIZES.text.footer, bold: false, color: "{{highlightTextColor}}" },
-        locationText: { fontSize: SIZES.text.body, bold: true, color: "{{highlightTextColor}}", lineLimit: 1 },
+        updateText: { fontSize: SIZES.text.footer, bold: false, color: "{{dividerTextColor}}" },
+        locationText: { fontSize: SIZES.text.body, bold: true, color: "{{dividerTextColor}}", lineLimit: 1 },
 
-        columnText: { font:"monospace", fontSize: SIZES.column.medium, color: "{{highlightTextColor}}", lineLimit: 1 },
-        columnExtraLargeText: { font:"monospace", fontSize: SIZES.column.extraLarge, color: "{{highlightTextColor}}", lineLimit: 1 },
-        columnLargeText: { font:"monospace", fontSize: SIZES.column.large, color: "{{highlightTextColor}}", lineLimit: 1 },
-        columnSmallText: { font:"monospace", fontSize: SIZES.column.small, color: "{{highlightTextColor}}", lineLimit: 1 },
-        columnExtraSmallText: { font:"monospace", fontSize: SIZES.column.extraSmall, color: "{{highlightTextColor}}", lineLimit: 1 },
+        columnText: { font:"monospace", fontSize: SIZES.column.medium, color: "{{dividerTextColor}}", lineLimit: 1 },
+        columnExtraLargeText: { font:"monospace", fontSize: SIZES.column.extraLarge, color: "{{dividerTextColor}}", lineLimit: 1 },
+        columnLargeText: { font:"monospace", fontSize: SIZES.column.large, color: "{{dividerTextColor}}", lineLimit: 1 },
+        columnSmallText: { font:"monospace", fontSize: SIZES.column.small, color: "{{dividerTextColor}}", lineLimit: 1 },
+        columnExtraSmallText: { font:"monospace", fontSize: SIZES.column.extraSmall, color: "{{dividerTextColor}}", lineLimit: 1 },
 
         dataText: { font:"monospace", fontSize: SIZES.row.medium, color: "{{defaultTextColor}}", lineLimit: 1 },
         dataExtraLargeText: { font:"monospace", fontSize: SIZES.row.extraLarge, color: "{{defaultTextColor}}", lineLimit: 1 },
@@ -740,6 +760,7 @@ module.exports = {
         bgColor: { type: "color", label: "Background Color", section: "BackgroundColor", default: COLORS.background.base, presets: PRESETS_COLORS.background },
 
         defaultTextColor: { type: "color", label: "Default Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
+        dividerTextColor: { type: "color", label: "Divider Text Color", section: "Style", default: COLORS.theme.divider, presets: PRESETS_COLORS.theme },
         highlightTextColor: { type: "color", label: "Highlight Text Color", section: "Style", default: COLORS.theme.highlight, presets: PRESETS_COLORS.theme },
         headerTextColor: { type: "color", label: "Header Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
         bodyTextColor: { type: "color", label: "Body Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
@@ -748,27 +769,26 @@ module.exports = {
         useTestData: { type: "bool", label: "Use Test Data", section: "Debug", default: true },
         showStorageType: { type: "bool", label: "Show Storage Type", section: "Debug", default: true },
         showTableFullscreen: { type: "bool", label: "Show Table Fullscreen", section: "Debug", default: true },
-        refreshInterval: { type: "select", label: "Refresh Interval", section: "Debug", default: "15", options: ["15", "30", "45", "60"] },
-        sort: { type: "select", label: "Sort", section: "Debug", default: "asc", options: ["asc", "desc"], readonlyExpr: "{{!useTestData}}" },
-        limit: { type: "number", label: "Limit", section: "Debug", default: 5, readonlyExpr: "{{!useTestData}}" },
-        minScore: { type: "number", label: "Min Score", section: "Debug", default: 80, readonlyExpr: "{{!useTestData}}" },
+
+        refreshInterval: { type: "select", label: "Refresh Interval", section: "WIDGET", default: "15", options: ["15", "30", "45", "60"] },
 
         myApiKey: { type: "text", label: "API KEY", section: "API", default: "MY_APIKEY" },
-        useCacheData: { type: "bool", label: "Use Cache Data", section: "API", default: true },
-        refreshMinutes: { type: "number", label: "Refresh Minutes", section: "API", default: 5 },
+        apiCacheEnabled: { type: "bool", label: "Enable API Cache", section: "API", default: true },
+        apiCacheMinutes: { type: "number", label: "Cache Refresh Minutes", section: "API", default: 5, readonlyExpr: "{{!apiCacheEnabled}}" },
         forceRefresh: { type: "bool", label: "Force Refresh in App", section: "API", default: false },
         intervalHours: { type: "number", label: "Interval Hours", section: "API", default: 2 },
         displayCount: { type: "number", label: "Display Count", section: "API", default: 4 },
 
         closeOnPreview: { type: "bool", label: "Close On Preview", section: "Menu", default: false },
 
-        useNotification: { type: "bool", label: "Use Notification Data", section: "Notification", default: true },
-        notifyCooldown: { type: "number", label: "Notification Cooldown", section: "Notification", default: 300000, readonlyExpr: "{{!useNotification}}"},
+        notifyEnabled: { type: "bool", label: "Enable Notification", section: "Notification", default: true },
+        notifySoundEnabled: { type: "bool", label: "Enable Notification Sound", section: "Notification", default: true, readonlyExpr: "{{!notifyEnabled}}" },
+        notifyCacheEnabled: { type: "bool", label: "Enable Cache Prune", section: "Notification", default: true, readonlyExpr: "{{!notifyEnabled}}" },
 
-        // Notification Cache
-        notifyCacheEnabled: { type: "bool", label: "Enable Cache Prune", section: "Notification", default: true, readonlyExpr: "{{!useNotification}}" },
-        notifyCacheMaxCount: { type: "number", label: "Cache Max Count", section: "Notification", default: 50, readonlyExpr: "{{!notifyCacheEnabled || !useNotification}}" },
-        notifyCacheMaxHours: { type: "number", label: "Cache Max Hours", section: "Notification", default: 24, readonlyExpr: "{{!notifyCacheEnabled || !useNotification}}" },
+        notifySound: { type: "select", label: "Notification Sound", section: "Notification", default: SOUNDS.notify.default, options: PRESETS_SOUNDS.notify, readonlyExpr: "{{!notifySoundEnabled || !notifyEnabled}}"},
+        notifyCooldown: { type: "number", label: "Notification Cooldown", section: "Notification", default: 300000, readonlyExpr: "{{!notifyEnabled}}"},
+        notifyCacheMaxCount: { type: "number", label: "Cache Max Count", section: "Notification", default: 50, readonlyExpr: "{{!notifyCacheEnabled || !notifyEnabled}}" },
+        notifyCacheMaxHours: { type: "number", label: "Cache Max Hours", section: "Notification", default: 24, readonlyExpr: "{{!notifyCacheEnabled || !notifyEnabled}}" },
 
         useCurrentLocation: { type: "bool", label: "現在地を使用", section: "Location", default: true },
         lat: { type: "number", label: "緯度（固定地点）", section: "Location", default: 35.6812, readonlyExpr: "{{useCurrentLocation}}" },
@@ -792,14 +812,18 @@ module.exports = {
   api: {
     baseURL: "https://api.weatherapi.com/v1",
     endpoint: "forecast.json",
+    timeout: 5000,
+    responseType: "json",
+    oncePerDay: false,
+//     refreshHours: [0],
     useLocation: true,
     useLocationQuery: true,
-    locationQueryKey: "q",
+//     locationQueryKey: "q",
 
     cache: {
       key: "forecast",
-      minutes: "{{refreshMinutes}}",
-      useCache: "{{useCacheData}}",
+      minutes: "{{apiCacheMinutes}}",
+      useCache: "{{apiCacheEnabled}}",
       forceRefreshInApp: "{{forceRefresh}}"
     },
 
@@ -866,23 +890,6 @@ module.exports = {
         }
       },
 
-      weather: {
-        padding: pos(16, 13, 16, 13),
-
-        blocks: [
-          ...headerBlock,
-          ...bodyBlock_small,
-          ...bodyBlock_mediumUp,
-          ...footerBlock
-        ],
-
-        // Spacing
-        spacing: {
-          headerBottom: "flex",
-          bodyBottom: "flex"
-        }
-      },
-
       // Test Data Layout
       testData: {
         padding: pos(10, 16, 10, 16),
@@ -892,7 +899,7 @@ module.exports = {
             size: new Size(0, 24),
             justify: "space-between",
             h: [
-              { text: "{{header_titleStr}}", style: "title" },
+              { text: "{{header_titleStr}}", style: "titleText" },
               { image: "{{status_icon}}", tint: "{{status_color}}", opacity: "{{status_opacity}}", size: 16 }
             ]
           }
@@ -1350,9 +1357,13 @@ module.exports = {
 */
   notificationTranceform(data, ctx, {items, meta}) {
 
+    const v = ctx?.config?.values ?? {}
+
     const current = meta?.current ?? {}
 
     const notifications = []
+
+    if (v.notifyEnabled) {
 
 //     items.map((h, i) => {
 //       notifications.push({ 
@@ -1365,6 +1376,8 @@ module.exports = {
 //         cooldown: 25000
 //       })
 //     })
+
+    }
 
     return notifications
   },
@@ -1408,9 +1421,6 @@ module.exports = {
     const runtime = ctx?.runtime ?? {}
     const appId = env?.appId ?? "WidgetFramework"
 
-    const minScore = Number(v.minScore) || 0
-    const limit = Number(v.limit) || 0
-
     // location
     const location = locationTransform(ctx)
 
@@ -1429,7 +1439,6 @@ module.exports = {
         titleStr: item?.title || "No Title",
         value: score,
         sub: this.getRank(score),
-        flag: score >= minScore,
 
         // 追加情報
         index: i + 1,
@@ -1668,16 +1677,16 @@ function convert12to24(time12h) {
 // isTimeInRangeAcrossDay
 // ======================
 function isTimeInRangeAcrossDay(checkTime, startTime, endTime) {
-  let start = timeToMinutes(startTime);
-  let end = timeToMinutes(endTime);
-  let check = timeToMinutes(checkTime);
+  let start = timeToMinutes(startTime)
+  let end = timeToMinutes(endTime)
+  let check = timeToMinutes(checkTime)
   if (end < start) {
-    end += 24 * 60;
+    end += 24 * 60
     if (check < start) {
-      check += 24 * 60;
+      check += 24 * 60
     }
   }
-  return check >= start && check <= end;
+  return check >= start && check <= end
 }
 
 // ======================
@@ -1685,9 +1694,9 @@ function isTimeInRangeAcrossDay(checkTime, startTime, endTime) {
 // ======================
 function getMoonphaseImage( dt, isMoonUp = true ) {
   Date.prototype.getMoonphase=function(){let t=0,e=0,$=0,o=0,n=this.getFullYear(),h=this.getMonth()+1,r=this.getDate();return h<3&&(n--,h+=12),++h,$=(t=365.25*n)+(e=30.6*h)+r-694039.09,$/=29.5305882,o=parseInt($),$-=o,(o=Math.round(8*$))>=8&&(o=0),o}
-  const sunIcon = '\ud83d\udfe0';
-  const moonIcons = [ '\ud83c\udf11', '\ud83c\udf12', '\ud83c\udf13', '\ud83c\udf14', '\ud83c\udf15', '\ud83c\udf16', '\ud83c\udf17', '\ud83c\udf18' ];
-  return isMoonUp ? moonIcons[ dt.getMoonphase() ] : sunIcon;
+  const sunIcon = '\ud83d\udfe0'
+  const moonIcons = [ '\ud83c\udf11', '\ud83c\udf12', '\ud83c\udf13', '\ud83c\udf14', '\ud83c\udf15', '\ud83c\udf16', '\ud83c\udf17', '\ud83c\udf18' ]
+  return isMoonUp ? moonIcons[ dt.getMoonphase() ] : sunIcon
 }
 
 // ======================
@@ -1701,11 +1710,12 @@ function drawArrow(t,e,a){let r=new Size(32,32),i=new DrawContext;i.opaque=!1,i.
 // ======================
 // Module Test
 // ======================
-const module_name = module.filename.match(/[^\/]+$/ )[ 0 ].replace('.js', '');
+const module_name = module.filename.match(/[^\/]+$/ )[ 0 ].replace('.js', '')
 if (module_name == Script.name()) {
   (async() => {
     const Main = importModule(APP_MAIN)
     Main.setAppInfo("id", APP_ID)
+    Main.setAppInfo("version", APP_VERSION)
     Main.setAppInfo("storageType", DEFAULT_STRAGE_TYPE)
     await Main.start()
   })()
