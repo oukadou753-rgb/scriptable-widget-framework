@@ -6,10 +6,10 @@
  * UTF-8 日本語コメント
  **/
 
-const APP_VERSION = "2.0.0"
+const APP_VERSION = "20260407-2000"
 const APP_MAIN = "Main"
 const APP_ID = "Earthquake"
-const DEFAULT_STRAGE_TYPE = "local" // "icloud", "local", "bookmark"
+const DEFAULT_STRAGE_TYPE = "local"
 
 // ======================
 // Color
@@ -30,7 +30,7 @@ const PALETTE = Object.freeze({
   white: "#ffffff",
   gray: "#7f8fa6",
   litegGray: "#acb6c5",
-  darkGray: "#596980",
+  darkGray: "#555555",
   black: "#000000"
 
 })
@@ -59,7 +59,7 @@ const COLORS = {
 
     accent: PALETTE.blue,      // 強調
     info: PALETTE.sky,         // 情報
-    highlight: PALETTE.purple  // 特殊
+    highlight: PALETTE.purple   // 特殊
   },
 
   background: {
@@ -183,6 +183,27 @@ const TEXT_ICON = {
 }
 
 // ======================
+// NOTIFICATION
+// ======================
+const SOUNDS = {
+  notify: {
+    default: "default",
+    accept: "accept",
+    alert: "alert",
+    complete: "complete",
+    event: "event",
+    failure: "failure",
+    piano_error: "piano_error",
+    piano_success: "piano_success",
+    popup: "popup"
+  }
+}
+
+const PRESETS_SOUNDS = {
+  notify: Object.values(SOUNDS.notify)
+}
+
+// ======================
 // Helper
 // ======================
 function betweenHelper(left, right) {
@@ -210,11 +231,12 @@ function imageHelper(image, size = 14, tint = "", opacity = 1) {
   }
 }
 
-function rowStackHelper(options = {size, justify, show}, data) {
+function rowStackHelper(options = {size, justify, show, bgColor}, data) {
   return {
     size: options?.size ?? new Size(0, 0),
     justify: options?.justify ?? "start",
     show: options?.show ?? true,
+    bgColor: options?.bgColor ?? "",
     h: [
       ...data
     ]
@@ -233,7 +255,7 @@ const headerBlock = [
       spacing: 3,
 
       h: [
-        textHelper("地震：", { base: "largeText", color: "{{highlightTextColor}}" }),
+        textHelper("地震：", { base: "largeText", color: "{{dividerTextColor}}" }),
         textHelper("{{header_titleStr}}", "largeText")
       ]
     },
@@ -266,7 +288,7 @@ const footerBlock = [
     },
     {
       h: [
-        textHelper("Update: ", { base: "smallText", color: "{{highlightTextColor}}" }),
+        textHelper("Update: ", { base: "smallText", color: "{{dividerTextColor}}" }),
         textHelper("{{footer_updateStr}}", "smallText")
       ]
     }
@@ -370,7 +392,7 @@ const bodyBlock_5 = [
     show: "{{ui_isMediumUp}}",
 
     h: [
-      textHelper("{{location_name}}", { base: "largeText", color: "{{highlightTextColor}}" }),
+      textHelper("{{location_name}}", { base: "largeText", color: "{{dividerTextColor}}" }),
     ]
   }
 ]
@@ -399,19 +421,26 @@ const repeatBlock = [
             ]
           ),
           rowStackHelper(
-            {size: new Size(80, 0), justify: "end"},
+            { size: new Size(75, 0), justify: "start", show: "ui_isExtraLarge" },
+            [
+              textHelper("津波警報", "columnText"),
+              { spacer: true }
+            ]
+          ),
+          rowStackHelper(
+            { size: new Size(35, 0), justify: "end" },
             [
               textHelper("震度", "columnText")
             ]
           ),
           rowStackHelper(
-            {size: new Size(35, 0), justify: "end", show: "ui_isExtraLarge"},
+            { size: new Size(35, 0), justify: "end", show: "ui_isExtraLarge" },
             [
               textHelper("体感", "columnText")
             ]
           ),
           rowStackHelper(
-            {size: new Size(80, 0), justify: "end"},
+            { size: new Size(80, 0), justify: "end" },
             [
               textHelper("発生日時", "columnText")
             ]
@@ -440,19 +469,26 @@ const repeatBlock = [
               ]
             ),
             rowStackHelper(
-              {size: new Size(35, 0), justify: "end"},
+              { size: new Size(80, 0), justify: "start", show: "ui_isExtraLarge" },
+              [
+                textHelper(" {{tsunamiStr}}", {base: "dataSmallText", color: "{{tsunamiColor}}", bgColor: "{{tsunamiBgColor}}"}),
+                { spacer: true }
+              ]
+            ),
+            rowStackHelper(
+              { size: new Size(35, 0), justify: "end" },
               [
                 textHelper("{{maxShindo}}", {base: "dataText", color: "{{maxColor}}"})
               ]
             ),
             rowStackHelper(
-              {size: new Size(35, 0), justify: "end", show: "ui_isExtraLarge"},
+              { size: new Size(35, 0), justify: "end", show: "ui_isExtraLarge" },
               [
                 textHelper("{{localShindo}}", {base: "dataText", color: "{{localColor}}"})
               ]
             ),
             rowStackHelper(
-              {size: new Size(80, 0), justify: "end"},
+              { size: new Size(80, 0), justify: "end" },
               [
                 textHelper("{{timeStr}}", {base: "dataText", color: "{{maxColor}}"})
               ]
@@ -478,7 +514,6 @@ const bodyBlock_small = [
 // [medium, large]
 const bodyBlock_mediumUp = [
   {
-    align: "top",
     show: "ui_isMediumUp",
 
     v: [
@@ -494,19 +529,15 @@ const bodyBlock_mediumUp = [
       ...bodyBlock_4,
     ]
   },
-  {
-  show: "{{ui_isLargeUp}}",
-
-    v: [
-      ...repeatBlock
-    ]
-  }
+  ...repeatBlock
 ]
 
 // ======================
 // Export
 // ======================
 module.exports = {
+
+  version: APP_VERSION,
 
   // ======================
   // getDefaultConfig
@@ -515,28 +546,26 @@ module.exports = {
 
     return {
 
-      version: APP_VERSION,
-
       colors: COLORS,
 
       styles: {
         defaultText: { fontSize: SIZES.text.default, bold: false, color: "{{defaultTextColor}}" },
-        HighlightText: { fontSize: SIZES.text.default, bold: false, color: "{{highlightTextColor}}" },
+        HighlightText: { fontSize: SIZES.text.default, bold: false, color: "{{dividerTextColor}}" },
 
         headerText: { fontSize: SIZES.text.header, bold: true, color: "{{headerTextColor}}" },
         bodyText: { fontSize: SIZES.text.body, bold: false, color: "{{bodyTextColor}}" },
         footerText: { fontSize: SIZES.text.footer, bold: false, color: "{{footerTextColor}}" },
 
-        titleText: { fontSize: SIZES.text.header, bold: true, color: "{{highlightTextColor}}" },
+        titleText: { fontSize: SIZES.text.header, bold: true, color: "{{dividerTextColor}}" },
         versionText: { fontSize: SIZES.text.footer, bold: false, color: "{{defaultTextColor}}" },
-        updateText: { fontSize: SIZES.text.footer, bold: false, color: "{{highlightTextColor}}" },
-        locationText: { fontSize: SIZES.text.body, bold: true, color: "{{highlightTextColor}}", lineLimit: 1 },
+        updateText: { fontSize: SIZES.text.footer, bold: false, color: "{{dividerTextColor}}" },
+        locationText: { fontSize: SIZES.text.body, bold: true, color: "{{dividerTextColor}}", lineLimit: 1 },
 
-        columnText: { font:"monospace", fontSize: SIZES.column.medium, color: "{{highlightTextColor}}", lineLimit: 1 },
-        columnExtraLargeText: { font:"monospace", fontSize: SIZES.column.extraLarge, color: "{{highlightTextColor}}", lineLimit: 1 },
-        columnLargeText: { font:"monospace", fontSize: SIZES.column.large, color: "{{highlightTextColor}}", lineLimit: 1 },
-        columnSmallText: { font:"monospace", fontSize: SIZES.column.small, color: "{{highlightTextColor}}", lineLimit: 1 },
-        columnExtraSmallText: { font:"monospace", fontSize: SIZES.column.extraSmall, color: "{{highlightTextColor}}", lineLimit: 1 },
+        columnText: { font:"monospace", fontSize: SIZES.column.medium, color: "{{dividerTextColor}}", lineLimit: 1 },
+        columnExtraLargeText: { font:"monospace", fontSize: SIZES.column.extraLarge, color: "{{dividerTextColor}}", lineLimit: 1 },
+        columnLargeText: { font:"monospace", fontSize: SIZES.column.large, color: "{{dividerTextColor}}", lineLimit: 1 },
+        columnSmallText: { font:"monospace", fontSize: SIZES.column.small, color: "{{dividerTextColor}}", lineLimit: 1 },
+        columnExtraSmallText: { font:"monospace", fontSize: SIZES.column.extraSmall, color: "{{dividerTextColor}}", lineLimit: 1 },
 
         dataText: { font:"monospace", fontSize: SIZES.row.medium, color: "{{defaultTextColor}}", lineLimit: 1 },
         dataExtraLargeText: { font:"monospace", fontSize: SIZES.row.extraLarge, color: "{{defaultTextColor}}", lineLimit: 1 },
@@ -562,6 +591,7 @@ module.exports = {
         bgColor: { type: "color", label: "Background Color", section: "BackgroundColor", default: COLORS.background.base, presets: PRESETS_COLORS.background },
 
         defaultTextColor: { type: "color", label: "Default Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
+        dividerTextColor: { type: "color", label: "Divider Text Color", section: "Style", default: COLORS.theme.divider, presets: PRESETS_COLORS.theme },
         highlightTextColor: { type: "color", label: "Highlight Text Color", section: "Style", default: COLORS.theme.highlight, presets: PRESETS_COLORS.theme },
         headerTextColor: { type: "color", label: "Header Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
         bodyTextColor: { type: "color", label: "Body Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
@@ -570,29 +600,28 @@ module.exports = {
         useTestData: { type: "bool", label: "Use Test Data", section: "Debug", default: true },
         showStorageType: { type: "bool", label: "Show Storage Type", section: "Debug", default: true },
         showTableFullscreen: { type: "bool", label: "Show Table Fullscreen", section: "Debug", default: true },
-        refreshInterval: { type: "select", label: "Refresh Interval", section: "Debug", default: "15", options: ["15", "30", "45", "60"] },
-//         sort: { type: "select", label: "Sort", section: "Debug", default: "asc", options: ["asc", "desc"], readonlyExpr: "{{!useTestData}}" },
-//         limit: { type: "number", label: "Limit", section: "Debug", default: 5, readonlyExpr: "{{!useTestData}}" },
-//         minScore: { type: "number", label: "Min Score", section: "Debug", default: 80, readonlyExpr: "{{!useTestData}}" },
 
-        useCacheData: { type: "bool", label: "Use Cache Data", section: "API", default: true },
-        refreshMinutes: { type: "number", label: "Refresh Minutes", section: "API", default: 5 },
+        refreshInterval: { type: "select", label: "Refresh Interval", section: "WIDGET", default: "15", options: ["15", "30", "45", "60"] },
+
+        apiCacheEnabled: { type: "bool", label: "Enable API Cache", section: "API", default: true },
+        apiCacheMinutes: { type: "number", label: "Cache Refresh Minutes", section: "API", default: 5, readonlyExpr: "{{!apiCacheEnabled}}" },
         forceRefresh: { type: "bool", label: "Force Refresh in App", section: "API", default: false },
         limit: { type: "number", label: "Limit", section: "API", default: 15 },
         displayCount: { type: "number", label: "Display Count", section: "API", default: 9 },
+        pinScale: { type: "select", label: "Pin Scale", section: "API", default: 30, options: PRESETS.scale },
+        pinHours: { type: "number", label: "Pin Hours ", section: "API", default: 6 },
 
         closeOnPreview: { type: "bool", label: "Close On Preview", section: "Menu", default: false },
 
-        useNotification: { type: "bool", label: "Use Notification Data", section: "Notification", default: true },
-        useCopyTextNotification: { type: "bool", label: "CopyText Notification", section: "Notification", default: true },
-        pinScale: { type: "select", label: "Pin Scale", section: "Notification", default: 30, options: PRESETS.scale, readonlyExpr: "{{!useNotification}}" },
-        pinHours: { type: "number", label: "Pin Hours ", section: "Notification", default: 6, readonlyExpr: "{{!useNotification}}" },
-        notifyCooldown: { type: "number", label: "Notification Cooldown", section: "Notification", default: 300000, readonlyExpr: "{{!useNotification}}" },
+        notifyEnabled: { type: "bool", label: "Enable Notification", section: "Notification", default: true },
+        notifySoundEnabled: { type: "bool", label: "Enable Notification Sound", section: "Notification", default: true, readonlyExpr: "{{!notifyEnabled}}" },
+        notifyCacheEnabled: { type: "bool", label: "Enable Cache Prune", section: "Notification", default: true, readonlyExpr: "{{!notifyEnabled}}" },
+        notifyCopyTextEnabled: { type: "bool", label: "CopyText Notification", section: "Notification", default: true },
 
-        // Notification Cache
-        notifyCacheEnabled: { type: "bool", label: "Enable Cache Prune", section: "Notification", default: true, readonlyExpr: "{{!useNotification}}" },
-        notifyCacheMaxCount: { type: "number", label: "Cache Max Count", section: "Notification", default: 50, readonlyExpr: "{{!notifyCacheEnabled || !useNotification}}" },
-        notifyCacheMaxHours: { type: "number", label: "Cache Max Hours", section: "Notification", default: 24, readonlyExpr: "{{!notifyCacheEnabled || !useNotification}}" },
+        notifySound: { type: "select", label: "Notification Sound", section: "Notification", default: SOUNDS.notify.default, options: PRESETS_SOUNDS.notify, readonlyExpr: "{{!notifySoundEnabled || !notifyEnabled}}"},
+        notifyCooldown: { type: "number", label: "Notification Cooldown", section: "Notification", default: 300000, readonlyExpr: "{{!notifyEnabled}}"},
+        notifyCacheMaxCount: { type: "number", label: "Cache Max Count", section: "Notification", default: 50, readonlyExpr: "{{!notifyCacheEnabled || !notifyEnabled}}" },
+        notifyCacheMaxHours: { type: "number", label: "Cache Max Hours", section: "Notification", default: 24, readonlyExpr: "{{!notifyCacheEnabled || !notifyEnabled}}" },
 
         useCurrentLocation: { type: "bool", label: "現在地を使用", section: "Location", default: true },
         lat: { type: "number", label: "緯度（固定地点）", section: "Location", default: 35.6812, readonlyExpr: "{{useCurrentLocation}}" },
@@ -615,13 +644,17 @@ module.exports = {
   api: {
     baseURL: "https://api.p2pquake.net/v2",
     endpoint: "history",
+    timeout: 3000,
+    responseType: "json",
+    oncePerDay: false,
+//     refreshHours: [0],
     useLocation: true,
     useLocationQuery: false,
 //     locationQueryKey: "q",
 
     cache: {
       key: "history",
-      minutes: "{{refreshMinutes}}",
+      minutes: "{{apiCacheMinutes}}",
       useCache: "{{useCacheData}}",
       forceRefreshInApp: "{{forceRefresh}}"
     },
@@ -676,23 +709,6 @@ module.exports = {
         }
       },
 
-      weather: {
-        padding: pos(16, 13, 16, 13),
-
-        blocks: [
-          ...headerBlock,
-          ...bodyBlock_small,
-          ...bodyBlock_mediumUp,
-          ...footerBlock
-        ],
-
-        // Spacing
-        spacing: {
-          headerBottom: "flex",
-          bodyBottom: "flex"
-        }
-      },
-
       // Test Data Layout
       testData: {
         padding: pos(10, 16, 10, 16),
@@ -702,7 +718,7 @@ module.exports = {
             size: new Size(0, 24),
             justify: "space-between",
             h: [
-              { text: "{{header_titleStr}}", style: "title" },
+              { text: "{{header_titleStr}}", style: "titleText" },
               { image: "{{status_icon}}", tint: "{{status_color}}", opacity: "{{status_opacity}}", size: 16 }
             ]
           }
@@ -760,7 +776,7 @@ module.exports = {
 
       case "copyText": {
 
-        const isNotif = cfg?.values?.useCopyTextNotification ?? false
+        const isNotif = cfg?.values?.notifyCopyTextEnabled ?? false
 
         core.profile.setActive(info.profile)
         await core.buildContext()
@@ -896,14 +912,14 @@ module.exports = {
           SCALE_THRESHOLDS.shindo,
           SCALE_THRESHOLDS.def
         )
-        : [Color.darkGray().hex, "0"]
+        : [PALETTE.darkGray, "0"]
 
       const tsunami = eq.earthquake?.domesticTsunami ?? ""
       const tsunamiStr = domesticTsunamiStr(tsunami)
       const [tsunamiBadge, tsunamiBgColor, tsunamiColor] =
         ["Watch","Warning","MajorWarning"].includes(tsunami)
           ? ["⚠️", PALETTE.yellow, PALETTE.black]
-          : ["", "", ""]
+          : ["", "", PALETTE.darkGray]
 
       return {
         index: idx + 1,
@@ -1079,29 +1095,41 @@ module.exports = {
 
     const v = ctx?.config?.values ?? {}
 
-    const notifications = notifyTargets.map(eq => {
+    const notifications = []
 
-      return {
-        id: `eq_alert_${eq.id}`,
-        delay: 5000,
-        title: `${eq.place}（${eq.distanceStr}km）最大震度${eq.maxShindo}`,
-        body: `${eq.timeRaw}`,
-        cooldown: v.notifyCooldown ?? 300000,
-        meta: {
-          action: "openPreview",
-          lp_type: "list",
-          lp_items: [
-            {
-              text: `津波：${eq.tsunamiBadge}${eq.tsunamiStr}`,
-              fontSize: 16,
-              bold: true,
-              color: "#ffffff",
-              bgColor: eq.tsunamiLevel === "warning" ? "#b00020" : "#333333",
-              align: "center"
-            }
-          ]
+    if (v.notifyEnabled) {
+
+      notifyTargets.map(eq => {
+
+        const notiyItem =  {
+          id: `eq_alert_${eq.id}`,
+          delay: 5000,
+          title: "地震情報",
+          subtitle: `${eq.place}（${eq.distanceStr}km）最大震度${eq.maxShindo}`,
+          body: `${eq.timeRaw}`,
+          sound: v.notifySound,
+          cooldown: v.notifyCooldown ?? 300000,
+          meta: {
+            action: "openPreview",
+            lp_type: "list",
+            lp_items: [
+              {
+                text: `津波：${eq.tsunamiBadge}${eq.tsunamiStr}`,
+                fontSize: 16,
+                bold: true,
+                color: "#ffffff",
+                bgColor: eq.tsunamiLevel === "warning" ? "#b00020" : "#333333",
+                align: "center"
+              }
+            ]
+          }
         }
-      }})
+
+        notifications.push(notiyItem)
+
+      })
+
+    }
 
     return notifications
   },
@@ -1145,9 +1173,6 @@ module.exports = {
     const runtime = ctx?.runtime ?? {}
     const appId = env?.appId ?? "WidgetFramework"
 
-    const minScore = Number(v.minScore) || 0
-    const limit = Number(v.limit) || 0
-
     // location
     const location = locationTransform(ctx)
 
@@ -1166,7 +1191,6 @@ module.exports = {
         titleStr: item?.title || "No Title",
         value: score,
         sub: this.getRank(score),
-        flag: score >= minScore,
 
         // 追加情報
         index: i + 1,
@@ -1387,19 +1411,6 @@ function pickPoint(eq, loc) {
 // ======================
 // dedupeLatest 
 // ======================
-function _dedupeLatest(list) {
-  const map = new Map()
-
-  for (const eq of list) {
-    const prev = map.get(eq.id)
-
-    if (!prev || new Date(eq.time) > new Date(prev.time)) {
-      map.set(eq.id, eq)
-    }
-  }
-
-  return Array.from(map.values())
-}
 function dedupeLatest(list) {
 
   const map = new Map()
@@ -1535,11 +1546,12 @@ function formatTimeAgo(ts) {
 // ======================
 // Module Test
 // ======================
-const module_name = module.filename.match(/[^\/]+$/ )[ 0 ].replace('.js', '');
+const module_name = module.filename.match(/[^\/]+$/ )[ 0 ].replace('.js', '')
 if (module_name == Script.name()) {
   (async() => {
     const Main = importModule(APP_MAIN)
     Main.setAppInfo("id", APP_ID)
+    Main.setAppInfo("version", APP_VERSION)
     Main.setAppInfo("storageType", DEFAULT_STRAGE_TYPE)
     await Main.start()
   })()
