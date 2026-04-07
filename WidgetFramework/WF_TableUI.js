@@ -17,7 +17,7 @@ module.exports = {
   TABLE_PRESETS: {
 
     tap: {
-      rowHeight: 90,
+      rowHeight: 60,
       cellSpacing: 10,
 
       fontTitle: Font.semiboldSystemFont(16),
@@ -51,11 +51,11 @@ module.exports = {
     const row = this.createRow(options.height)
 
     const left = row.addText(String(title || ""))
-    left.widthWeight = options.leftWeight || 70
+    left.widthWeight = options.leftWeight || 30
     left.titleFont = options.leftFont || Font.semiboldSystemFont(14)
 
     const right = row.addText(String(value || ""))
-    right.widthWeight = options.rightWeight || 30
+    right.widthWeight = options.rightWeight || 70
     right.rightAligned()
     right.titleFont = options.rightFont || Font.systemFont(14)
 
@@ -81,6 +81,10 @@ module.exports = {
       ...this.TABLE_PRESETS[preset],
       ...meta
     }
+
+    const lineCount = ([title, subtitle].join("\n").match(new RegExp("\n", "g")) || []).length + 1
+    const lineHeight = (16 * 1.6) * lineCount
+    height = Math.ceil(Math.max(style.rowHeight, lineHeight))
 
     const row = this.createRow(height || style.rowHeight)
     row.cellSpacing = style.cellSpacing
