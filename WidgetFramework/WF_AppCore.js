@@ -666,11 +666,12 @@ module.exports = class WF_AppCore {
 
     const a = new Alert()
 
-    a.title = "Framework v" + this.version
+    a.title = "Framework"
     a.message =
       "AppId: " + this.appId + "\n" +
       "Profile: " + this.profile.getActive() + "\n" +
-      "Mode: " + this.storageType
+      "Mode: " + this.storageType + "\n" +
+      "Version: " + this.version
 
     a.addAction("OK")
 
