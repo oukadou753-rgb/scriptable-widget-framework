@@ -132,9 +132,8 @@ module.exports = class WF_MenuEngine {
     const a = new Alert()
 
     // タイトル
-    if (options.title) {
-      a.title = String(options.title)
-    }
+    if (options.title) a.title = String(options.title)
+    if (options.message) a.message = String(options.message)
 
     // =========================
     // Menu Items
