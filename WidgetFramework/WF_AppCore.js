@@ -110,7 +110,7 @@ module.exports = class WF_AppCore {
         { label: "Profile Manage", action: () => this.manageProfiles() },
         { label: "About", action: () => this.showAbout() }
       ],
-      { title: "Main Menu" }
+      { title: this.appId, message: `ver.${this.version}` }
     )
 
     this.menu.register(
