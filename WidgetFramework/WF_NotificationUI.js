@@ -211,7 +211,7 @@ module.exports = {
   // 詳細
   // =========================
   renderDetail(table, core) {
-  
+
     const item = this.currentItem
     if (!item) return
 
@@ -234,17 +234,18 @@ module.exports = {
     table.addRow(this.tableUI.createKeyValueRow("Title", item.title).row)
 
     if (item.subtitle) {
-  
+
       table.addRow(this.tableUI.createKeyValueRow("Subtitle", item.subtitle).row)
 
     }
 
     if (item.body) {
-  
-      const lineCount = (item.body.match(new RegExp("\n", "g")) || []).length + 1
-      const { row } = this.tableUI.createKeyValueRow("Body", item.body)
-      row.height = Math.ceil((16 * 1.6) * lineCount)
-      table.addRow(row)
+
+      table.addRow(this.tableUI.createKeyValueRow("Body", item.body).row)
+//       const lineCount = (item.body.match(new RegExp("\n", "g")) || []).length + 1
+//       const { row } = this.tableUI.createKeyValueRow("Body", item.body)
+//       row.height = Math.ceil((16 * 1.6) * lineCount)
+//       table.addRow(row)
 
     }
 
