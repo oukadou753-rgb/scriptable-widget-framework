@@ -242,10 +242,6 @@ module.exports = {
     if (item.body) {
 
       table.addRow(this.tableUI.createKeyValueRow("Body", item.body).row)
-//       const lineCount = (item.body.match(new RegExp("\n", "g")) || []).length + 1
-//       const { row } = this.tableUI.createKeyValueRow("Body", item.body)
-//       row.height = Math.ceil((16 * 1.6) * lineCount)
-//       table.addRow(row)
 
     }
 
