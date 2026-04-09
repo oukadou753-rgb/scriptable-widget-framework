@@ -17,7 +17,7 @@ module.exports = {
   TABLE_PRESETS: {
 
     tap: {
-      rowHeight: 60,
+      rowHeight: 44,
       cellSpacing: 10,
 
       fontTitle: Font.semiboldSystemFont(16),
@@ -37,10 +37,12 @@ module.exports = {
   // 基本Row
   // =========================
   createRow(height = 0) {
+    const style = this.TABLE_PRESETS.tap
+
     const row = new UITableRow()
     row.dismissOnSelect = false
-    row.cellSpacing = this.TABLE_PRESETS.tap.cellSpacing
-    if (height > 0) row.height = height || this.TABLE_PRESETS.tap.rowHeight
+    row.cellSpacing = style.cellSpacing
+    if (height > 0) row.height = height || style.rowHeight
     return row
   },
 
@@ -48,7 +50,14 @@ module.exports = {
   // Key-Value（基本）
   // =========================
   createKeyValueRow(title, value, options = {}) {
-    const row = this.createRow(options.height)
+    const style = this.TABLE_PRESETS.tap
+
+    const titleLineCount = (String(title).match(new RegExp("\n", "g")) || []).length + 1
+    const valueLineCount = (String(value).match(new RegExp("\n", "g")) || []).length + 1
+    const lineHeight = ((16 * 1.6) * titleLineCount) + ((14 * 1.6) * valueLineCount)
+    const height = Math.ceil(Math.max(style.rowHeight, lineHeight))
+
+    const row = this.createRow(options.height || height)
 
     const left = row.addText(String(title || ""))
     left.widthWeight = options.leftWeight || 30
@@ -98,7 +107,7 @@ module.exports = {
       String(title || ""),
       String(subtitle || "")
     )
-    left.widthWeight = 70
+    left.widthWeight = 80
     left.titleFont = style.fontTitle
     left.subtitleFont = style.fontSubtitle
 
@@ -108,7 +117,7 @@ module.exports = {
       String(rightTitle || ""),
       String(rightSubtitle || "")
     )
-    right.widthWeight = 30
+    right.widthWeight = 20
     right.rightAligned()
     right.titleFont = style.fontRightTitle
     right.subtitleFont = style.fontRightSubtitle
