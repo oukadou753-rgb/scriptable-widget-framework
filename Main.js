@@ -39,6 +39,31 @@ module.exports = {
 
     try {
 
+      // =========================
+      // ★ runtime取得（最優先）
+      // =========================
+      let runtime = {}
+
+      const sp = args.shortcutParameter
+
+      if (typeof sp === "string") {
+        try {
+          runtime = JSON.parse(sp)
+        } catch {}
+      } else if (typeof sp === "object" && sp !== null) {
+        runtime = sp
+      }
+
+      // =========================
+      // ★ appId上書き
+      // =========================
+      if (runtime.appId) {
+        this.setAppInfo("id", runtime.appId)
+      }
+
+      // =========================
+      // Notification
+      // =========================
       if (config.runsInNotification) {
         await handleNotificationUI(args.notification.userInfo)
         return
@@ -67,7 +92,22 @@ module.exports = {
         [appInfo.appConfig]: { type: "both", path: "" },
       }
 
-      await this.init(appInfo, modules)
+      const core = await this.init(appInfo, modules)
+
+      // =========================
+      // Shortcut
+      // =========================
+      if (runtime.mode === "fetch") {
+        const cfg = core.profile.getConfig()
+        cfg.values.forceRefresh = runtime.forceRefresh ?? true
+        await core.getDataProvider().fetchAll(core.appConfig.api)
+        return
+      }
+
+      // =========================
+      // 通常処理
+      // =========================
+      await core.start()
 
     } catch(e) {
 
@@ -103,12 +143,13 @@ module.exports = {
 
     }
 
+    if (obj[appInfo.appConfig].version)
+      appInfo.version = obj[appInfo.appConfig].version
+
     if (config.runsInWidget) {
-      const core = new obj.WF_WidgetCore(appInfo, obj[appInfo.appConfig], obj)
-      await core.start()
+      return new obj.WF_WidgetCore(appInfo, obj[appInfo.appConfig], obj)
     } else {
-      const core = new obj.WF_AppCore(appInfo, obj[appInfo.appConfig], obj)
-      await core.start()
+      return new obj.WF_AppCore(appInfo, obj[appInfo.appConfig], obj)
     }
 
   },
