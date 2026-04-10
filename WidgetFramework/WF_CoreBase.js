@@ -56,7 +56,10 @@ module.exports = class WF_CoreBase {
     else if (size === "extraLarge") {
       if (Device.isPad()) await widget.presentExtraLarge()
       else await widget.presentLarge()
-    } else return false
+    } else {
+//       App.close()
+      return true
+    }
 
     return true
 
@@ -91,14 +94,7 @@ module.exports = class WF_CoreBase {
     // =========================
     const { data, location } = configData.values.useTestData
       ? this.appConfig.getTestData()
-      : await new this.WF_DataProvider(
-          this.appId,
-          this.storage,
-          {
-            ...this.appConfig,
-            config: configData
-          }
-        ).fetchAll(this.appConfig.api)
+      : await this.fetchData(configData)
 
     // =========================
     // transformContext（整理版）
@@ -158,6 +154,37 @@ module.exports = class WF_CoreBase {
       location
     }
 
+  }
+
+  // ======================
+  // getDataProvider
+  // ======================
+  getDataProvider() {
+    return new this.WF_DataProvider(
+      this.appId,
+      this.storage,
+      {
+        ...this.appConfig,
+        config: this.profile.getConfig()
+      }
+    )
+  }
+
+  // ======================
+  // fetchData
+  // ======================
+  async fetchData(configData) {
+    return await new this.WF_DataProvider(
+      this.appId,
+      this.storage,
+      {
+        ...this.appConfig,
+        config: configData
+      },
+      {
+        debug: this.debug.bind(this)
+      }
+    ).fetchAll(this.appConfig.api)
   }
 
   // ======================
@@ -345,6 +372,40 @@ module.exports = class WF_CoreBase {
     return true
 
   }
+
+// ======================
+// debug
+// ======================
+debug(section, obj = {}) {
+
+  try {
+
+    const text = Object.entries(obj)
+      .map(([k, v]) => {
+        if (typeof v === "object") {
+          try {
+            return `${k}: ${JSON.stringify(v)}`
+          } catch {
+            return `${k}: [object]`
+          }
+        }
+        return `${k}: ${v}`
+      })
+      .join("\n")
+
+    const output = `==== ${section} ====\n` + text
+
+    console.log(output)
+
+    if (this.profile?.getConfig()?.values?.debugCopy) {
+      Pasteboard.copyString(output)
+    }
+
+  } catch(e) {
+    console.warn("debug error: " + e)
+  }
+
+}
 
 }
 
