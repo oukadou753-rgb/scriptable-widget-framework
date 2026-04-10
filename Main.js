@@ -4,17 +4,14 @@
 /**
  * Main
  * UTF-8 日本語コメント
- * 2026/03/28 21:00
+ * 2026/04/11 00:10
  */
 
-const DEFAULT_APP_ID = "Earthquake"
+const DEFAULT_APP_ID = "Weather"
 const DEFAULT_STRAGE_TYPE = "local"
 
 const APP_DEV_MODE = true
-const APP_ID =
-  args.queryParameters?.appId ||
-  args.widgetParameter ||
-  DEFAULT_APP_ID
+const APP_ID = args.widgetParameter || DEFAULT_APP_ID
 const APP_VERSION = "1.0.0"
 const APP_CONFIG = `App_${APP_ID}Config`
 
@@ -42,16 +39,21 @@ module.exports = {
       // =========================
       // ★ runtime取得（最優先）
       // =========================
-      let runtime = {}
+      let notifParam = args.notification?.userInfo || {}
 
-      const sp = args.shortcutParameter
+      let shortcutParam = {}
 
-      if (typeof sp === "string") {
-        try {
-          runtime = JSON.parse(sp)
-        } catch {}
-      } else if (typeof sp === "object" && sp !== null) {
-        runtime = sp
+      try {
+        shortcutParam =
+          typeof args.shortcutParameter === "string"
+            ? JSON.parse(args.shortcutParameter)
+            : args.shortcutParameter || {}
+      } catch {}
+
+      const runtime = {
+        ...notifParam,
+        ...shortcutParam,
+        ...(args.queryParameters || {})
       }
 
       // =========================
@@ -65,7 +67,7 @@ module.exports = {
       // Notification
       // =========================
       if (config.runsInNotification) {
-        await handleNotificationUI(args.notification.userInfo)
+        await handleNotificationUI(runtime)
         return
       }
 
@@ -97,10 +99,10 @@ module.exports = {
       // =========================
       // Shortcut
       // =========================
-      if (runtime.mode === "fetch") {
+      if (runtime.mode === "buildContext") {
         const cfg = core.profile.getConfig()
         cfg.values.forceRefresh = runtime.forceRefresh ?? true
-        await core.getDataProvider().fetchAll(core.appConfig.api)
+        await core.buildContext({ cfg }) // await core.getDataProvider().fetchAll(core.appConfig.api)
         return
       }
 
