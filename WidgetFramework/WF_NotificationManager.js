@@ -477,7 +477,10 @@ module.exports = class WF_NotificationManager {
 
       n.openURL = `scriptable:///run?scriptName=${encodeURIComponent(
         scriptName
-      )}&${toQuery({ id: payload.id })}`
+      )}&${toQuery({
+        id: payload.id,
+        appId: this.appId
+      })}`
 
     }
 
