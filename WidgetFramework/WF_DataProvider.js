@@ -494,10 +494,10 @@ module.exports = class WF_DataProvider {
 
       console.warn(`API error (${type}): ` + e)
 
-//       if (cache && cache.data) {
-//         console.warn("Using stale cache")
-//         return cache.data
-//       }
+      if (cache && cache.data) {
+        console.warn("Using stale cache")
+        return cache.data
+      }
 
       throw e
     }
