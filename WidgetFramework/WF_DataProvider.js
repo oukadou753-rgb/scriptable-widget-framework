@@ -11,10 +11,11 @@
 // ========================
 module.exports = class WF_DataProvider {
 
-  constructor(appId, storage, appConfig) {
+  constructor(appId, storage, appConfig, utils = {}) {
     this.appId = appId
     this.storage = storage
     this.appConfig = appConfig
+    this.debug = utils.debug || (() => {})
   }
 
   // =========================
@@ -23,6 +24,18 @@ module.exports = class WF_DataProvider {
   async fetchAll(apiConfig = {}) {
 
     const values = this.appConfig?.config?.values || {}
+
+    let runtime = {}
+
+    const sp = args.shortcutParameter
+
+    if (typeof sp === "string") {
+      try {
+        runtime = JSON.parse(sp)
+      } catch {}
+    } else if (typeof sp === "object" && sp !== null) {
+      runtime = sp
+    }
 
     const bindValue = (v) => {
       if (typeof v !== "string") return v
@@ -38,9 +51,12 @@ module.exports = class WF_DataProvider {
     const cacheMinutes = bindValue(apiConfig.cache?.minutes) ?? 0
 
     const forceRefresh =
-      config.runsInApp &&
-      (bindValue(apiConfig.cache?.forceRefreshInApp) ?? false)
-
+      runtime.forceRefresh === true ||
+      (
+        config.runsInApp &&
+        (bindValue(apiConfig.cache?.forceRefreshInApp) ?? false)
+      )
+  
     // =========================
     // ■ ① locationを先に解決（★ここが最重要）
     // =========================
@@ -154,13 +170,15 @@ module.exports = class WF_DataProvider {
         isNormalCache
       )
 
-//     log("==== CACHE DEBUG ====")
-//     log("useCache: " + useCache)
-//     log("forceRefresh: " + forceRefresh)
-//     log("isMultiRefresh: " + isMultiRefresh)
-//     log("isDailyCache: " + isDailyCache)
-//     log("isNormalCache: " + isNormalCache)
-//     log("shouldUseCache: " + shouldUseCache)
+// this.debug("CACHE", {
+//   useCache,
+//   forceRefresh,
+//   isMultiRefresh,
+//   isDailyCache,
+//   isNormalCache,
+//   shouldUseCache,
+//   "runtime": JSON.stringify(runtime)
+// })
 
     if (shouldUseCache) {
       return {
@@ -476,10 +494,10 @@ module.exports = class WF_DataProvider {
 
       console.warn(`API error (${type}): ` + e)
 
-      if (cache && cache.data) {
-        console.warn("Using stale cache")
-        return cache.data
-      }
+//       if (cache && cache.data) {
+//         console.warn("Using stale cache")
+//         return cache.data
+//       }
 
       throw e
     }
