@@ -183,7 +183,8 @@ module.exports = class WF_DataProvider {
     if (shouldUseCache) {
       return {
         data: cache.data || {},
-        location
+        location,
+        fromCache: true
       }
     }
 
@@ -212,7 +213,8 @@ module.exports = class WF_DataProvider {
           console.warn("Using cached data")
           return {
             data: cache.data || {},
-            location: location ?? null
+            location: location ?? null,
+            fromCache: true
           }
         }
 
@@ -230,7 +232,8 @@ module.exports = class WF_DataProvider {
 
       return {
         data: data || {},
-        location: location ?? null
+        location: location ?? null,
+        fromCache: false
       }
 
     } catch (e) {
@@ -239,7 +242,8 @@ module.exports = class WF_DataProvider {
       if (cache && cache.data) {
         return {
           data: cache.data || {},
-          location: location ?? null
+          location: location ?? null,
+          fromCache: true
         }
       }
 
