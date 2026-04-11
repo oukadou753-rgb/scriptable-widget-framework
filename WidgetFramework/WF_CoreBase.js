@@ -92,7 +92,7 @@ module.exports = class WF_CoreBase {
     // =========================
     // data取得
     // =========================
-    const { data, location } = configData.values.useTestData
+    const { data, location, fromCache } = configData.values.useTestData
       ? this.appConfig.getTestData()
       : await this.fetchData(configData)
 
@@ -118,7 +118,8 @@ module.exports = class WF_CoreBase {
 
       runtime: {
         isOnline,
-        location
+        location,
+        fromCache
       },
 
       services: {
