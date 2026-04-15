@@ -8,8 +8,7 @@
 
 const ALIAS = {
   backgroundColor: ["bgColor", "bg"],
-  fontSize: ["fs"],
-  textColor: ["color", "fgColor"]
+  cornerRadius: ["radius"]
 }
 
 // ======================
@@ -372,6 +371,10 @@ module.exports = class WF_WidgetRenderer {
 
     // Spacing
     if (el.spacing != null) stack.spacing = Number(el.spacing)
+
+    // CornerRadius
+    const cr = this.resolveProp(el, "cornerRadius")
+    if (cr != null) stack.cornerRadius = Number(cr)
 
     // horizontal / vertical
     if (horizontal) stack.layoutHorizontally()
