@@ -8,7 +8,9 @@
 
 const ALIAS = {
   backgroundColor: ["bgColor", "bg"],
-  cornerRadius: ["radius"]
+  cornerRadius: ["radius"],
+  borderWidth: ["bWidth"],
+  borderColor: ["bColor"]
 }
 
 // ======================
@@ -375,6 +377,20 @@ module.exports = class WF_WidgetRenderer {
     // CornerRadius
     const cr = this.resolveProp(el, "cornerRadius")
     if (cr != null) stack.cornerRadius = Number(cr)
+
+    // borderWidth
+    const bw = this.resolveProp(el, "borderWidth")
+    if (bw) {
+      const width = this.bind(bw, context)
+      stack.borderWidth = Number(width)
+    }
+
+    // borderColor
+    const bc = this.resolveProp(el, "borderColor")
+    if (bc != null) {
+      const color = this.resolveColor(this.bind(bc, context), context)
+      stack.borderColor = this.toColor(color)
+    }
 
     // horizontal / vertical
     if (horizontal) stack.layoutHorizontally()
