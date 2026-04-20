@@ -577,7 +577,6 @@ module.exports = class WF_WidgetRenderer {
     textItem.font = this.getFont(style)
 
     const colorValue = this.bind(style.color, context)
-
     if (colorValue === "") {
 
       const baseColor = styles[styleInput?.base]?.color
@@ -605,30 +604,35 @@ module.exports = class WF_WidgetRenderer {
     }
 
     // lineLimit
-    if (style.lineLimit !== undefined) {
-      textItem.lineLimit = Number(style.lineLimit)
+    const lineLimitValue = this.bind(style.lineLimit, context)
+    if (lineLimitValue) {
+      textItem.lineLimit = Number(lineLimitValue)
     }
 
     // minimumScaleFactor
-    if (style.minimumScaleFactor !== undefined) {
-      textItem.minimumScaleFactor = Number(style.minimumScaleFactor)
+    const minimumScaleFactor = this.bind(style.minimumScaleFactor, context)
+    if (style.minimumScaleFactor) {
+      textItem.minimumScaleFactor = Number(minimumScaleFactor)
     }
 
     // shadowColor
     const shadowColor = this.bind(style.shadowColor, context)
     if (shadowColor) {
-      textItem.shadowColor = new Color(shadowColor)
+      const finalColor = this.toColor(shadowColor)
+      textItem.shadowColor = finalColor
     }
 
     // shadowRadius
-    if (style.shadowRadius !== undefined) {
-      textItem.shadowRadius = Number(style.shadowRadius)
+    const shadowRadius = this.bind(style.shadowRadius, context)
+    if (shadowRadius) {
+      textItem.shadowRadius = Number(shadowRadius)
     }
 
     // shadowOffset
-    if (style.shadowOffset) {
-      const x = Number(style.shadowOffset.x || 0)
-      const y = Number(style.shadowOffset.y || 0)
+    const shadowOffset = this.bind(style.shadowOffset, context)
+    if (shadowOffset) {
+      const x = Number(shadowOffset.x || 0)
+      const y = Number(shadowOffset.y || 0)
       textItem.shadowOffset = new Point(x, y)
     }
 
