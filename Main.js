@@ -4,14 +4,17 @@
 /**
  * Main
  * UTF-8 日本語コメント
- * 2026/04/11 00:10
+ * 2026/04/2s 11:00
  */
 
 const DEFAULT_APP_ID = "Weather"
-const DEFAULT_STRAGE_TYPE = "local"
+const DEFAULT_STORAGE_TYPE = "local"
 
 const APP_DEV_MODE = true
-const APP_ID = args.widgetParameter || DEFAULT_APP_ID
+const APP_ID =
+  args.queryParameters?.appId ||
+  args.widgetParameter ||
+  DEFAULT_APP_ID
 const APP_VERSION = "1.0.0"
 const APP_CONFIG = `App_${APP_ID}Config`
 
@@ -22,7 +25,7 @@ const APP_INFO = {
   debug: APP_DEV_MODE,
   id: APP_ID,
   version: APP_VERSION,
-  storageType: DEFAULT_STRAGE_TYPE,
+  storageType: DEFAULT_STORAGE_TYPE,
   moduleDir: WF_MODULE_DIR,
   frameworkRepo: WF_REPO,
 }
@@ -131,7 +134,9 @@ module.exports = {
     const ModuleLoader = importModule("ModuleLoader")
     const moduleLoader = new ModuleLoader(appInfo.storageType)
 
-    let obj = {}
+    let obj = {
+      moduleLoader: moduleLoader
+    }
 
     for (key in modules) {
 
