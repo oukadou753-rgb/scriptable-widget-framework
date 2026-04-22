@@ -29,6 +29,8 @@ module.exports = class WF_CoreBase {
 
     this.WF_DataProvider = WF_DataProvider
 
+    this.moduleLoader = moduleLoader
+
     this.pinText = ""
   }
 
@@ -125,6 +127,7 @@ module.exports = class WF_CoreBase {
       services: {
         notification: this.notification,
         storage: this.storage,
+        moduleLoader: this.moduleLoader,
         core: this
       }
 
