@@ -456,7 +456,12 @@ module.exports = class WF_WidgetRenderer {
     let image
 
     // DrawContext Image
-    if (rawSrc && rawSrc.size) {
+    if (
+      rawSrc &&
+      typeof rawSrc === "object" &&
+      rawSrc.size &&
+      typeof rawSrc.size.width === "number"
+    ) {
       image = rawSrc
     }
 
@@ -473,7 +478,10 @@ module.exports = class WF_WidgetRenderer {
     }
 
     // SF Symbol
-    else if (typeof rawSrc === "string" && !rawSrc.includes("/")) {
+    else if (
+      typeof rawSrc === "string" &&
+      /^[a-z0-9.\-]+$/i.test(rawSrc)
+    ) {
 
       const sym = SFSymbol.named(rawSrc)
       if (sym) {
