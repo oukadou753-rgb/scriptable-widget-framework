@@ -9,10 +9,11 @@
 // ======================
 // Constat
 // ======================
-const APP_VERSION = "20260407-2000"
+const APP_VERSION = "20260424-1700"
 const APP_MAIN = "Main"
 const APP_ID = "Weather"
-const DEFAULT_STRAGE_TYPE = "local"
+const DEFAULT_STORAGE_TYPE = "local"
+const WF_MODULE_DIR = "WidgetFramework/"
 
 // ======================
 // Color
@@ -766,11 +767,12 @@ module.exports = {
         bodyTextColor: { type: "color", label: "Body Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
         footerTextColor: { type: "color", label: "Footer Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
 
+        debugCopy: { type: "bool", label: "Debug Copy", section: "Debug", default: false },
         useTestData: { type: "bool", label: "Use Test Data", section: "Debug", default: true },
         showStorageType: { type: "bool", label: "Show Storage Type", section: "Debug", default: true },
         showTableFullscreen: { type: "bool", label: "Show Table Fullscreen", section: "Debug", default: true },
 
-        refreshInterval: { type: "select", label: "Refresh Interval", section: "WIDGET", default: "15", options: ["15", "30", "45", "60"] },
+        refreshInterval: { type: "select", label: "Refresh Interval", section: "WIDGET", default: "0", options: ["0", "15", "30", "45", "60"] },
 
         myApiKey: { type: "text", label: "API KEY", section: "API", default: "MY_APIKEY" },
         apiCacheEnabled: { type: "bool", label: "Enable API Cache", section: "API", default: true },
@@ -782,10 +784,10 @@ module.exports = {
         closeOnPreview: { type: "bool", label: "Close On Preview", section: "Menu", default: false },
 
         notifyEnabled: { type: "bool", label: "Enable Notification", section: "Notification", default: true },
+//         notifyforceRefresh: { type: "bool", label: "Force Refresh in Notification", section: "Notification", default: false, readonlyExpr: "{{!notifyEnabled}}" },
         notifySoundEnabled: { type: "bool", label: "Enable Notification Sound", section: "Notification", default: true, readonlyExpr: "{{!notifyEnabled}}" },
-        notifyCacheEnabled: { type: "bool", label: "Enable Cache Prune", section: "Notification", default: true, readonlyExpr: "{{!notifyEnabled}}" },
-
         notifySound: { type: "select", label: "Notification Sound", section: "Notification", default: SOUNDS.notify.default, options: PRESETS_SOUNDS.notify, readonlyExpr: "{{!notifySoundEnabled || !notifyEnabled}}"},
+        notifyCacheEnabled: { type: "bool", label: "Enable Cache Prune", section: "Notification", default: true, readonlyExpr: "{{!notifyEnabled}}" },
         notifyCooldown: { type: "number", label: "Notification Cooldown", section: "Notification", default: 300000, readonlyExpr: "{{!notifyEnabled}}"},
         notifyCacheMaxCount: { type: "number", label: "Cache Max Count", section: "Notification", default: 50, readonlyExpr: "{{!notifyCacheEnabled || !notifyEnabled}}" },
         notifyCacheMaxHours: { type: "number", label: "Cache Max Hours", section: "Notification", default: 24, readonlyExpr: "{{!notifyCacheEnabled || !notifyEnabled}}" },
@@ -947,6 +949,18 @@ module.exports = {
   },
 
   // =========================
+  // preloadModules
+  // =========================
+  preloadModules(ctx) {
+
+    const loader = ctx.services.moduleLoader
+
+    return {
+
+    }
+  },
+
+  // =========================
   // onNotificationTap
   // =========================
   onNotificationTap: async (info, core) => {
@@ -970,7 +984,7 @@ module.exports = {
 
     const items = this.dataTransform(data, ctx)
     const meta = this.metaTransform(data, ctx)
-    const notifications = this.notificationTranceform(data, ctx, {items, meta})
+    const notifications = this.notificationTransform(data, ctx, {items, meta})
 
     return {
       items,
@@ -1098,6 +1112,7 @@ module.exports = {
     const v = ctx?.config?.values ?? {}
     const env = ctx?.env ?? {}
     const runtime = ctx?.runtime ?? {}
+
     const appId = env?.appId ?? "WidgetFramework"
     const storageType = env?.storageType ?? "****"
 
@@ -1245,6 +1260,15 @@ module.exports = {
     const sunriseToday = convert12to24(todayAstro?.sunrise)
     const sunsetToday = convert12to24(todayAstro?.sunset)
 
+    Keychain.set("sunriseToday", sunriseToday)
+    if (Keychain.contains("sunriseToday")) {
+      console.log("sunriseToday: " + Keychain.get("sunriseToday"))
+    }
+    Keychain.set("sunsetToday", sunsetToday)
+    if (Keychain.contains("sunsetToday")) {
+      console.log("sunsetToday: " + Keychain.get("sunsetToday"))
+    }
+
     const isDay = isTimeInRangeAcrossDay(nowStr, sunriseToday, sunsetToday)
     const isAfterSunset = !isTimeInRangeAcrossDay(nowStr, "00:00", sunsetToday)
 
@@ -1325,7 +1349,7 @@ module.exports = {
   },
 
   // =========================
-  // notificationTranceform
+  // notificationTransform
   // =========================
 /*
 {
@@ -1355,9 +1379,12 @@ module.exports = {
   }
 }
 */
-  notificationTranceform(data, ctx, {items, meta}) {
+  notificationTransform(data, ctx, {items, meta}) {
 
     const v = ctx?.config?.values ?? {}
+
+//     const fromCache = ctx?.runtime?.fromCache || false
+//     if (!v.notifyforceRefresh && fromCache) return []
 
     const current = meta?.current ?? {}
 
@@ -1548,18 +1575,15 @@ function locationTransform(ctx) {
 // ======================
 function flatObj(obj, prefix = "") {
   const result = {}
-
   for (const key of Object.keys(obj)) {
-
     const value = obj[key]
     const newKey = prefix + key
-
     if (
       typeof value === "object" &&
       value !== null &&
       !Array.isArray(value) &&
       !(value instanceof Date) &&
-      !(value instanceof Image)
+      !isImage(value)
     ) {
       Object.assign(result, flatObj(value, newKey + "_"))
     }
@@ -1571,6 +1595,17 @@ function flatObj(obj, prefix = "") {
   }
 
   return result
+}
+
+// ======================
+// isImage
+// ======================
+function isImage(obj) {
+  return obj &&
+    typeof obj === "object" &&
+    obj.size &&
+    typeof obj.size.width === "number" &&
+    typeof obj.size.height === "number"
 }
 
 // ======================
@@ -1716,7 +1751,7 @@ if (module_name == Script.name()) {
     const Main = importModule(APP_MAIN)
     Main.setAppInfo("id", APP_ID)
     Main.setAppInfo("version", APP_VERSION)
-    Main.setAppInfo("storageType", DEFAULT_STRAGE_TYPE)
+    Main.setAppInfo("storageType", DEFAULT_STORAGE_TYPE)
     await Main.start()
   })()
 }
