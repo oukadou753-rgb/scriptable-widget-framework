@@ -134,6 +134,14 @@ module.exports = class WF_CoreBase {
     }
 
     // =========================
+    // modules preload
+    // =========================
+    transformContext.modules =
+      this.appConfig.preloadModules
+        ? this.appConfig.preloadModules(transformContext)
+        : {}
+
+    // =========================
     // transform
     // =========================
     const finalData = this.appConfig.transform
