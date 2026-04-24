@@ -6,10 +6,11 @@
  * UTF-8 日本語コメント
  **/
 
-const APP_VERSION = "20260407-2000"
+const APP_VERSION = "20260424-1700"
 const APP_MAIN = "Main"
 const APP_ID = "Earthquake"
-const DEFAULT_STRAGE_TYPE = "local"
+const DEFAULT_STORAGE_TYPE = "local"
+const WF_MODULE_DIR = "WidgetFramework/"
 
 // ======================
 // Color
@@ -179,7 +180,9 @@ const TEXT_ICON = {
 
   // 数値
   plus: "+",
-  minus: "−"
+  minus: "−",
+
+  badge: "●"
 }
 
 // ======================
@@ -202,6 +205,8 @@ const SOUNDS = {
 const PRESETS_SOUNDS = {
   notify: Object.values(SOUNDS.notify)
 }
+
+const PIN_TSUNAMI = ["Watch", "Warning", "MajorWarning"]
 
 // ======================
 // Helper
@@ -231,9 +236,10 @@ function imageHelper(image, size = 14, tint = "", opacity = 1) {
   }
 }
 
-function rowStackHelper(options = {size, justify, show, bgColor}, data) {
+function rowStackHelper(options = {size, padding, justify, show, bgColor}, data) {
   return {
     size: options?.size ?? new Size(0, 0),
+    padding: options?.padding ?? pos(0, 0, 0, 0),
     justify: options?.justify ?? "start",
     show: options?.show ?? true,
     bgColor: options?.bgColor ?? "",
@@ -324,7 +330,8 @@ const bodyBlock_2 = [
     size: new Size(130, 0),
     justify: "center",
     meta: {
-      action: "copyText"
+      action: "copyText",
+      appId: APP_ID
     },
 
     h: [
@@ -356,7 +363,7 @@ const bodyBlock_3 = [
       {
         h: [
           textHelper("津波：", "columnText"),
-          { bgColor: "{{pinned_tsunamiBgColor}}",
+          { padding: pos(0, 4, 0, 4), bgColor: "{{pinned_tsunamiBgColor}}",
             h: [
               textHelper("{{pinned_tsunamiStr}}", {base: "dataText", color: "{{pinned_tsunamiColor}}" })
             ]
@@ -463,15 +470,21 @@ const repeatBlock = [
             rowStackHelper(
               {},
               [
+                { text: "{{tsunamiBadge}}", style: "dataSmallText", show: "ui_isLarge" },
                 textHelper("{{badge}}{{place}}", {base: "dataText", color: "{{maxColor}}"}),
                 textHelper(" ({{distanceStr}}km)", {base: "dataSmallText", color: "{{maxColor}}"}),
                 { spacer: true }
               ]
             ),
             rowStackHelper(
-              { size: new Size(80, 0), justify: "start", show: "ui_isExtraLarge" },
+              { size: new Size(80, 0), justify: "start", show: "!ui_isLarge" },
               [
-                textHelper(" {{tsunamiStr}}", {base: "dataSmallText", color: "{{tsunamiColor}}", bgColor: "{{tsunamiBgColor}}"}),
+                rowStackHelper(
+                  { padding: pos(0, 4, 0, 2), bgColor: "{{tsunamiBgColor}}" },
+                  [
+                    textHelper(" {{tsunamiStr}}", {base: "dataSmallText", color: "{{tsunamiColor}}"})
+                  ]
+                ),
                 { spacer: true }
               ]
             ),
@@ -597,11 +610,12 @@ module.exports = {
         bodyTextColor: { type: "color", label: "Body Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
         footerTextColor: { type: "color", label: "Footer Text Color", section: "Style", default: COLORS.theme.textPrimary, presets: PRESETS_COLORS.theme },
 
+        debugCopy: { type: "bool", label: "Debug Copy", section: "Debug", default: false },
         useTestData: { type: "bool", label: "Use Test Data", section: "Debug", default: true },
         showStorageType: { type: "bool", label: "Show Storage Type", section: "Debug", default: true },
         showTableFullscreen: { type: "bool", label: "Show Table Fullscreen", section: "Debug", default: true },
 
-        refreshInterval: { type: "select", label: "Refresh Interval", section: "WIDGET", default: "15", options: ["15", "30", "45", "60"] },
+        refreshInterval: { type: "select", label: "Refresh Interval", section: "WIDGET", default: "0", options: ["0", "15", "30", "45", "60"] },
 
         apiCacheEnabled: { type: "bool", label: "Enable API Cache", section: "API", default: true },
         apiCacheMinutes: { type: "number", label: "Cache Refresh Minutes", section: "API", default: 5, readonlyExpr: "{{!apiCacheEnabled}}" },
@@ -610,18 +624,19 @@ module.exports = {
         displayCount: { type: "number", label: "Display Count", section: "API", default: 9 },
         pinScale: { type: "select", label: "Pin Scale", section: "API", default: 30, options: PRESETS.scale },
         pinHours: { type: "number", label: "Pin Hours ", section: "API", default: 6 },
+        pinTunami: { type: "bool", label: "Pin Tunami ", section: "API", default: false },
 
         closeOnPreview: { type: "bool", label: "Close On Preview", section: "Menu", default: false },
 
         notifyEnabled: { type: "bool", label: "Enable Notification", section: "Notification", default: true },
+//         notifyforceRefresh: { type: "bool", label: "Force Refresh in Notification", section: "Notification", default: false, readonlyExpr: "{{!notifyEnabled}}" },
         notifySoundEnabled: { type: "bool", label: "Enable Notification Sound", section: "Notification", default: true, readonlyExpr: "{{!notifyEnabled}}" },
-        notifyCacheEnabled: { type: "bool", label: "Enable Cache Prune", section: "Notification", default: true, readonlyExpr: "{{!notifyEnabled}}" },
-        notifyCopyTextEnabled: { type: "bool", label: "CopyText Notification", section: "Notification", default: true },
-
         notifySound: { type: "select", label: "Notification Sound", section: "Notification", default: SOUNDS.notify.default, options: PRESETS_SOUNDS.notify, readonlyExpr: "{{!notifySoundEnabled || !notifyEnabled}}"},
+        notifyCacheEnabled: { type: "bool", label: "Enable Cache Prune", section: "Notification", default: true, readonlyExpr: "{{!notifyEnabled}}" },
         notifyCooldown: { type: "number", label: "Notification Cooldown", section: "Notification", default: 300000, readonlyExpr: "{{!notifyEnabled}}"},
         notifyCacheMaxCount: { type: "number", label: "Cache Max Count", section: "Notification", default: 50, readonlyExpr: "{{!notifyCacheEnabled || !notifyEnabled}}" },
         notifyCacheMaxHours: { type: "number", label: "Cache Max Hours", section: "Notification", default: 24, readonlyExpr: "{{!notifyCacheEnabled || !notifyEnabled}}" },
+        notifyCopyTextEnabled: { type: "bool", label: "CopyText Notification", section: "Notification", default: true },
 
         useCurrentLocation: { type: "bool", label: "現在地を使用", section: "Location", default: true },
         lat: { type: "number", label: "緯度（固定地点）", section: "Location", default: 35.6812, readonlyExpr: "{{useCurrentLocation}}" },
@@ -766,6 +781,18 @@ module.exports = {
   },
 
   // =========================
+  // preloadModules
+  // =========================
+  preloadModules(ctx) {
+
+    const loader = ctx.services.moduleLoader
+
+    return {
+
+    }
+  },
+
+  // =========================
   // onNotificationTap
   // =========================
   onNotificationTap: async (info, core) => {
@@ -813,7 +840,7 @@ module.exports = {
 
     const {items, notifyTargets} = this.dataTransform(data, ctx)
     const meta = this.metaTransform(data, ctx, {items})
-    const notifications = this.notificationTranceform(data, ctx, {notifyTargets, meta})
+    const notifications = this.notificationTransform(data, ctx, {notifyTargets, meta})
 
     return {
       items,
@@ -844,10 +871,13 @@ module.exports = {
     const location = locationTransform(ctx)
     const filtered = deduped.map(eq => pickPoint(eq, location))
 
-    // 最終ソート
-    const sorted = filtered.sort((a, b) =>
-      new Date(b.time) - new Date(a.time)
-    )
+    // 発生時刻順（新しい順）
+    const sorted = filtered
+      .slice()
+      .sort((a, b) =>
+        new Date(b.earthquake?.time || 0) -
+        new Date(a.earthquake?.time || 0)
+      )
 
     // 最終件数制限（ここだけでOK）
     const sliced = sorted.slice(0, v.displayCount ?? 9)
@@ -865,7 +895,7 @@ module.exports = {
 
       const p = eq.points?.[0] ?? {}
 
-      const badge = isPinned ? "●" : ""
+      const badge = isPinned ? TEXT_ICON.badge : ""
       const place = eq.earthquake?.hypocenter?.name ?? ""
 
       const time = eq.earthquake?.time ?? new Date()
@@ -917,13 +947,14 @@ module.exports = {
       const tsunami = eq.earthquake?.domesticTsunami ?? ""
       const tsunamiStr = domesticTsunamiStr(tsunami)
       const [tsunamiBadge, tsunamiBgColor, tsunamiColor] =
-        ["Watch","Warning","MajorWarning"].includes(tsunami)
+        PIN_TSUNAMI.includes(tsunami)
           ? ["⚠️", PALETTE.yellow, PALETTE.black]
           : ["", "", PALETTE.darkGray]
 
       return {
         index: idx + 1,
         id: eq.id,
+        eqId: createEventKey(eq),
         isPinned: isPinned,
 
         badge: badge,
@@ -969,6 +1000,8 @@ module.exports = {
       return !state || (!state.hasSent && !state.hasPending)
     })
 
+    printf(notifyTargets)
+
     return {
       items,
       notifyTargets
@@ -983,6 +1016,7 @@ module.exports = {
     const v = ctx?.config?.values ?? {}
     const env = ctx?.env ?? {}
     const runtime = ctx?.runtime ?? {}
+
     const appId = env?.appId ?? "WidgetFramework"
     const storageType = env?.storageType ?? "****"
 
@@ -1023,9 +1057,12 @@ module.exports = {
     const level = levelMap[env?.size] ?? 2
     const ui = {
       isSmall: level === 1,
+      isMedium: level === 2,
+      isLarge: level === 3,
+      isExtraLarge: level === 4,
+
       isMediumUp: level >= 2,
       isLargeUp: level >= 3,
-      isExtraLarge: level === 4,
 
       showForecast: level >= 2 && v.showStorageType,
       showDetail: level >= 3,
@@ -1061,7 +1098,7 @@ module.exports = {
   },
 
   // =========================
-  // notificationTranceform
+  // notificationTransform
   // =========================
 /*
 {
@@ -1075,7 +1112,9 @@ module.exports = {
   meta?: object        // ★拡張領域（重要）
 
   meta: {
-    action: "openNotificationUI"
+    action: "openNotificationUI",
+    appId: APP_ID,
+    mode: "history"
   }
   meta: {
     action: "openNotificationDetail"
@@ -1091,9 +1130,12 @@ module.exports = {
   }
 }
 */
-  notificationTranceform(data, ctx, {notifyTargets, meta}) {
+  notificationTransform(data, ctx, {notifyTargets, meta}) {
 
     const v = ctx?.config?.values ?? {}
+
+//     const fromCache = ctx?.runtime?.fromCache || false
+//     if (!v.notifyforceRefresh && fromCache) return []
 
     const notifications = []
 
@@ -1300,18 +1342,15 @@ function locationTransform(ctx) {
 // ======================
 function flatObj(obj, prefix = "") {
   const result = {}
-
   for (const key of Object.keys(obj)) {
-
     const value = obj[key]
     const newKey = prefix + key
-
     if (
       typeof value === "object" &&
       value !== null &&
       !Array.isArray(value) &&
       !(value instanceof Date) &&
-      !(value instanceof Image)
+      !isImage(value)
     ) {
       Object.assign(result, flatObj(value, newKey + "_"))
     }
@@ -1323,6 +1362,17 @@ function flatObj(obj, prefix = "") {
   }
 
   return result
+}
+
+// ======================
+// isImage
+// ======================
+function isImage(obj) {
+  return obj &&
+    typeof obj === "object" &&
+    obj.size &&
+    typeof obj.size.width === "number" &&
+    typeof obj.size.height === "number"
 }
 
 // ======================
@@ -1373,15 +1423,89 @@ function createEventKey(eq) {
 
   const t = (e.time || "").slice(0, 19)
 
-  const name = (e.hypocenter?.name || "").replace(/\s/g, "")
-
-  const lat = Number(e.hypocenter?.latitude?.toFixed(2) || 0)
-  const lon = Number(e.hypocenter?.longitude?.toFixed(2) || 0)
+  const lat = Math.round((e.hypocenter?.latitude || 0) * 10) / 10
+  const lon = Math.round((e.hypocenter?.longitude || 0) * 10) / 10
 
   const depth = e.hypocenter?.depth ?? 0
-  const mag = Number((e.hypocenter?.magnitude || 0).toFixed(1))
 
-  return `${t}_${name}_${lat}_${lon}_${depth}_${mag}`
+  return `${t}_${lat}_${lon}_${depth}`
+}
+
+// ======================
+// mergeEvent 
+// ======================
+function mergeEvent(prev, curr) {
+
+  const p = prev.earthquake || {}
+  const c = curr.earthquake || {}
+
+  return {
+    ...prev,
+
+    // 常に最新のタイムスタンプ
+    timestamp: curr.timestamp,
+
+    earthquake: {
+      ...p,
+      ...c,
+
+      hypocenter: {
+        ...p.hypocenter,
+        ...c.hypocenter,
+
+        // magnitudeは大きい方（更新対策）
+        magnitude: Math.max(
+          p.hypocenter?.magnitude || 0,
+          c.hypocenter?.magnitude || 0
+        ),
+
+        // depthは新しい方を優先
+        depth: c.hypocenter?.depth ?? p.hypocenter?.depth,
+      }
+    },
+
+    // 震度（最大を保持）
+    maxScale: Math.max(prev.maxScale || 0, curr.maxScale || 0),
+
+    // 津波情報は上書き（後勝ち）
+    tsunami: curr.tsunami ?? prev.tsunami,
+  }
+}
+
+// ======================
+// dedupeLatest 
+// ======================
+function dedupeLatest(list) {
+
+  const map = new Map()
+
+  for (const eq of list) {
+
+    const key = createEventKey(eq)
+    const prev = map.get(key)
+
+    if (!prev) {
+
+      map.set(key, eq)
+
+    } else {
+
+      const prevTime = new Date(prev.timestamp?.register || 0)
+      const currTime = new Date(eq.timestamp?.register || 0)
+
+      if (currTime > prevTime) {
+
+        map.set(key, mergeEvent(prev, eq))
+
+      } else {
+
+        map.set(key, mergeEvent(eq, prev))
+
+      }
+    }
+  }
+
+  return Array.from(map.values())
 }
 
 // ======================
@@ -1407,47 +1531,6 @@ function pickPoint(eq, loc) {
     points: filtered.length ? [filtered[0]] : []
   }
 }
-
-// ======================
-// dedupeLatest 
-// ======================
-function dedupeLatest(list) {
-
-  const map = new Map()
-
-  for (const eq of list) {
-
-    const key = createEventKey(eq)
-
-    const prev = map.get(key)
-
-    if (!prev) {
-
-      map.set(key, eq)
-
-    } else {
-
-      const prevTime = prev.timestamp?.register || ""
-      const currTime = eq.timestamp?.register || ""
-
-      if (currTime > prevTime) {
-        map.set(key, eq)
-      }
-
-    }
-
-  }
-
-  return Array.from(map.values())
-}
-
-// ======================
-// shouldNotify 
-// ======================
-// function shouldNotify(eq, v) {
-//   const scale = eq.points?.[0]?.scale ?? 0
-//   return scale >= (v.minScale ?? 0)
-// }
 
 // ======================
 // calcDistanceKm 
@@ -1483,8 +1566,6 @@ function domesticTsunamiStr(tsunami) {
 // ======================
 // isImportant 
 // ======================
-const PIN_TSUNAMI = ["Watch", "Warning", "MajorWarning"]
-
 function isImportant(eq, v) {
 
   const maxScale =
@@ -1506,12 +1587,13 @@ function isImportant(eq, v) {
   const eqTime = new Date(time).getTime()
 
   const withinTime = (now - eqTime) <= hours * 60 * 60 * 1000
+  const withinTunami = v.pinTunami && PIN_TSUNAMI.includes(tsunami)
 
   return (
     withinTime &&
     (
-      maxScale >= (v.pinScale ?? 40) ||
-      PIN_TSUNAMI.includes(tsunami)
+      maxScale >= (v.pinScale ?? 40)
+      || withinTunami
     )
   )
 }
@@ -1552,7 +1634,7 @@ if (module_name == Script.name()) {
     const Main = importModule(APP_MAIN)
     Main.setAppInfo("id", APP_ID)
     Main.setAppInfo("version", APP_VERSION)
-    Main.setAppInfo("storageType", DEFAULT_STRAGE_TYPE)
+    Main.setAppInfo("storageType", DEFAULT_STORAGE_TYPE)
     await Main.start()
   })()
 }
