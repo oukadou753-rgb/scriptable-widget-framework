@@ -488,7 +488,7 @@ module.exports = class WF_WidgetRenderer {
         sym.applyFont(Font.systemFont(size))
         image = sym.image
       } else {
-        console.warn(`SFSymbol not found: ${rawSrc}`)
+        console.warn("SFSymbol not found: " + rawSrc)
         return
       }
 
