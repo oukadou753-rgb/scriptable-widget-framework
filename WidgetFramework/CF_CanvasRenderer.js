@@ -14,7 +14,7 @@ module.exports = class CF_CanvasRenderer {
   constructor(size, options = {}) {
     this.ctx = new DrawContext()
     this.ctx.opaque = options?.opaque ?? false
-    this.ctx.respectScreenScale = options?.respectScreenScale ?? true
+    this.ctx.respectScreenScale = options?.respectScreenScale ?? false
     this.ctx.size = size ?? new Size(300, 300)
   }
 
