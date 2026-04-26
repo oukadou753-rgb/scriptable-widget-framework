@@ -17,7 +17,6 @@ module.exports = class WF_CoreBase {
     const appVersion = appInfo.version
 
     const {
-      ModuleLoader,
       moduleLoader,
 
       WF_DataProvider,
@@ -29,6 +28,7 @@ module.exports = class WF_CoreBase {
 
     this.WF_DataProvider = WF_DataProvider
 
+    this.modules = moduleCache
     this.moduleLoader = moduleLoader
 
     this.pinText = ""
@@ -129,17 +129,11 @@ module.exports = class WF_CoreBase {
         storage: this.storage,
         moduleLoader: this.moduleLoader,
         core: this
-      }
+      },
+
+      modules: this.modules
 
     }
-
-    // =========================
-    // modules preload
-    // =========================
-    transformContext.modules =
-      this.appConfig.preloadModules
-        ? this.appConfig.preloadModules(transformContext)
-        : {}
 
     // =========================
     // transform
