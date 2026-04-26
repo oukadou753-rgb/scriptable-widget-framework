@@ -116,18 +116,17 @@ module.exports = class WF_WidgetRenderer {
     // =========================
     // background
     // =========================
-    if (values.useBgGradient && values.bgColorTop && values.bgColorBottom) {
-      widget.backgroundGradient = await this.setGradientBackground(
-        values.bgColorTop,
-        values.bgColorBottom
-      )
-    }
-    else if (values.bgColor) {
-      try {
-        widget.backgroundColor = new Color(String(values.bgColor))
-      } catch (e) {
-        console.warn("Invalid bgColor: " + values.bgColor)
-      }
+    const bg = layout.background
+    const type = bg?.type ?? values.bgType
+
+    if (type === "gradient") {
+      const top = bg?.top ?? values.bgColorTop
+      const bottom = bg?.bottom ?? values.bgColorBottom
+      widget.backgroundGradient =
+        await this.setGradientBackground(top, bottom)
+    } else if (type === "color") {
+      const color = bg?.color ?? values.bgColor
+      widget.backgroundColor = new Color(String(color))
     }
 
     // =========================
