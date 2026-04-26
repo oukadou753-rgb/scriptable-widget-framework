@@ -13,7 +13,6 @@ module.exports = class WF_WidgetCore {
     const appVersion = appInfo.version
 
     const {
-      ModuleLoader,
       moduleLoader,
 
       WF_StorageEngine,
