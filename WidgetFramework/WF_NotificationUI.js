@@ -15,7 +15,7 @@ module.exports = {
   // 状態
   // =========================
   view: "list",
-  mode: "scheduled",
+  mode: "history",
   currentItem: null,
   table: null,
 
@@ -101,13 +101,13 @@ module.exports = {
   // =========================
   getList(core) {
 
-    if (this.mode === "history") {
+    if (this.mode === "scheduled") {
 
-      return core.notification.getUIList("history")
+      return core.notification.getUIList("scheduled")
 
     }
 
-    return core.notification.getUIList("scheduled")
+    return core.notification.getUIList("history")
 
   },
 
@@ -118,20 +118,20 @@ module.exports = {
 
     table.addRow(this.tableUI.createButtonRow([
       {
-        label: this.mode === "scheduled" ? "●予定" : "予定",
+        label: this.mode === "history" ? "●履歴" : "履歴",
         onTap: async () => {
 
-          this.mode = "scheduled"
+          this.mode = "history"
           await this.reload(core)
 
         }
 
       },
       {
-        label: this.mode === "history" ? "●履歴" : "履歴",
+        label: this.mode === "scheduled" ? "●予定" : "予定",
         onTap: async () => {
 
-          this.mode = "history"
+          this.mode = "scheduled"
           await this.reload(core)
 
         }
@@ -242,6 +242,10 @@ module.exports = {
     if (item.body) {
 
       table.addRow(this.tableUI.createKeyValueRow("Body", item.body).row)
+//       const lineCount = (item.body.match(new RegExp("\n", "g")) || []).length + 1
+//       const { row } = this.tableUI.createKeyValueRow("Body", item.body)
+//       row.height = Math.ceil((16 * 1.6) * lineCount)
+//       table.addRow(row)
 
     }
 
