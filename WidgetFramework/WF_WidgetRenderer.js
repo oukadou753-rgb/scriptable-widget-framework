@@ -172,9 +172,7 @@ module.exports = class WF_WidgetRenderer {
   shouldForceRefresh(ctx) {
 
     const v = ctx?.config?.values ?? {}
-
     if (v.forceRenderDiff === false) return false
-
     return true
   }
 
@@ -198,6 +196,7 @@ module.exports = class WF_WidgetRenderer {
     stack.size = new Size(1, 1)
 
     const image = stack.addImage(img)
+    image.imageSize = new Size(1, 1)
     image.imageOpacity = 0.01
   }
 
