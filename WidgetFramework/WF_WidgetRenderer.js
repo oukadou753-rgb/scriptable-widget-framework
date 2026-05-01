@@ -181,22 +181,23 @@ module.exports = class WF_WidgetRenderer {
   // =========================
   addForceRefresh(container) {
 
+    const size = new Size(1, 1)
     const ctx = new DrawContext()
-    ctx.size = new Size(1, 1)
+    ctx.size = size
     ctx.opaque = false
     ctx.respectScreenScale = false
 
-    const alpha = Math.random() // * 0.02
+    const alpha = Math.random() * 0.02
     ctx.setFillColor(new Color("#000000", alpha))
     ctx.fillRect(new Rect(0, 0, 1, 1))
 
     const img = ctx.getImage()
 
     const stack = container.addStack()
-    stack.size = new Size(1, 1)
+    stack.size = size
 
     const image = stack.addImage(img)
-    image.imageSize = new Size(1, 1)
+    image.imageSize = size
     image.imageOpacity = 0.01
   }
 
