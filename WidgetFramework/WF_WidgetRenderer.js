@@ -186,7 +186,7 @@ module.exports = class WF_WidgetRenderer {
     ctx.opaque = false
     ctx.respectScreenScale = false
 
-    const alpha = Math.random() * 0.02
+    const alpha = Math.random() // * 0.02
     ctx.setFillColor(new Color("#000000", alpha))
     ctx.fillRect(new Rect(0, 0, 1, 1))
 
