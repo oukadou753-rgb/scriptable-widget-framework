@@ -51,7 +51,7 @@ const ROLE = Object.freeze({
 
 })
 
-const COLORS = {
+const COLORS = Object.freeze({
 
   theme: {
     textPrimary: "#d1cdda",    // メイン文字
@@ -87,14 +87,16 @@ const COLORS = {
 
   extra: {}
 
-}
+})
 
-const PRESETS_COLORS = {
+const PRESETS_COLORS = Object.freeze({
+
   theme: Object.values(COLORS.theme),
   background: Object.values(COLORS.background)
-}
 
-const SCALE_THRESHOLDS = {
+})
+
+const SCALE_THRESHOLDS = Object.freeze({
 
   shindo: [
     [70, [PALETTE.red, "７"]],
@@ -109,16 +111,19 @@ const SCALE_THRESHOLDS = {
   ],
   def: [Color.darkGray().hex, "不明"]
 
-}
+})
 
-const PRESETS = {
+const PRESETS = Object.freeze({
+
   scale: SCALE_THRESHOLDS.shindo.map(v => String(v[0]))
-}
+
+})
 
 // ======================
 // Sizes
 // ======================
-const SIZES = {
+const SIZES = Object.freeze({
+
   text: {
     header: 16,
     body: 14,
@@ -154,12 +159,14 @@ const SIZES = {
     small: 12,
     extraSmall: 10
   }
-}
+
+})
 
 // ======================
 // Text Icon
 // ======================
-const TEXT_ICON = {
+const TEXT_ICON = Object.freeze({
+
   // 基本
   mark: "■",
   empty: "□",
@@ -183,12 +190,14 @@ const TEXT_ICON = {
   minus: "−",
 
   badge: "●"
-}
+
+})
 
 // ======================
 // NOTIFICATION
 // ======================
-const SOUNDS = {
+const SOUNDS = Object.freeze({
+
   notify: {
     default: "default",
     accept: "accept",
@@ -200,13 +209,16 @@ const SOUNDS = {
     piano_success: "piano_success",
     popup: "popup"
   }
-}
 
-const PRESETS_SOUNDS = {
+})
+
+const PRESETS_SOUNDS = Object.freeze({
+
   notify: Object.values(SOUNDS.notify)
-}
 
-const PIN_TSUNAMI = ["Watch", "Warning", "MajorWarning"]
+})
+
+const PIN_TSUNAMI = Object.freeze(["Watch", "Warning", "MajorWarning"])
 
 // ======================
 // Helper
@@ -316,7 +328,7 @@ const bodyBlock_1 = [
         justify: "center",
 
         h: [
-          textHelper("{{pinned_maxShindo}}", { base: "dataText", fontSize: 55, color: "{{pinned_maxColor}}" })
+          textHelper("{{pinned_maxShindo}}", { base: "dataText", fontSize: 52, color: "{{pinned_maxColor}}" })
         ]
       },
       textHelper("{{pinned_place}}", "dataText")
@@ -598,7 +610,7 @@ module.exports = {
       schema: {
         titleStr: { type: "text", label: "Title", section: "General", default: "My Widget" },
 
-        useBgGradient: { type: "bool", label: "Use Gradient Color", section: "BackgroundColor", default: true },
+        bgType: { type: "select", label: "Background Type", section: "BackgroundColor", default: "gradient", options: ["none", "color", "gradient"]},
         bgColorTop: { type: "color", label: "Gradient Background Top Color", section: "BackgroundColor", default: COLORS.background.top, presets: PRESETS_COLORS.background },
         bgColorBottom: { type: "color", label: "Gradient Background Bottom Color", section: "BackgroundColor", default: COLORS.background.bottom, presets: PRESETS_COLORS.background },
         bgColor: { type: "color", label: "Background Color", section: "BackgroundColor", default: COLORS.background.base, presets: PRESETS_COLORS.background },
@@ -615,7 +627,9 @@ module.exports = {
         showStorageType: { type: "bool", label: "Show Storage Type", section: "Debug", default: true },
         showTableFullscreen: { type: "bool", label: "Show Table Fullscreen", section: "Debug", default: true },
 
-        refreshInterval: { type: "select", label: "Refresh Interval", section: "WIDGET", default: "0", options: ["0", "15", "30", "45", "60"] },
+        maintenanceMode: { type: "bool", label: "Widget Maintenance", section: "Widget", default: false },
+        refreshInterval: { type: "select", label: "Refresh Interval", section: "Widget", default: "0", options: ["0", "15", "30", "45", "60"] },
+        forceRenderDiff: { type: "bool", label: "Force Refresh in Widget", section: "Widget", default: true },
 
         apiCacheEnabled: { type: "bool", label: "Enable API Cache", section: "API", default: true },
         apiCacheMinutes: { type: "number", label: "Cache Refresh Minutes", section: "API", default: 5, readonlyExpr: "{{!apiCacheEnabled}}" },
@@ -780,16 +794,8 @@ module.exports = {
     return layouts[layoutId] || layouts.default
   },
 
-  // =========================
-  // preloadModules
-  // =========================
-  preloadModules(ctx) {
-
-    const loader = ctx.services.moduleLoader
-
-    return {
-
-    }
+  modules: {
+//     CF_JsonDataProvider: { type: "both", path: WF_MODULE_DIR },
   },
 
   // =========================
@@ -834,6 +840,8 @@ module.exports = {
   transform(data, ctx) {
 
     const v = ctx?.config?.values ?? {}
+
+    if (v.maintenanceMode) throw new Error("Widget Maintenance")
 
     const useTestData = v?.useTestData ?? false
     if (useTestData) return this.testDataTransform(data, ctx)
