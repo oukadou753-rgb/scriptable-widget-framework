@@ -54,7 +54,7 @@ const ROLE = Object.freeze({
 
 })
 
-const COLORS = {
+const COLORS = Object.freeze({
 
   theme: {
     textPrimary: "#d1cdda",    // メイン文字
@@ -158,14 +158,16 @@ const COLORS = {
     pressureLow: PALETTE.purple
   }
 
-}
+})
 
-const PRESETS_COLORS = {
+const PRESETS_COLORS = Object.freeze({
+
   theme: Object.values(COLORS.theme),
   background: Object.values(COLORS.background)
-}
 
-const LEVEL_THRESHOLDS = {
+})
+
+const LEVEL_THRESHOLDS = Object.freeze({
 
   temp: [
     [35, COLORS.temp.extremeHot],
@@ -212,12 +214,13 @@ const LEVEL_THRESHOLDS = {
   ],
   discomfortDef: [COLORS.discomfort.cold, "寒い"]
 
-}
+})
 
 // ======================
 // Sizes
 // ======================
-const SIZES = {
+const SIZES = Object.freeze({
+
   text: {
     header: 16,
     body: 14,
@@ -253,9 +256,11 @@ const SIZES = {
     small: 12,
     extraSmall: 10
   }
-}
 
-const TEXT_ICON = {
+})
+
+const TEXT_ICON = Object.freeze({
+
   // 基本
   mark: "■",
   empty: "□",
@@ -277,12 +282,14 @@ const TEXT_ICON = {
   // 数値
   plus: "+",
   minus: "−"
-}
+
+})
 
 // ======================
 // NOTIFICATION
 // ======================
-const SOUNDS = {
+const SOUNDS = Object.freeze({
+
   notify: {
     default: "default",
     accept: "accept",
@@ -294,11 +301,14 @@ const SOUNDS = {
     piano_success: "piano_success",
     popup: "popup"
   }
-}
 
-const PRESETS_SOUNDS = {
+})
+
+const PRESETS_SOUNDS = Object.freeze({
+
   notify: Object.values(SOUNDS.notify)
-}
+
+})
 
 // ======================
 // Helper
@@ -755,7 +765,7 @@ module.exports = {
       schema: {
         titleStr: { type: "text", label: "Title", section: "General", default: "My Widget" },
 
-        useBgGradient: { type: "bool", label: "Use Gradient Color", section: "BackgroundColor", default: true },
+        bgType: { type: "select", label: "Background Type", section: "BackgroundColor", default: "gradient", options: ["none", "color", "gradient"]},
         bgColorTop: { type: "color", label: "Gradient Background Top Color", section: "BackgroundColor", default: COLORS.background.top, presets: PRESETS_COLORS.background },
         bgColorBottom: { type: "color", label: "Gradient Background Bottom Color", section: "BackgroundColor", default: COLORS.background.bottom, presets: PRESETS_COLORS.background },
         bgColor: { type: "color", label: "Background Color", section: "BackgroundColor", default: COLORS.background.base, presets: PRESETS_COLORS.background },
@@ -772,7 +782,9 @@ module.exports = {
         showStorageType: { type: "bool", label: "Show Storage Type", section: "Debug", default: true },
         showTableFullscreen: { type: "bool", label: "Show Table Fullscreen", section: "Debug", default: true },
 
-        refreshInterval: { type: "select", label: "Refresh Interval", section: "WIDGET", default: "0", options: ["0", "15", "30", "45", "60"] },
+        maintenanceMode: { type: "bool", label: "Widget Maintenance", section: "Widget", default: false },
+        refreshInterval: { type: "select", label: "Refresh Interval", section: "Widget", default: "0", options: ["0", "15", "30", "45", "60"] },
+        forceRenderDiff: { type: "bool", label: "Force Refresh in Widget", section: "Widget", default: true },
 
         myApiKey: { type: "text", label: "API KEY", section: "API", default: "MY_APIKEY" },
         apiCacheEnabled: { type: "bool", label: "Enable API Cache", section: "API", default: true },
@@ -948,16 +960,8 @@ module.exports = {
     return layouts[layoutId] || layouts.default
   },
 
-  // =========================
-  // preloadModules
-  // =========================
-  preloadModules(ctx) {
-
-    const loader = ctx.services.moduleLoader
-
-    return {
-
-    }
+  modules: {
+//     CF_JsonDataProvider: { type: "both", path: WF_MODULE_DIR },
   },
 
   // =========================
@@ -978,6 +982,8 @@ module.exports = {
   transform(data, ctx) {
 
     const v = ctx?.config?.values ?? {}
+
+    if (v.maintenanceMode) throw new Error("Widget Maintenance")
 
     const useTestData = v?.useTestData ?? false
     if (useTestData) return this.testDataTransform(data, ctx)
