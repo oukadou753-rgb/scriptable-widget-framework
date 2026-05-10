@@ -4,7 +4,7 @@
 /**
  * Main
  * UTF-8 日本語コメント
- * 2026/04/2s 11:00
+ * 2026/04/26 11:00
  */
 
 const DEFAULT_APP_ID = "Weather"
@@ -105,7 +105,14 @@ module.exports = {
       if (runtime.mode === "buildContext") {
         const cfg = core.profile.getConfig()
         cfg.values.forceRefresh = runtime.forceRefresh ?? true
-        await core.buildContext({ cfg }) // await core.getDataProvider().fetchAll(core.appConfig.api)
+        await core.buildContext({ cfg })
+        App.close()
+        return
+      } else if (runtime.mode === "refleshWidget") {
+        const cfg = core.profile.getConfig()
+        const size = runtime.widgetSize ?? "large"
+        await core.preview(size)
+        App.close()
         return
       }
 
@@ -129,13 +136,26 @@ module.exports = {
   // =========================
   // init
   // =========================
-  async init(appInfo, modules) {
+  async init(appInfo, coreModules) {
 
     const ModuleLoader = importModule("ModuleLoader")
     const moduleLoader = new ModuleLoader(appInfo.storageType)
 
+    const AppConfig = moduleLoader.load(appInfo.appConfig)
+
     let obj = {
-      moduleLoader: moduleLoader
+      moduleLoader: moduleLoader,
+      [appInfo.appConfig]: AppConfig
+    }
+
+    const appModules =
+      this.normalizeAppModules(
+        obj[appInfo.appConfig].modules || {}
+      )
+
+    const modules = {
+      ...coreModules,
+      ...appModules
     }
 
     for (key in modules) {
@@ -190,6 +210,38 @@ module.exports = {
       if(type == "app" || type == "both") return true
     }
     return false
+  },
+
+  // =========================
+  // normalizeAppModules
+  // =========================
+  normalizeAppModules(appModules) {
+
+    const res = {}
+
+    for (let key in appModules) {
+
+      const v = appModules[key]
+
+      if (typeof v === "string") {
+        res[key] = {
+          type: "both",
+          path: v
+        }
+      } else {
+        res[key] = {
+          type: v.type || "both",
+          path: v.path
+        }
+      }
+
+      if (res[key].path === undefined || res[key].path === null) {
+        throw new Error("Invalid module path: " + key)
+      }
+
+    }
+
+    return res
   },
 
   // =========================
