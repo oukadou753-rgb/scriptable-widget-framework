@@ -19,11 +19,21 @@ module.exports = class CF_CanvasRenderer {
   }
 
   // ======================
+  // normalizeImage
+  // ======================
+  normalizeImage() {
+    const x = Math.floor(Math.random() * this.ctx.size.width)
+    const y = Math.floor(Math.random() * this.ctx.size.height)
+    this.ctx.setFillColor(new Color("#000000", Math.random() * 0.01))
+    this.ctx.fillRect(new Rect(x, y, 1, 1))
+  }
+
+  // ======================
   // getImage
   // ======================
-  getImage() {
-
-    return this.ctx.getImage()
+  getImage(normalize = false) {
+      if (normalize) this.normalizeImage()
+      return this.ctx.getImage()
   }
 
   // ======================
