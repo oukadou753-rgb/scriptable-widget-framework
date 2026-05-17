@@ -4,6 +4,7 @@
 /**
  * ModuleLoader
  * UTF-8 日本語コメント
+ * 2026/05/17 09:00
  **/
 
 // =========================
@@ -11,14 +12,16 @@
 // =========================
 module.exports = class ModuleLoader {
 
-  constructor(storageType = "local") {
+  constructor(storageType = "local", debug = false) {
 
     this.storageType = storageType
+    this.debug = debug
     this.cache = {}
 
     this.initStorage()
 
     console.log("MODULE LOADER" + "\n")
+    if (this.debug) console.warn("DEBUG MODE: " + this.debug)
     console.log("STORAGE: " + this.storageType)
     console.log("BASE: " + this.baseDir + "\n")
 
@@ -29,34 +32,68 @@ module.exports = class ModuleLoader {
   // =========================
   load(path) {
 
+    // =========================
+    // キー正規化（超重要）
+    // =========================
+    const key = String(path).replace(/\.js$/, "")
+
+    // =========================
+    // cache hit
+    // =========================
+    if (this.cache[key]) {
+      return this.cache[key]
+    }
+
+    let module
+
     try {
 
-//       if (this.cache[path]) {
-//         return this.cache[path]
-//       }
+      // =========================
+      // フルパス解決
+      // =========================
+      const fullPath = this.getFilePath(key)
 
-      const fullPath = this.getFilePath(path)
+      // =========================
+      // import
+      // =========================
+      module = importModule(fullPath)
 
-      const module = importModule(fullPath)
-
-//       this.cache[fullPath] = module
-
-      if (module) console.log("ModuleLoader: " + path)
-
-      return module
-
-    }
-
-    catch(e) {
-
-      const module = importModule(path)
-
-      if (module) console.warn("importModule: " + path)
-
-      return module
+      if (module) {
+        console.log("ModuleLoader: " + key)
+      }
 
     }
 
+    catch (e) {
+
+      // =========================
+      // fallback（直接import）
+      // =========================
+      try {
+
+        module = importModule(key)
+
+        if (module) {
+          console.warn("importModule fallback: " + key)
+        }
+
+      }
+
+      catch (e2) {
+
+        console.warn("Module load failed: " + key)
+//         throw new Error("Module load failed: " + key)
+
+      }
+
+    }
+
+    // =========================
+    // cache保存（必ず）
+    // =========================
+    this.cache[key] = module
+
+    return module
   }
 
   // =========================
