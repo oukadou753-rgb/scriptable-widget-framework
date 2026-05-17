@@ -9,7 +9,8 @@
 // ======================
 // Constat
 // ======================
-const APP_VERSION = "20260424-1700"
+const APP_DEV_MODE = false
+const APP_VERSION = "20260517-0900"
 const APP_MAIN = "Main"
 const APP_ID = "Weather"
 const DEFAULT_STORAGE_TYPE = "local"
@@ -1758,6 +1759,7 @@ if (module_name == Script.name()) {
     Main.setAppInfo("id", APP_ID)
     Main.setAppInfo("version", APP_VERSION)
     Main.setAppInfo("storageType", DEFAULT_STORAGE_TYPE)
+    Main.setAppInfo("debug", APP_DEV_MODE)
     await Main.start()
   })()
 }
