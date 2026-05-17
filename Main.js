@@ -140,11 +140,11 @@ module.exports = {
     const ModuleLoader = importModule("ModuleLoader")
     const moduleLoader = new ModuleLoader(appInfo.storageType, appInfo.debug)
 
-    const AppConfig = moduleLoader.load(appInfo.appConfig)
+    const appConfig = moduleLoader.load(appInfo.appConfig)
 
     let obj = {
       moduleLoader: moduleLoader,
-      [appInfo.appConfig]: AppConfig
+      [appInfo.appConfig]: appConfig
     }
 
     const appModules =
