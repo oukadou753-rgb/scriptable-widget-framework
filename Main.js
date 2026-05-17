@@ -4,13 +4,13 @@
 /**
  * Main
  * UTF-8 日本語コメント
- * 2026/04/26 11:00
+ * 2026/05/17 09:00
  */
 
 const DEFAULT_APP_ID = "Weather"
 const DEFAULT_STORAGE_TYPE = "local"
 
-const APP_DEV_MODE = true
+const APP_DEV_MODE = false
 const APP_ID =
   args.queryParameters?.appId ||
   args.widgetParameter ||
@@ -18,6 +18,7 @@ const APP_ID =
 const APP_VERSION = "1.0.0"
 const APP_CONFIG = `App_${APP_ID}Config`
 
+const WF_CONFIG_DIR = "WF_Config/"
 const WF_MODULE_DIR = "WidgetFramework/"
 const WF_REPO = "oukadou753-rgb/scriptable-widget-framework"
 
@@ -74,8 +75,6 @@ module.exports = {
         return
       }
 
-      appInfo.appConfig = `App_${appInfo.id}Config`
-
       const modules = {
         WF_StorageEngine: { type: "both", path: WF_MODULE_DIR },
         WF_DataProvider: { type: "both", path: WF_MODULE_DIR },
@@ -93,10 +92,10 @@ module.exports = {
 
         WF_AppCore: { type: "app", path: WF_MODULE_DIR },
         WF_WidgetCore: { type: "widget", path: WF_MODULE_DIR },
-
-        [appInfo.appConfig]: { type: "both", path: "" },
       }
 
+      const debugDir = appInfo.debug ? "" : WF_CONFIG_DIR
+      appInfo.appConfig = `${debugDir}App_${appInfo.id}Config`
       const core = await this.init(appInfo, modules)
 
       // =========================
@@ -139,7 +138,7 @@ module.exports = {
   async init(appInfo, coreModules) {
 
     const ModuleLoader = importModule("ModuleLoader")
-    const moduleLoader = new ModuleLoader(appInfo.storageType)
+    const moduleLoader = new ModuleLoader(appInfo.storageType, appInfo.debug)
 
     const AppConfig = moduleLoader.load(appInfo.appConfig)
 
