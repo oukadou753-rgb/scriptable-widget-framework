@@ -4,8 +4,9 @@
 /**
  * DevLoader
  * UTF-8 日本語コメント
- * 2026/03/10
+ * 2026/05/17 09:00
  **/
+
 let storageType = "icloud"
 storageType = "local"
 // storageType = "bookmark"
@@ -13,7 +14,7 @@ storageType = "local"
 // "local"
 // "bookmark"
 
-const loadMain = true
+const loadMain = false
 
 const useDiff = true
 const useTarget = true
@@ -22,6 +23,10 @@ const targetFiles = [
 //   "Tools/DevLoader.js",
 //   "Tools/ModuleLoader.js",
 //   "WidgetFramework/App_WeatherConfig.js",
+//   "WidgetFramework/App_DevConfig.js",
+//   "WidgetFramework/CF_CanvasRenderer.js",
+//   "WidgetFramework/CF_JsonDataProvider.js",
+//   "WidgetFramework/CF_TinySegmenter.js",
 //   "WidgetFramework/WF_AppCore.js",
 //   "WidgetFramework/WF_ConfigUI.js",
 //   "WidgetFramework/WF_CoreBase.js",
@@ -30,6 +35,9 @@ const targetFiles = [
 //   "WidgetFramework/WF_ProfileEngine.js",
 //   "WidgetFramework/WF_StorageEngine.js",
 //   "WidgetFramework/WF_NotificationManager.js",
+//   "WidgetFramework/WF_NotificationUI.js",
+//   "WidgetFramework/WF_NotificationHandlers.js",
+//   "WidgetFramework/WF_TableUI.js",
 //   "WidgetFramework/WF_WidgetCore.js",
 //   "WidgetFramework/WF_WidgetRenderer.js"
 ]
@@ -87,7 +95,16 @@ async function devLoader({
 
   let localSHA = {}
   if (fm.fileExists(shaFilePath)) {
-    try { localSHA = JSON.parse(fm.readString(shaFilePath)) } catch(e) { localSHA = {} }
+    try {
+      if (storageType === "icloud") {
+        await ensureDownloaded(fm, shaFilePath)
+      }
+
+      localSHA = JSON.parse(fm.readString(shaFilePath))
+    }
+    catch(e) {
+      localSHA = {}
+    }
   }
 
   // --- GitHub 全ファイル取得（再帰的） ---
@@ -95,20 +112,25 @@ async function devLoader({
   const cacheLife = 600 // 10分
 
   let tree
-
   if (fm.fileExists(treeCacheFile)) {
+    try {
+      if (storageType === "icloud") {
+        await ensureDownloaded(fm, treeCacheFile)
+      }
 
-    const cache = JSON.parse(fm.readString(treeCacheFile))
-    const now = Date.now() / 1000
+      const cache = JSON.parse(fm.readString(treeCacheFile))
+      const now = Date.now() / 1000
 
-    if (now - cache.time < cacheLife) {
-      console.log("Using GitHub tree cache")
-      tree = cache.data
+      if (now - cache.time < cacheLife) {
+        console.log("Using GitHub tree cache")
+        tree = cache.data
+      }
+    } catch (e) {
+      console.warn("Cache read failed, fallback to fetch")
     }
   }
 
   if (!tree) {
-
     console.log("Fetching GitHub tree")
 
     const api = `https://api.github.com/repos/${user}/${repo}/git/trees/${branch}?recursive=1`
@@ -199,6 +221,23 @@ async function devLoader({
     const Main = importModule("Main")
     Main.setAppInfo("storageType", storageType)
     await Main.start()
+  }
+}
+
+async function ensureDownloaded(fm, path, timeout = 3000) {
+
+  if (!fm.isFileDownloaded(path)) {
+    fm.downloadFileFromiCloud(path)
+  }
+
+  const start = Date.now()
+
+  while (!fm.isFileDownloaded(path)) {
+    await new Promise(r => setTimeout(r, 50))
+
+    if (Date.now() - start > timeout) {
+      throw new Error("iCloud DL timeout: " + path)
+    }
   }
 }
 
